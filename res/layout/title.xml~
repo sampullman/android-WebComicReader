@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res/com.threeDBJ.comicReader"
+    xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+  <ScrollView 
+      android:layout_width="fill_parent"
+      android:layout_height="fill_parent">
+    <LinearLayout 
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+      <LinearLayout
+	  android:orientation="horizontal"
+	  android:layout_width="fill_parent"
+	  android:layout_height="fill_parent"
+	  android:layout_weight="1" >
+	<Button
+	    android:id="@+id/smbc"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_weight="1"
+	    android:background="@drawable/btn_default_holo_dark"
+	    android:textSize="18sp"
+	    android:textColor="#DDDDDDDD"
+	    android:text="SMBC"/> 
+	<Button
+	    android:id="@+id/xkcd"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_weight="1"
+	    android:text="XKCD"
+	    android:textSize="18sp"
+	    android:textColor="#DDDDDDDD"
+	    android:background="@drawable/btn_default_holo_dark"/> 
+      </LinearLayout>
+      <LinearLayout
+	  android:orientation="horizontal"
+	  android:layout_width="fill_parent"
+	  android:layout_height="fill_parent"
+	  android:layout_weight="1" >
+	<Button
+	    android:id="@+id/explosm"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:layout_weight="1"
+	    android:text="Cyanide &amp; Happiness"
+	    android:textSize="15sp"
+	    android:textColor="#DDDDDDDD"
+	    android:background="@drawable/btn_default_holo_dark"/> 
+	<Button
+	    android:id="@+id/feelafraid"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:layout_weight="1"
+	    android:textSize="18sp"
+	    android:textColor="#DDDDDDDD"
+	    android:text="Feel Afraid"
+	    android:background="@drawable/btn_default_holo_dark"/> 
+	</LinearLayout>
+	<LinearLayout
+	  android:orientation="horizontal"
+	  android:layout_width="fill_parent"
+	  android:layout_height="fill_parent"
+	  android:layout_weight="1" >
+	<Button
+	    android:id="@+id/phd"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:layout_weight="1"
+	    android:text="PHD Comics"
+	    android:textSize="18sp"
+	    android:textColor="#DDDDDDDD"
+	    android:background="@drawable/btn_default_holo_dark"/> 
+	<Button
+	    android:id="@+id/buttersafe"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:layout_weight="1"
+	    android:text="Buttersafe"
+	    android:textSize="18sp"
+	    android:textColor="#DDDDDDDD"
+	    android:background="@drawable/btn_default_holo_dark"/> 
+      </LinearLayout>
+      <LinearLayout
+	  android:orientation="horizontal"
+	  android:layout_width="fill_parent"
+	  android:layout_height="fill_parent"
+	  android:layout_weight="1" >
+	<Button
+	    android:id="@+id/cad"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:layout_weight="1"
+	    android:text="Ctrl Alt Delete"
+	    android:textSize="16sp"
+	    android:textColor="#DDDDDDDD"
+	    android:background="@drawable/btn_default_holo_dark"/> 
+	<Button
+	    android:id="@+id/pennyarcade"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:layout_weight="1"
+	    android:text="Penny Arcade"
+	    android:textSize="16sp"
+	    android:textColor="#DDDDDDDD"
+	    android:background="@drawable/btn_default_holo_dark"/> 
+      </LinearLayout>
+      <LinearLayout
+	  android:orientation="horizontal"
+	  android:layout_width="fill_parent"
+	  android:layout_height="fill_parent"
+	  android:layout_weight="1" >
+	<com.google.ads.AdView 
+	    android:id="@+id/ad" 
+	    android:layout_width="fill_parent" 
+	    android:layout_height="fill_parent" 
+	    ads:adUnitId="a14faafe97d9753"
+	    ads:adSize="BANNER"
+	    ads:loadAdOnCreate="true"
+	    app:backgroundColor="#000000" 
+	    app:primaryTextColor="#FFFFFF" 
+	    app:secondaryTextColor="#CCCCCC" 
+	    android:gravity="center"
+	    app:keywords="comic reader smbc xkcd"/>
+      </LinearLayout>
+    </LinearLayout>
+  </ScrollView>
+</LinearLayout>

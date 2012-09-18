@@ -1,0 +1,21 @@
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/text_alt_root"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="8dp">
+  <TextView 
+      android:id="@+id/alt_text"
+      android:layout_width="wrap_content"
+      android:layout_height="fill_parent"
+      android:textColor="#FFF" />
+  <Button
+      android:id="@+id/alt_done"
+      android:layout_width="fill_parent"
+      android:layout_height="50dp"
+      android:text="Done"
+      android:textSize="16sp"
+      android:textColor="#EEEEEEEE"
+      android:background="@drawable/btn_default_holo_dark"/>
+</LinearLayout>

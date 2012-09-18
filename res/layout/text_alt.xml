@@ -1,0 +1,21 @@
+<RelativeLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/text_alt_root"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="8dp">
+  <TextView 
+      android:id="@+id/alt_text"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textColor="#FFF" />
+  <Button
+      android:id="@+id/alt_done"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Done"
+      android:textSize="16sp"
+      android:layout_centerInParent="true"
+      android:layout_below="@+id/alt_text"
+      />
+</RelativeLayout>
