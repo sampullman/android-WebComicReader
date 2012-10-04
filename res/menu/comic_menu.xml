@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:id="@+id/comic_select"
+        android:title="Select Comic" />
+  <item android:id="@+id/comic_swipe"
+        android:title="Enable Swipe" />
+  <item android:id="@+id/comic_save"
+        android:title="Save to SD" />
+  <item android:id="@+id/comic_about"
+        android:title="About" />
+</menu>
