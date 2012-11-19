@@ -143,7 +143,7 @@ public class TouchImageView extends ImageView implements OnGestureListener {
 			    // 	rightEdge = false;
 			    // 	if(mvp != null) mvp.setPagingEnabled(false);
 			    // }
-			    Log.v("matrix", matrix.toString() + " "+x+" "+right+" "+d);
+			    //Log.v("matrix", matrix.toString() + " "+x+" "+right+" "+d);
 			    matrix.postTranslate(deltaX, deltaY);
 			    last.set(curr.x, curr.y);
 			}

@@ -35,7 +35,7 @@ public class AbstruseGooseReader extends Reader {
 	this.title = "Abstruse Goose";
 	this.storeUrl = "http://www.cafepress.com/abstrusegoose";
 
-	grabComicCold(max);
+	loadInitial(max);
     }
 
     public void UISetup() {
@@ -43,23 +43,23 @@ public class AbstruseGooseReader extends Reader {
 	setAltListener(altListener);
     }
 
-    public String handleRawPage(String page) {
+    public String handleRawPage(Comic c, String page) {
 	Matcher mImages = pImages.matcher(page);
 	Matcher mPrev = pPrev.matcher(page);
 	Matcher mNext = pNext.matcher(page);
 	boolean success = mImages.find();
 	String imgUrl = mImages.group(1);
 	if(mImages.groupCount() == 2) {
-	    setAlt(mImages.group(2));
+	    c.setAlt(mImages.group(2));
 	} else {
-	    setAlt(null);
+	    c.setAlt(null);
 	}
 
 	if(mPrev.find()) {
-	    setPrevIndex(mPrev.group(1));
+	    c.setPrevInd(mPrev.group(1));
 	    /* Normal comic */
 	    if(mNext.find()) {
-		setNextIndex(mNext.group(1));
+		c.setNextInd(mNext.group(1));
 		/* Last comic */
 	    } else {
 		String temp = Integer.toString(Integer.parseInt(mPrev.group(1))+1);
@@ -69,7 +69,7 @@ public class AbstruseGooseReader extends Reader {
 	    /* First comic */
 	} else {
 	    if(mNext.find(1)) {
-		setNextIndex(mNext.group(1));
+		c.setNextInd(mNext.group(1));
 	    } else {
 		/* Anomaly, this should not happen */
 	    }
@@ -79,15 +79,15 @@ public class AbstruseGooseReader extends Reader {
 
     protected OnClickListener altListener = new OnClickListener() {
             public void onClick(View v) {
-		dispAltText(currentComic.altData, "Abstruse Goose Hover Text");
+		dispAltText(curComic.altData, "Abstruse Goose Hover Text");
             }
         };
 
     protected OnClickListener randomListener = new OnClickListener() {
             public void onClick(View v) {
-		currentComic.curInd = "random";
 		clearComics();
-		grabComicCold(max + "random.php");
+		clearVisible();
+		loadInitial(max + "random.php");
             }
         };
 

@@ -42,10 +42,10 @@ public class CtrlAltDeleteReader extends Reader {
 	Button b = (Button) findViewById(R.id.comic_random);
 	b.setOnClickListener(randomListener);
 
-	grabComicCold(max);
+	loadInitial(max);
     }
 
-    public String handleRawPage(String page) {
+    public String handleRawPage(Comic c, String page) {
 	Matcher mImages = pImages.matcher(page);
 	Matcher mPrev = pPrev.matcher(page);
 	Matcher mNext = pNext.matcher(page);
@@ -56,16 +56,16 @@ public class CtrlAltDeleteReader extends Reader {
 	int dotInd = imgTitle.indexOf(".");
 	if(dotInd != -1)
 	    imgTitle = imgTitle.substring(0, dotInd);
-	setImageTitle(imgTitle);
+	c.setImageTitle(imgTitle);
 
 	if(mPrev.find()) {
-	    setPrevIndex(mPrev.group(1));
+	    c.setPrevInd(mPrev.group(1));
 	    /* Normal comic */
 	    if(mNext.find()) {
 		if(mNext.group(1).equals(""))
-		   setNextIndex(maxInd);
+		   c.setNextInd(maxInd);
 		else
-		    setNextIndex(mNext.group(1));
+		    c.setNextInd(mNext.group(1));
 	    /* Last comic */
 	    } else {
 		Matcher mMax = pMax.matcher(page);
@@ -75,7 +75,7 @@ public class CtrlAltDeleteReader extends Reader {
 	/* First comic */
 	} else {
 	    if(mNext.find(1)) {
-		setNextIndex(mNext.group(1));
+		c.setNextInd(mNext.group(1));
 	    } else {
 		/* Anomaly, this should not happen */
 	    }
@@ -89,8 +89,9 @@ public class CtrlAltDeleteReader extends Reader {
 
     protected OnClickListener randomListener = new OnClickListener() {
             public void onClick(View v) {
-		currentComic.curInd = "random";
-		grabRandomComic(base + "random");
+		clearComics();
+		clearVisible();
+		loadInitial(base + "random");
             }
         };
 

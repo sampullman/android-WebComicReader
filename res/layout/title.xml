@@ -4,19 +4,26 @@
     xmlns:app="http://schemas.android.com/apk/res/com.threeDBJ.comicReader"
     xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
   <ScrollView
-      android:layout_width="fill_parent"
-      android:layout_height="fill_parent">
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
     <LinearLayout
 	android:orientation="vertical"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+      <TextView
+	  android:id="@+id/title"
+	  android:layout_width="match_parent"
+	  android:layout_height="match_parent"
+	  android:layout_weight="0.8"
+	  android:padding="10dp"
+	  android:background="@drawable/reader_title" />
       <LinearLayout
 	  android:orientation="horizontal"
-	  android:layout_width="fill_parent"
-	  android:layout_height="fill_parent"
+	  android:layout_width="match_parent"
+	  android:layout_height="match_parent"
 	  android:layout_weight="1" >
 	<Button
 	    android:id="@+id/smbc"
@@ -29,8 +36,8 @@
       </LinearLayout>
       <LinearLayout
 	  android:orientation="horizontal"
-	  android:layout_width="fill_parent"
-	  android:layout_height="fill_parent"
+	  android:layout_width="match_parent"
+	  android:layout_height="match_parent"
 	  android:layout_weight="1" >
 	<Button
 	    android:id="@+id/explosm"
@@ -43,8 +50,8 @@
 	</LinearLayout>
 	<LinearLayout
 	  android:orientation="horizontal"
-	  android:layout_width="fill_parent"
-	  android:layout_height="fill_parent"
+	  android:layout_width="match_parent"
+	  android:layout_height="match_parent"
 	  android:layout_weight="1" >
 	<Button
 	    android:id="@+id/phd"
@@ -57,8 +64,8 @@
       </LinearLayout>
       <LinearLayout
 	  android:orientation="horizontal"
-	  android:layout_width="fill_parent"
-	  android:layout_height="fill_parent"
+	  android:layout_width="match_parent"
+	  android:layout_height="match_parent"
 	  android:layout_weight="1" >
 	<Button
 	    android:id="@+id/cad"
@@ -73,8 +80,8 @@
       </LinearLayout>
       <LinearLayout
 	  android:orientation="horizontal"
-	  android:layout_width="fill_parent"
-	  android:layout_height="fill_parent"
+	  android:layout_width="match_parent"
+	  android:layout_height="match_parent"
 	  android:layout_weight="1" >
 	<Button
 	    android:id="@+id/abstrusegoose"
@@ -88,8 +95,8 @@
       </LinearLayout>
       <LinearLayout
 	  android:orientation="horizontal"
-	  android:layout_width="fill_parent"
-	  android:layout_height="fill_parent"
+	  android:layout_width="match_parent"
+	  android:layout_height="match_parent"
 	  android:layout_weight="1" >
 	<Button
 	    android:id="@+id/completelyserious"
@@ -102,8 +109,8 @@
 	    android:text="Mongrel Designs" />
       </LinearLayout>
       <RelativeLayout
-	  android:layout_width="fill_parent"
-	  android:layout_height="fill_parent"
+	  android:layout_width="match_parent"
+	  android:layout_height="match_parent"
 	  android:layout_weight="0.8">
 	<Button
 	    android:id="@+id/saved_comics"
@@ -112,18 +119,21 @@
 	    android:layout_centerInParent="true"
 	    android:text="Saved Comic Reader"
 	    android:textSize="17sp"
-	    android:textColor="#DDDDDDDD"
-	    android:background="@drawable/btn_default_holo_dark"/>
+	    android:textColor="#FFAAAAAA"
+	    android:layout_marginTop="4dp"
+	    android:paddingLeft="12dp"
+	    android:paddingRight="12dp"
+	    android:background="@drawable/btn_transparent"/>
       </RelativeLayout>
       <LinearLayout
 	  android:orientation="horizontal"
-	  android:layout_width="fill_parent"
-	  android:layout_height="fill_parent"
+	  android:layout_width="match_parent"
+	  android:layout_height="match_parent"
 	  android:layout_weight="1" >
 	<com.google.ads.AdView
 	    android:id="@+id/ad"
-	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
 	    ads:adUnitId="a14faafe97d9753"
 	    ads:adSize="BANNER"
 	    ads:loadAdOnCreate="true"

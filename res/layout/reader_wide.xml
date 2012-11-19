@@ -25,7 +25,7 @@
 	android:textColor="#DDDDDDDD"
 	android:layout_above="@id/comic_store"
 	android:layout_alignParentRight="true"
-	android:background="@drawable/btn_default_holo_dark"/>
+	android:background="@drawable/btn_transparent"/>
     <Button
 	android:id="@+id/comic_store"
 	android:layout_width="65dp"

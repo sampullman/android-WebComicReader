@@ -5,24 +5,24 @@
     xmlns:app="http://schemas.android.com/apk/res/com.threeDBJ.comicReader"
     android:id="@+id/main"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
   <LinearLayout
       android:orientation="vertical"
-      android:layout_width="fill_parent"
-      android:layout_height="fill_parent"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
       android:layout_weight="0.21"
       android:id="@+id/comic_wrapper">
     <com.threeDBJ.comicReader.MyViewPager
-        android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+	android:layout_height="match_parent"
         android:id="@+id/reader_pager" />
   </LinearLayout>
   <LinearLayout
       android:id="@+id/nav_bar"
       android:orientation="horizontal"
-      android:layout_width="fill_parent"
-      android:layout_height="fill_parent"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
       android:layout_weight="0.95">
     <Button
 	android:id="@+id/comic_first"
@@ -46,29 +46,29 @@
 	android:background="@drawable/comic_last"/>
     <Button
 	android:id="@+id/comic_alt"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
 	android:layout_weight="0.85"
 	android:text="Alt"
 	android:textSize="14sp"
 	android:textColor="#DDDDDDDD"
-	android:background="@drawable/btn_default_holo_dark"/>
+	android:background="@drawable/btn_transparent"/>
     <Button
 	android:id="@+id/comic_store"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
 	android:layout_weight="0.93"
 	android:background="@drawable/comic_store"/>
   </LinearLayout>
   <LinearLayout
       android:orientation="vertical"
-      android:layout_width="fill_parent"
-      android:layout_height="fill_parent"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
       android:layout_weight="0.93">
     <com.google.ads.AdView
 	android:id="@+id/ad"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
 	ads:adUnitId="a14faafe97d9753"
 	ads:adSize="BANNER"
 	ads:loadAdOnCreate="true"

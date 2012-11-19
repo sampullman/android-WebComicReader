@@ -28,13 +28,7 @@ import android.util.Log;
 
 public class RequestManager {
 
-    public enum LoadingState {
-	None, Current, Previous, Next, Done;
-    }
-
     Pattern unichar = Pattern.compile("&#[0-9]+");
-
-    public LoadingState state = LoadingState.None;
 
     public int running = 0;
 
@@ -43,8 +37,8 @@ public class RequestManager {
     }
 
     /* Start a background task that grabs a comic. */
-    public void grabComic(Reader context, String url) {
-	new GetComicTask(context).execute(url);
+    public void grabComic(Reader context, Comic c) {
+	new GetComicTask(context).execute(c);
     }
 
     /* Start a background task that grabs a comic's alt image. */
@@ -86,7 +80,7 @@ public class RequestManager {
 	return null;
     }
 
-    /* Retrieves the web page at the input url. 
+    /* Retrieves the web page at the input url.
        On 302 response, go to redirect. */
     public String makeQuery (String url) {
         try {
@@ -168,7 +162,7 @@ public class RequestManager {
     }
 
     /* Background task for grabbing a comic. */
-    private class GetComicTask extends AsyncTask<String,Integer,Bitmap> {
+    private class GetComicTask extends AsyncTask<Comic,Integer,Comic> {
 	protected Reader context;
 
 	public GetComicTask(Reader context) {
@@ -179,15 +173,17 @@ public class RequestManager {
 	    running += 1;
 	}
 
-	protected Bitmap doInBackground (String... data) {
+	protected Comic doInBackground (Comic... data) {
 	    String page, imgUrl;
 	    try{
-		page = makeQuery(data[0]);
+		page = makeQuery(data[0].getUrl());
 		if(page == null) {
 		    return null;
 		}
-		imgUrl = this.context.handleRawPage(page);
-		return retrieveImage(imgUrl);
+		imgUrl = this.context.handleRawPage(data[0], page);
+		Log.e("comic", "url: "+imgUrl);
+		data[0].setComic(retrieveImage(imgUrl));
+		return data[0];
 	    }catch(Exception e) {
 		if(e.getMessage() != null)
 		    Log.v("doInBg", e.getMessage());
@@ -196,27 +192,12 @@ public class RequestManager {
         }
 
 	/* Decide what to do with the comic according to the loading state. */
-	protected void onPostExecute (Bitmap comic) {
+	protected void onPostExecute (Comic comic) {
 	    running -= 1;
 	    if(comic != null) {
-		switch(state) {
-		case None:
-		    state = LoadingState.Current;
-		    break;
-		case Current:
-		    context.setCurrentComic(comic, true);
-		    break;
-		case Previous:
-		    context.setPreviousComic(comic);
-		    break;
-		case Next:
-		    context.setNextComic(comic);
-		    break;
-		case Done:
-		    break;
-		}
+		context.notifyComicLoaded(comic);
 	    } else {
-	        this.context.handleComicError();
+	        context.handleComicError(comic);
 	    }
 	}
 

@@ -43,7 +43,7 @@ public class ManlyGuysReader extends Reader {
 	LinearLayout nav = (LinearLayout) findViewById(R.id.nav_bar);
         nav.removeView(b);
 
-	grabComicCold(max);
+	loadInitial(max);
     }
 
     public void UISetup() {
@@ -52,7 +52,7 @@ public class ManlyGuysReader extends Reader {
     }
 
 
-    public String handleRawPage(String page) {
+    public String handleRawPage(Comic c, String page) {
 	Matcher mImages = pImages.matcher(page);
 	Matcher mPrev = pPrev.matcher(page);
 	Matcher mNext = pNext.matcher(page);
@@ -61,16 +61,16 @@ public class ManlyGuysReader extends Reader {
 	String imgUrl = mImages.group(1);
 
 	if(mImages.groupCount() == 2) {
-	    setAlt( mImages.group(2));
+	    c.setAlt( mImages.group(2));
 	} else {
-	    setAlt(null);
+	    c.setAlt(null);
 	}
 
 	if(mPrev.find()) {
-	    setPrevIndex(mPrev.group(1));
+	    c.setPrevInd(mPrev.group(1));
 	    /* Normal comic */
 	    if(mNext.find()) {
-		setNextIndex(mNext.group(1));
+		c.setNextInd(mNext.group(1));
 		/* Last comic */
 	    } else {
 		if(maxInd == null) {
@@ -82,7 +82,7 @@ public class ManlyGuysReader extends Reader {
 	    /* First comic */
 	} else {
 	    if(mNext.find(1)) {
-		setNextIndex(mNext.group(1));
+		c.setNextInd(mNext.group(1));
 	    } else {
 		/* Anomaly, this should not happen */
 	    }
@@ -92,7 +92,7 @@ public class ManlyGuysReader extends Reader {
 
     protected OnClickListener altListener = new OnClickListener() {
             public void onClick(View v) {
-		dispAltText(currentComic.altData, "Abstruse Goose Hover Text");
+		dispAltText(curComic.altData, "Abstruse Goose Hover Text");
             }
         };
 

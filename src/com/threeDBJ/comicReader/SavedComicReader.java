@@ -9,7 +9,10 @@ import android.os.Environment;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TextView;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
 import android.view.Menu;
@@ -29,13 +32,17 @@ import android.util.Log;
 import java.util.Random;
 import java.io.File;
 
-public class SavedComicReader extends Reader {
+public class SavedComicReader extends FragmentActivity {
+
+    public static final String PREFS_NAME = "ComicPrefsFile";
 
     File[] images;
-    int storeIndex;
+    int cur, storeIndex;
     Random rand;
+    String sdPath, title;
+    boolean swipe = false;
 
-    ViewPager mViewPager;
+    MyViewPager mViewPager;
     ReaderPagerAdapter mReaderPagerAdapter;
 
     static final String[] storeUrls = new String[] { "http://smbc.myshopify.com/", "http://store.xkcd.com/",
@@ -49,13 +56,25 @@ public class SavedComicReader extends Reader {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+	Configuration config = this.getResources().getConfiguration();
+	if(config.orientation == 1) {
+            setContentView(R.layout.reader);
+	} else if(config.orientation == 2) {
+            setContentView(R.layout.reader_wide);
+	}
+	mViewPager = (MyViewPager) findViewById(R.id.reader_pager);
+	SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+	setSwipe(settings.getBoolean("swipe", false));
+
 	Intent intent = getIntent();
 	this.title = intent.getExtras().getString("comic");
 	rand = new Random();
 
 	this.storeIndex = intent.getExtras().getInt("index");
-	if(isStorageWritable()) {
+	setupUI();
+	if(Reader.isStorageWritable()) {
 	    String path = sdPath + "/comics/" + title + "/";
+	    Log.e("scr", path);
 	    File dir = new File(path);
 	    if (dir != null) {
 		images = dir.listFiles();
@@ -74,13 +93,14 @@ public class SavedComicReader extends Reader {
 	    finish();
 	    return;
 	}
+
 	setResult(0);
 	Log.v("scr", "" + images.length);
-	mViewPager = (ViewPager) findViewById(R.id.reader_pager);
 	mViewPager.setOnPageChangeListener(pageListener);
 	mReaderPagerAdapter = new ReaderPagerAdapter(getSupportFragmentManager(), images.length);
 	mViewPager.setAdapter(mReaderPagerAdapter);
-	mViewPager.setCurrentItem(images.length - 1);
+	cur = images.length - 1;
+	mViewPager.setCurrentItem(cur);
     }
 
     OnPageChangeListener pageListener = new OnPageChangeListener() {
@@ -122,6 +142,33 @@ public class SavedComicReader extends Reader {
 	}
     }
 
+    public void setSwipe(boolean on) {
+	swipe = on;
+	mViewPager.setSwipeEnabled(on);
+	SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+	SharedPreferences.Editor editor = settings.edit();
+	editor.putBoolean("swipe", swipe);
+	editor.commit();
+    }
+
+    public OnClickListener prevListener = new OnClickListener() {
+	    public void onClick(View v) {
+		if(cur > 0) {
+		    cur -= 1;
+		    mViewPager.setCurrentItem(cur);
+		}
+	    }
+	};
+
+    public OnClickListener nextListener = new OnClickListener() {
+	    public void onClick(View v) {
+		if(cur < images.length - 1) {
+		    cur += 1;
+		    mViewPager.setCurrentItem(cur);
+		}
+	    }
+	};
+
 
     public OnClickListener firstListener = new OnClickListener() {
 	    public void onClick(View v) {
@@ -137,7 +184,9 @@ public class SavedComicReader extends Reader {
 
     public OnClickListener randomListener = new OnClickListener() {
 	    public void onClick(View v) {
-		mViewPager.setCurrentItem(rand.nextInt(images.length));
+		if(images.length > 1) {
+		    mViewPager.setCurrentItem(rand.nextInt(images.length));
+		}
 	    }
 	};
 
@@ -156,11 +205,13 @@ public class SavedComicReader extends Reader {
         return true;
     }
 
-    public void setup() {
-	rm = new RequestManager();
-
+    public void setupUI() {
 	Button b = (Button) findViewById(R.id.comic_first);
 	b.setOnClickListener(firstListener);
+	b = (Button) findViewById(R.id.comic_prev);
+	b.setOnClickListener(prevListener);
+	b = (Button) findViewById(R.id.comic_next);
+	b.setOnClickListener(nextListener);
 	b = (Button) findViewById(R.id.comic_last);
 	b.setOnClickListener(lastListener);
 	b = (Button) findViewById(R.id.comic_random);
@@ -169,7 +220,6 @@ public class SavedComicReader extends Reader {
 	b.setOnClickListener(storeListener);
 	b = (Button) findViewById(R.id.comic_alt);
 	b.setVisibility(View.GONE);
-	//b.setVisibility(View.INVISIBLE);
 
 	sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
     }

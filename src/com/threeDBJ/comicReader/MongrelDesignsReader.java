@@ -42,7 +42,7 @@ public class MongrelDesignsReader extends Reader {
 	LinearLayout nav = (LinearLayout) findViewById(R.id.nav_bar);
         nav.removeView(b);
 
-	grabComicCold(max);
+	loadInitial(max);
     }
 
     public void UISetup() {
@@ -50,7 +50,7 @@ public class MongrelDesignsReader extends Reader {
 	setAltListener(altListener);
     }
 
-    public String handleRawPage(String page) {
+    public String handleRawPage(Comic c, String page) {
 	Matcher mImages = pImages.matcher(page);
 	Matcher mPrev = pPrev.matcher(page);
 	Matcher mNext = pNext.matcher(page);
@@ -58,22 +58,22 @@ public class MongrelDesignsReader extends Reader {
 	boolean success = mImages.find();
 	String imgUrl = mImages.group(1);
 	if(mImages.groupCount() == 2) {
-	    setAlt(mImages.group(2));
+	    c.setAlt(mImages.group(2));
 	} else {
-	    setAlt(null);
+	    c.setAlt(null);
 	}
 	Matcher mMax = pMax.matcher(page);
 	mMax.find();
 	String title = mMax.group(1);
 	if(mPrev.find()) {
-	    setPrevIndex(mPrev.group(1));
+	    c.setPrevInd(mPrev.group(1));
 	    /* Normal comic */
 	    if(mNext.find()) {
 		/* Last comic -- Will have to change if comic is not started at max */
 		if(this.maxInd == null) {
 		    setMaxIndex(title);
 		} else {
-		    setNextIndex(mNext.group(1));
+		    c.setNextInd(mNext.group(1));
 		}
 	    } else {
 
@@ -81,23 +81,23 @@ public class MongrelDesignsReader extends Reader {
 	    /* First comic */
 	} else {
 	    if(mNext.find(1)) {
-		setNextIndex(mNext.group(1));
+		c.setNextInd(mNext.group(1));
 	    } else {
 		/* Anomaly, this should not happen */
 	    }
 	}
 	int ind = title.lastIndexOf("/");
 	if(ind != -1) {
-	    setImageTitle(title.substring(ind, title.length()-1));
+	    c.setImageTitle(title.substring(ind, title.length()-1));
 	} else {
-	    setImageTitle(title);
+	    c.setImageTitle(title);
 	}
 	return imgUrl;
     }
 
     protected OnClickListener altListener = new OnClickListener() {
             public void onClick(View v) {
-		dispAltText(currentComic.altData, "Completely Serious Hover Text");
+		dispAltText(curComic.altData, "Completely Serious Hover Text");
             }
         };
 

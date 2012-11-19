@@ -22,7 +22,7 @@ public class ExplosmReader extends Reader {
         super.onCreate(savedInstanceState);
         String prevPat = "a rel=\"prev\".*?href=\"/comics/([0-9]+)/\"";
 	String nextPat = "a rel=\"next\".*?href=\"/comics/([0-9]+)/\"";
-	String imgPat = "src=\"(http://www.explosm.net/db/files/Comics.*?)\"";
+	String imgPat = "src=\"(http://w?w?w?.?explosm.net/db/files/Comics.*?)\"";
 
 	this.pImages = Pattern.compile(imgPat,Pattern.DOTALL | Pattern.UNIX_LINES);
 	this.pPrev = Pattern.compile(prevPat,Pattern.DOTALL | Pattern.UNIX_LINES);
@@ -37,20 +37,20 @@ public class ExplosmReader extends Reader {
 	/* Wierd, but true */
 	this.firstInd = "15";
 
-	grabComicCold(max);
+	loadInitial(max);
 
     }
 
-    public String handleRawPage(String page) {
+    public String handleRawPage(Comic c, String page) {
 	Matcher mImages = pImages.matcher(page);
 	Matcher mPrev = pPrev.matcher(page);
 	Matcher mNext = pNext.matcher(page);
 
 	if(mPrev.find()) {
-	    setPrevIndex(mPrev.group(1));
+	    c.setPrevInd(mPrev.group(1));
 	    /* Normal comic */
 	    if(mNext.find()) {
-		setNextIndex(mNext.group(1));
+		c.setNextInd(mNext.group(1));
 	    /* Last comic */
 	    } else {
 		String temp = Integer.toString(Integer.parseInt(mPrev.group(1))+1);
@@ -60,7 +60,7 @@ public class ExplosmReader extends Reader {
 	/* First comic */
 	} else {
 	    if(mNext.find(1)) {
-		setNextIndex(mNext.group(1));
+		c.setNextInd(mNext.group(1));
 	    } else {
 		/* Anomaly, this should not happen */
 	    }

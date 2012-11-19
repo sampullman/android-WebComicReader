@@ -36,25 +36,25 @@ public class FeelAfraidReader extends Reader {
 
 	this.firstInd = "1.php";
 
-	grabComicCold(max);
+	loadInitial(max);
     }
 
     public String getIndFromNum(String num) {
 	return num + ".php";
     }
 
-    public String handleRawPage(String page) {
+    public String handleRawPage(Comic c, String page) {
 	Matcher mImages = pImages.matcher(page);
 	Matcher mPrev = pPrev.matcher(page);
 	Matcher mNext = pNext.matcher(page);
-
 	if(mPrev.find()) {
-	    setPrevIndex(mPrev.group(1));
-	    if(prevInd.equals("75.php"))
-		setNextIndex("77.php");
+	    c.setPrevInd(mPrev.group(1));
+	    // TODO -- figure out better solution
+	    //if(c.curComic.prevInd.equals("75.php"))
+	    //c.setNextInd("77.php");
 	    /* Normal comic */
 	    if(mNext.find()) {
-		setNextIndex(mNext.group(1));
+		c.setNextInd(mNext.group(1));
 	    /* Last comic */
 	    } else {
 		String temp = mPrev.group(1);
@@ -66,7 +66,7 @@ public class FeelAfraidReader extends Reader {
 	/* First comic */
 	} else {
 	    if(mNext.find(1)) {
-		setNextIndex(mNext.group(1));
+		c.setNextInd(mNext.group(1));
 	    } else {
 		/* Anomaly, this should not happen */
 		Log.v("FeelAfraid", "Grevious error");
@@ -78,7 +78,7 @@ public class FeelAfraidReader extends Reader {
 	    int dotInd = imgTitle.indexOf(".");
 	    if(dotInd != -1)
 		imgTitle = imgTitle.substring(0, dotInd);
-	    setImageTitle(imgTitle);
+	    c.setImageTitle(imgTitle);
 	    return imgUrl;
 	} else {
 	    return null;

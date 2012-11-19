@@ -18,6 +18,10 @@ public class SavedComicMenu extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.title);
+
+	TextView t = (TextView) findViewById(R.id.title);
+	t.setBackgroundResource(R.drawable.saved_reader_title);
+
 	Button b;
 	b = (Button)findViewById(R.id.saved_comics);
 	b.setVisibility(View.GONE);

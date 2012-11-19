@@ -43,24 +43,24 @@ public class ButtersafeReader extends Reader {
 	Button b = (Button) findViewById(R.id.comic_random);
 	b.setOnClickListener(randomListener);
 
-	grabComicCold(max);
+	loadInitial(max);
 
     }
 
-    public String handleRawPage(String page) {
+    public String handleRawPage(Comic c, String page) {
 	Matcher mImages = pImages.matcher(page);
 	Matcher mPrev = pPrev.matcher(page);
 	Matcher mNext = pNext.matcher(page);
 
 	mImages.find();
 	String imgUrl = mImages.group(1);
-	setImageTitle(mImages.group(2));
+	c.setImageTitle(mImages.group(2));
 
 	if(mPrev.find()) {
-	    setPrevIndex(mPrev.group(1));
+	    c.setPrevInd(mPrev.group(1));
 	    /* Normal comic */
 	    if(mNext.find()) {
-		setNextIndex(mNext.group(1));
+		c.setNextInd(mNext.group(1));
 	    /* Last comic */
 	    } else if(!haveMax()) {
 		Matcher mMax = pMax.matcher(page);
@@ -70,7 +70,7 @@ public class ButtersafeReader extends Reader {
 	/* First comic */
 	} else {
 	    if(mNext.find(1)) {
-		setNextIndex(mNext.group(1));
+		c.setNextInd(mNext.group(1));
 	    } else {
 		/* Anomaly, this should not happen */
 	    }
@@ -84,9 +84,9 @@ public class ButtersafeReader extends Reader {
 
     protected OnClickListener randomListener = new OnClickListener() {
             public void onClick(View v) {
-		currentComic.curInd = "random";
 		clearComics();
-		grabComicCold(randComic);
+		clearVisible();
+		loadInitial(randComic);
             }
         };
 

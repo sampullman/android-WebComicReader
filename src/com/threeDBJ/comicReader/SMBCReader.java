@@ -36,7 +36,7 @@ public class SMBCReader extends Reader {
 	this.title = "SMBC";
 	this.storeUrl = "http://smbc.myshopify.com/";
 
-	grabComicCold(max);
+	loadInitial(max);
     }
 
     public void UISetup() {
@@ -48,7 +48,7 @@ public class SMBCReader extends Reader {
        First comic only has a next
        Last comic has a first and a previous
        All other comics have a first, previous, and next */
-    public String handleRawPage(String page) {
+    public String handleRawPage(Comic c, String page) {
 	int nIndices=0;
 	Matcher mImages = pImages.matcher(page);
 	Matcher mIndices = pIndices.matcher(page);
@@ -58,9 +58,9 @@ public class SMBCReader extends Reader {
 	    imgUrl = mImages.group(1);
 	    Matcher mAlt = pAlt.matcher(page);
 	    if(mAlt.find()) {
-		setAlt(mAlt.group(1));
+		c.setAlt(mAlt.group(1));
 	    } else {
-		setAlt(null);
+		c.setAlt(null);
 	    }
 	} catch(Exception e) {
 	    imgUrl = "http://cdn.shopify.com/s/files/1/0066/2852/products/science_large_grande.jpg?100646";
@@ -71,10 +71,10 @@ public class SMBCReader extends Reader {
 	}
 	/* First comic */
 	if(nIndices == 1) {
-	    setNextIndex(indices[0]);
+	    c.setNextInd(indices[0]);
 	} else if(nIndices == 2) {
 	    if(haveMax() && indices[1].equals(Integer.toString(Integer.parseInt(maxInd)-2))) {
-		setNextIndex(Integer.toString(Integer.parseInt(indices[1])+2));
+		c.setNextInd(Integer.toString(Integer.parseInt(indices[1])+2));
 	    } else if(!haveMax()) {
 		Matcher mMax = pMax.matcher(page);
 		mMax.find();
@@ -83,10 +83,10 @@ public class SMBCReader extends Reader {
 		setMaxNum(temp);
 	    } else {
 	    }
-	    setPrevIndex(indices[1]);
+	    c.setPrevInd(indices[1]);
 	} else if(nIndices == 3){
-	    setPrevIndex(indices[1]);
-	    setNextIndex(indices[2]);
+	    c.setPrevInd(indices[1]);
+	    c.setNextInd(indices[2]);
 	} else {
 	    Log.v("smbc", "error - invalid comic");
 	}
@@ -95,8 +95,8 @@ public class SMBCReader extends Reader {
 
     protected OnClickListener altListener = new OnClickListener() {
             public void onClick(View v) {
-		if(currentComic.altData != null) {
-		    dispAltImage(currentComic.altData, "SMBC Red Button");
+		if(curComic.altData != null) {
+		    dispAltImage(curComic.altData, "SMBC Red Button");
 		} else {
 		    dispAltText("No Red Button Available!", "SMBC Red Button");
 		}

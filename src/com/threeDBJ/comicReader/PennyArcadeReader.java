@@ -43,11 +43,11 @@ public class PennyArcadeReader extends Reader {
 	LinearLayout nav = (LinearLayout) findViewById(R.id.nav_bar);
         nav.removeView(b);
 
-	grabComicCold(max);
+	loadInitial(max);
 
     }
 
-    public String handleRawPage(String page) {
+    public String handleRawPage(Comic c, String page) {
 	Matcher mImages = pImages.matcher(page);
 	Matcher mPrev = pPrev.matcher(page);
 	Matcher mNext = pNext.matcher(page);
@@ -60,9 +60,9 @@ public class PennyArcadeReader extends Reader {
 	if(dotInd != -1) {
 	    imgTitle = imgTitle.substring(slashInd+1, dotInd);
 	}
-	setImageTitle(imgTitle);
+	c.setImageTitle(imgTitle);
 	if(mPrev.find()) {
-	    setPrevIndex(mPrev.group(1));
+	    c.setPrevInd(mPrev.group(1));
 	    /* Normal comic */
 	    if(mNext.find()) {
 		if(mNext.group(1).equals("") && !haveMax()) {
@@ -72,14 +72,14 @@ public class PennyArcadeReader extends Reader {
 		    Log.e("wat", "found max");
 		} else {
 		    Log.e("wat", "not the max");
-		    setNextIndex(mNext.group(1));
+		    c.setNextInd(mNext.group(1));
 		}
 	    }
 	    /* No easy way to detect last comic */
 	/* First comic */
 	} else {
 	    if(mNext.find(1)) {
-		setNextIndex(mNext.group(1));
+		c.setNextInd(mNext.group(1));
 	    } else {
 		/* Anomaly, this should not happen */
 	    }
@@ -94,9 +94,9 @@ public class PennyArcadeReader extends Reader {
 
     protected OnClickListener randomListener = new OnClickListener() {
             public void onClick(View v) {
-		currentComic.curInd = "random";
 		clearComics();
-		grabComicCold(base + "random");
+		clearVisible();
+		loadInitial(base + "random");
             }
         };
 
