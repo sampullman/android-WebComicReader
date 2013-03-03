@@ -1,3 +1,2 @@
-ant clean
 ant debug
 adb install -r bin/comicReader-debug.apk

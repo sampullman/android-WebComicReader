@@ -8,8 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import android.util.Log;
-
 public class PageFragment extends Fragment {
 
     ViewGroup ll;

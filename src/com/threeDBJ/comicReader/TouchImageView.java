@@ -11,7 +11,6 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.ImageView;
 import android.util.AttributeSet;
-import android.util.Log;
 
 public class TouchImageView extends ImageView implements OnGestureListener {
 
@@ -143,7 +142,7 @@ public class TouchImageView extends ImageView implements OnGestureListener {
 			    // 	rightEdge = false;
 			    // 	if(mvp != null) mvp.setPagingEnabled(false);
 			    // }
-			    //Log.v("matrix", matrix.toString() + " "+x+" "+right+" "+d);
+			    //DebugLog.v("matrix", matrix.toString() + " "+x+" "+right+" "+d);
 			    matrix.postTranslate(deltaX, deltaY);
 			    last.set(curr.x, curr.y);
 			}

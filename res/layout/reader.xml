@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-  <LinearLayout
+  <RelativeLayout
       android:orientation="vertical"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
@@ -15,9 +15,9 @@
       android:id="@+id/comic_wrapper">
     <com.threeDBJ.comicReader.MyViewPager
         android:layout_width="match_parent"
-	android:layout_height="match_parent"
+        android:layout_height="match_parent"
         android:id="@+id/reader_pager" />
-  </LinearLayout>
+  </RelativeLayout>
   <LinearLayout
       android:id="@+id/nav_bar"
       android:orientation="horizontal"
@@ -25,40 +25,42 @@
       android:layout_height="match_parent"
       android:layout_weight="0.95">
     <Button
-	android:id="@+id/comic_first"
-	style="@style/btn"
-	android:background="@drawable/comic_first"/>
+        android:id="@+id/comic_first"
+        style="@style/btn"
+        android:background="@drawable/comic_first"/>
     <Button
-	android:id="@+id/comic_prev"
-	style="@style/btn"
-	android:background="@drawable/comic_prev"/>
+        android:id="@+id/comic_prev"
+        style="@style/btn"
+        android:background="@drawable/comic_prev"/>
     <Button
-	android:id="@+id/comic_random"
-	style="@style/btn"
-	android:background="@drawable/comic_random"/>
+        android:id="@+id/comic_random"
+        style="@style/btn"
+        android:background="@drawable/comic_random"/>
     <Button
-	android:id="@+id/comic_next"
-	style="@style/btn"
-	android:background="@drawable/comic_next"/>
+        android:id="@+id/comic_next"
+        style="@style/btn"
+        android:background="@drawable/comic_next"/>
     <Button
-	android:id="@+id/comic_last"
-	style="@style/btn"
-	android:background="@drawable/comic_last"/>
+        android:id="@+id/comic_last"
+        style="@style/btn"
+        android:background="@drawable/comic_last"/>
     <Button
-	android:id="@+id/comic_alt"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:layout_weight="0.85"
-	android:text="Alt"
-	android:textSize="14sp"
-	android:textColor="#DDDDDDDD"
-	android:background="@drawable/btn_transparent"/>
+        android:id="@+id/comic_alt"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.85"
+        android:text="Alt"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFDDDDDD"
+        android:padding="0dp"
+        android:background="@drawable/btn_grey"/>
     <Button
-	android:id="@+id/comic_store"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:layout_weight="0.93"
-	android:background="@drawable/comic_store"/>
+        android:id="@+id/comic_store"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0.93"
+        android:background="@drawable/comic_store"/>
   </LinearLayout>
   <LinearLayout
       android:orientation="vertical"
@@ -66,16 +68,16 @@
       android:layout_height="match_parent"
       android:layout_weight="0.93">
     <com.google.ads.AdView
-	android:id="@+id/ad"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	ads:adUnitId="a14faafe97d9753"
-	ads:adSize="BANNER"
-	ads:loadAdOnCreate="true"
-	app:backgroundColor="#000000"
-	app:primaryTextColor="#FFFFFF"
-	app:secondaryTextColor="#CCCCCC"
-	android:gravity="center"
-	app:keywords="comic reader smbc xkcd viewer web"/>
+        android:id="@+id/ad"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        ads:adUnitId="a14faafe97d9753"
+        ads:adSize="BANNER"
+        ads:loadAdOnCreate="true"
+        app:backgroundColor="#000000"
+        app:primaryTextColor="#FFFFFF"
+        app:secondaryTextColor="#CCCCCC"
+        android:gravity="center"
+        app:keywords="comic reader smbc xkcd viewer web"/>
   </LinearLayout>
 </LinearLayout>

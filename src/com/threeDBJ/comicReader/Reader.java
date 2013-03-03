@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Environment;
 
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.EditText;
@@ -20,8 +21,10 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.pm.ActivityInfo;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.preference.PreferenceManager;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +35,6 @@ import android.view.Gravity;
 import android.widget.Button;
 import android.view.LayoutInflater;
 
-import java.util.regex.Matcher;
 import java.io.FileOutputStream;
 import java.io.File;
 
@@ -46,17 +48,16 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import android.util.Log;
 
 public class Reader extends FragmentActivity {
 
     public static final String PREFS_NAME = "ComicPrefsFile";
 
     String prevPat, nextPat, imgPat, base, max, errorInd,
-	firstInd="1", maxInd, storeUrl,	sdPath, title;
+        firstInd="1", maxInd, storeUrl,	sdPath, title, shortTitle;
 
     static String aboutText = "Created by 3DBJ developers. Please email questions, comments, or " +
-	"concerns to 3dbj.dev@gmail.com";
+        "concerns to 3dbj.dev@gmail.com";
 
     HashSet<String> loadingInds = new HashSet<String>();
     HashMap<String, CachedComic> comicMap = new HashMap<String, CachedComic>();
@@ -64,7 +65,7 @@ public class Reader extends FragmentActivity {
     CachedComic prevComic = new CachedComic();
     CachedComic nextComic = new CachedComic();
 
-    Double maxNum=null;
+    int maxNum=-1;
 
     EditText selectEdit;
     Dialog selectDialog;
@@ -72,7 +73,7 @@ public class Reader extends FragmentActivity {
 
     int setPager=20000, errorCount=0, accessed=0;
     boolean firstRun=false, error=false, swipe=false,
-	nextEnabled=true, prevEnabled=false;
+        nextEnabled=true, prevEnabled=false, loadLastViewed;
 
     MyViewPager mViewPager;
     ReaderPagerAdapter mReaderPagerAdapter;
@@ -86,45 +87,47 @@ public class Reader extends FragmentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-	setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-	Configuration config = this.getResources().getConfiguration();
-	if(config.orientation == 1) {
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+        Configuration config = this.getResources().getConfiguration();
+        if(config.orientation == 1) {
             setContentView(R.layout.reader);
-	} else if(config.orientation == 2) {
+        } else if(config.orientation == 2) {
             setContentView(R.layout.reader_wide);
-	}
-	sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-	this.UISetup();
+        }
+        sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+        this.UISetup();
 
-	SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-	setSwipe(settings.getBoolean("swipe", false));
+        Intent intent = getIntent();
+        this.loadLastViewed = intent.getExtras().getBoolean("load_last_viewed");
+
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        setSwipe(settings.getBoolean("swipe", false));
     }
 
     /* Set up click listeners and initialize the view pager */
     public void UISetup() {
-
-	Button b = (Button) findViewById(R.id.comic_first);
-	b.setOnClickListener(firstListener);
-	b = (Button) findViewById(R.id.comic_prev);
-	b.setOnClickListener(prevListener);
-	b = (Button) findViewById(R.id.comic_last);
-	b.setOnClickListener(lastListener);
-	b = (Button) findViewById(R.id.comic_next);
-	b.setOnClickListener(nextListener);
-	b = (Button) findViewById(R.id.comic_random);
-	b.setOnClickListener(randomListener);
-	b = (Button) findViewById(R.id.comic_store);
-	b.setOnClickListener(storeListener);
-	b = (Button) findViewById(R.id.comic_alt);
-	b.setVisibility(View.GONE);
-	firstRun = true;
-	mViewPager = (MyViewPager) findViewById(R.id.reader_pager);
-	mReaderPagerAdapter = new ReaderPagerAdapter(getSupportFragmentManager());
-	mViewPager.setAdapter(mReaderPagerAdapter);
-	mViewPager.setOffscreenPageLimit(1);
-	mViewPager.setOnPageChangeListener(pageListener);
-	mViewPager.setCurrentItem(setPager);
-	mViewPager.setCurrentItem(setPager);
+        Button b = (Button) findViewById(R.id.comic_first);
+        b.setOnClickListener(firstListener);
+        b = (Button) findViewById(R.id.comic_prev);
+        b.setOnClickListener(prevListener);
+        b = (Button) findViewById(R.id.comic_last);
+        b.setOnClickListener(lastListener);
+        b = (Button) findViewById(R.id.comic_next);
+        b.setOnClickListener(nextListener);
+        b = (Button) findViewById(R.id.comic_random);
+        b.setOnClickListener(randomListener);
+        b = (Button) findViewById(R.id.comic_store);
+        b.setOnClickListener(storeListener);
+        b = (Button) findViewById(R.id.comic_alt);
+        b.setVisibility(View.GONE);
+        firstRun = true;
+        mViewPager = (MyViewPager) findViewById(R.id.reader_pager);
+        mReaderPagerAdapter = new ReaderPagerAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(mReaderPagerAdapter);
+        mViewPager.setOffscreenPageLimit(1);
+        mViewPager.setOnPageChangeListener(pageListener);
+        mViewPager.setCurrentItem(setPager);
+        mViewPager.setCurrentItem(setPager);
     }
 
     /* Handle a change in orientation */
@@ -135,90 +138,129 @@ public class Reader extends FragmentActivity {
             setContentView(R.layout.reader);
         } else if(config.orientation == 2) {
             setContentView(R.layout.reader_wide);
-	}
-	setPager = prevPos;
-	this.UISetup();
-	if(curComic.image != null) {
-	    mReaderPagerAdapter.getFragment(mViewPager.getCurrentItem()).setImage(curComic.image, mViewPager);
-	}
+        }
+        setPager = prevPos;
+        this.UISetup();
+        if(curComic.image != null) {
+            mReaderPagerAdapter.getFragment(mViewPager.getCurrentItem()).setImage(curComic.image, mViewPager);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if(curComic.curInd != null) {
+            Editor edit = prefs.edit();
+            edit.putString(shortTitle, curComic.curInd);
+            if(maxNum != -1) {
+                edit.putInt(shortTitle+"-max", maxNum);
+            }
+            edit.commit();
+        }
     }
 
     public void loadInitial(String url) {
-	loadingInds.add(url);
-	comicMap.put(url, curComic);
-	rm.grabComic(this, new Comic("", url));
-	errorInd = null;
-	showLoadingDialog();
+        if(loadLastViewed) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            String lastInd = prefs.getString(shortTitle, "");
+            if(lastInd.equals("") || lastInd.equals(max)) {
+                maxNum = prefs.getInt(shortTitle+"-max", -1);
+                loadLast(url);
+            } else {
+                comicMap.put(lastInd, curComic);
+                showLoadingDialog();
+                loadComic(lastInd);
+            }
+        } else {
+            loadLast(url);
+        }
+    }
+
+    public void loadLast(String url) {
+        removeError();
+        loadingInds.add(url);
+        comicMap.put(url, curComic);
+        rm.grabComic(this, new Comic("", url));
+        errorInd = null;
+        showLoadingDialog();
     }
 
     public void loadComic(String ind) {
-	if(ind != null && !loadingInds.contains(ind)) {
-	    loadingInds.add(ind);
-	    rm.grabComic(this, new Comic(base, ind));
-	}
+        removeError();
+        if(ind != null && !loadingInds.contains(ind)) {
+            loadingInds.add(ind);
+            rm.grabComic(this, new Comic(base, ind));
+        }
     }
 
     /* Notification from the RequestManager that a comic has finished loading.
        Matches comic url with current cur/prev/nextComic */
     public void notifyComicLoaded(Comic c) {
-	loadingInds.remove(c.getInd());
-	CachedComic cached = comicMap.remove(c.getInd());
-	if(cached != null) {
-	    cached.load(c);
-	    Log.e("comic", cached.prevInd+" "+cached.curInd+" "+cached.nextInd+" : "+maxInd);
-	    if(cached == curComic) {
-		errorInd = null;
-		mReaderPagerAdapter.getFragment(mViewPager.getCurrentItem()).setImage(c.getComic(), mViewPager);
-		if(loadingDialog != null && loadingDialog.isShowing()) {
-		    loadingDialog.dismiss();
-		}
-		prevEnabled = true;
-		nextEnabled = true;
-	    } else if(cached == prevComic) {
-		prevEnabled = true;
-	    } else if(cached == nextComic) {
-		nextEnabled = true;
-	    }
-	    if(curComic.loaded) {
-		if(!prevComic.loaded && !loadingInds.contains(curComic.prevInd)) {
-		    comicMap.put(curComic.prevInd, prevComic);
-		    loadComic(curComic.prevInd);
-		} else if(!nextComic.loaded && !loadingInds.contains(curComic.nextInd)) {
-		    comicMap.put(curComic.nextInd, nextComic);
-		    loadComic(curComic.nextInd);
-		}
-	    }
-	}
+        loadingInds.remove(c.getInd());
+        CachedComic cached = comicMap.remove(c.getInd());
+        if(cached != null) {
+            cached.load(c);
+            //DebugLog.e("comic", cached.prevInd+" "+cached.curInd+" "+cached.nextInd+" : "+maxInd);
+            if(cached == curComic) {
+                errorInd = null;
+                if(loadingDialog != null && loadingDialog.isShowing()) {
+                    loadingDialog.dismiss();
+                }
+                PageFragment frag = mReaderPagerAdapter.getFragment(mViewPager.getCurrentItem());
+                if(frag == null) {
+                    handleComicCancel();
+                } else {
+                    frag.setImage(c.getComic(), mViewPager);
+                    prevEnabled = true;
+                    nextEnabled = true;
+                }
+            } else if(cached == prevComic) {
+                prevEnabled = true;
+            } else if(cached == nextComic) {
+                nextEnabled = true;
+            }
+            if(curComic.loaded) {
+                if(!prevComic.loaded && !loadingInds.contains(curComic.prevInd)) {
+                    comicMap.put(curComic.prevInd, prevComic);
+                    loadComic(curComic.prevInd);
+                } else if(!nextComic.loaded && !loadingInds.contains(curComic.nextInd)) {
+                    comicMap.put(curComic.nextInd, nextComic);
+                    loadComic(curComic.nextInd);
+                }
+            }
+        }
     }
 
     /* Display error message (tap to refresh) - Most likely caused by
        network failure. TODO - Update method */
     public void handleComicError(Comic c) {
-	loadingInds.remove(c.getInd());
-	CachedComic cached = comicMap.remove(c.getInd());
-	if(c.getInd() == null && curComic.curInd == null) {
-	    comicMap.clear();
-	    loadingInds.clear();
-	    cached = curComic;
-	}
-	if(loadingDialog != null && loadingDialog.isShowing()) {
-	    loadingDialog.cancel();
-	}
-	errorCount += 1;
-	Log.e("comic", "error:"+c.getInd()+" "+curComic.curInd);
-	if(cached == curComic && !curComic.loaded) {
-	    Log.e("comic", "error: errTextNull = "+(errorText == null));
-	    ViewGroup ll = (ViewGroup) findViewById(R.id.comic_wrapper);
-	    if(errorText == null) {
-		errorText = (TextView) getLayoutInflater().inflate(R.layout.error_text_view, null);
-		errorText.setOnClickListener(reloadListener);
-		ll.setOnClickListener(reloadListener);
-		ll.addView(errorText, 0);
-	    }
-	    prevEnabled = prevComic.loaded;
-	    nextEnabled = nextComic.loaded;
-	    error = true;
-	}
+        loadingInds.remove(c.getInd());
+        CachedComic cached = comicMap.remove(c.getInd());
+        if(c.getInd() == null && curComic.curInd == null) {
+            comicMap.clear();
+            loadingInds.clear();
+            cached = curComic;
+        }
+        if(loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.cancel();
+        }
+        errorCount += 1;
+        //DebugLog.e("comic", "error:"+c.getInd()+" "+curComic.curInd);
+        if(cached == curComic && !curComic.loaded) {
+            //DebugLog.e("comic", "error: errTextNull = "+(errorText == null));
+            ViewGroup ll = (ViewGroup) findViewById(R.id.comic_wrapper);
+            if(errorText == null) {
+                errorText = (TextView) getLayoutInflater().inflate(R.layout.error_text_view, ll, false);
+                errorText.setOnClickListener(reloadListener);
+                ll.setOnClickListener(reloadListener);
+                ll.addView(errorText, 0);
+                ll.bringChildToFront(errorText);
+            }
+            prevEnabled = prevComic.loaded;
+            nextEnabled = nextComic.loaded;
+            error = true;
+        }
     }
 
     int prevPos = 20000;
@@ -226,455 +268,455 @@ public class Reader extends FragmentActivity {
     /* Swipe listener for the view pager. */
     OnPageChangeListener pageListener = new OnPageChangeListener() {
 
-	    @Override
-	    public void onPageScrollStateChanged (int state) {
-	    }
-	    @Override
-	    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-	    }
+            @Override
+            public void onPageScrollStateChanged (int state) {
+            }
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
 
-	    /* Handles a page change. If a caching operation is in process, it must
-	       either be ignored or marked as the current comic. */
-	    @Override
-	    public void onPageSelected (int position) {
-		if(firstRun) {
-		    firstRun = false;
-		    return;
-		}
-		mReaderPagerAdapter.clean(position);
-		/* Load the next comic. */
-		String newInd = "";
-		if(position > prevPos) {
-		    if(curComic.curInd == null && nextEnabled) {
-		    } else if(curComic.curInd == null || !nextEnabled || curComic.curInd.equals(maxInd) ||
-			      curComic.curInd.equals(max)) {
-			mViewPager.setCurrentItem(prevPos);
-			return;
-		    }
-		    prevComic.become(curComic);
-		    curComic.become(nextComic);
-		    nextComic.clear();
+            /* Handles a page change. If a caching operation is in process, it must
+               either be ignored or marked as the current comic. */
+            @Override
+            public void onPageSelected (int position) {
+                if(firstRun) {
+                    firstRun = false;
+                    return;
+                }
+                mReaderPagerAdapter.clean(position);
+                /* Load the next comic. */
+                String newInd = "";
+                if(position > prevPos) {
+                    if(curComic.curInd == null && nextEnabled) {
+                    } else if(curComic.curInd == null || !nextEnabled || curComic.curInd.equals(maxInd) ||
+                              curComic.curInd.equals(max)) {
+                        mViewPager.setCurrentItem(prevPos);
+                        return;
+                    }
+                    prevComic.become(curComic);
+                    curComic.become(nextComic);
+                    nextComic.clear();
 
-		    newInd = prevComic.nextInd;
-		    if(curComic.loaded) {
-			comicMap.put(curComic.nextInd, nextComic);
-			loadComic(curComic.nextInd);
-		    }
-	        /* Load the previous comic. */
-		} else if(position < prevPos) {
-		    if(curComic.curInd == null && prevEnabled) {
-		    } else if(curComic.curInd == null || !prevEnabled || curComic.curInd.equals(firstInd)) {
-			mViewPager.setCurrentItem(prevPos);
-			return;
-		    }
-		    nextComic.become(curComic);
-		    curComic.become(prevComic);
-		    prevComic.clear();
+                    newInd = prevComic.nextInd;
+                    if(curComic.loaded) {
+                        comicMap.put(curComic.nextInd, nextComic);
+                        loadComic(curComic.nextInd);
+                    }
+                    /* Load the previous comic. */
+                } else if(position < prevPos) {
+                    if(curComic.curInd == null && prevEnabled) {
+                    } else if(curComic.curInd == null || !prevEnabled || curComic.curInd.equals(firstInd)) {
+                        mViewPager.setCurrentItem(prevPos);
+                        return;
+                    }
+                    nextComic.become(curComic);
+                    curComic.become(prevComic);
+                    prevComic.clear();
 
-		    newInd = nextComic.prevInd;
-		    if(curComic.loaded && !curComic.curInd.equals(firstInd)) {
-			comicMap.put(curComic.prevInd, prevComic);
-			loadComic(curComic.prevInd);
-		    }
-		}
-		removeError();
-		prevEnabled = true; nextEnabled = true;
-		comicMap.put(newInd, curComic);
-		if(loadingInds.contains(newInd)) {
-		    showLoadingDialog();
-		    errorInd = newInd;
-		} else if(!curComic.loaded) {
-		    showLoadingDialog();
-		    loadComic(newInd);
-		    errorInd = newInd;
-		} else {
-		    mReaderPagerAdapter.getFragment(mViewPager.getCurrentItem()).setImage(curComic.image, mViewPager);
-		}
-		prevPos = position;
-	    }
-	};
+                    newInd = nextComic.prevInd;
+                    if(curComic.loaded && !curComic.curInd.equals(firstInd)) {
+                        comicMap.put(curComic.prevInd, prevComic);
+                        loadComic(curComic.prevInd);
+                    }
+                }
+                removeError();
+                prevEnabled = true; nextEnabled = true;
+                comicMap.put(newInd, curComic);
+                if(loadingInds.contains(newInd)) {
+                    showLoadingDialog();
+                    errorInd = newInd;
+                } else if(!curComic.loaded) {
+                    showLoadingDialog();
+                    loadComic(newInd);
+                    errorInd = newInd;
+                } else {
+                    mReaderPagerAdapter.getFragment(mViewPager.getCurrentItem()).setImage(curComic.image, mViewPager);
+                }
+                prevPos = position;
+            }
+        };
 
     /* Adapter for the view pager. Creates and destroys views when necessary. */
     private class ReaderPagerAdapter extends FragmentStatePagerAdapter {
 
-	HashMap<Integer, PageFragment> fragMap = new HashMap<Integer, PageFragment>();
+        HashMap<Integer, PageFragment> fragMap = new HashMap<Integer, PageFragment>();
 
-	public ReaderPagerAdapter(FragmentManager fm) {
-	    super(fm);
-	}
+        public ReaderPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
 
-	public void destroyItem(ViewGroup container, int position, Object object) {
-	    super.destroyItem(container, position, object);
-	    PageFragment frag = fragMap.remove(position);
-	    frag.clean();
-	}
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            super.destroyItem(container, position, object);
+            PageFragment frag = fragMap.remove(position);
+            frag.clean();
+        }
 
-	public void kill() {
-	    for(Fragment frag : fragMap.values()) {
-		getSupportFragmentManager().beginTransaction().remove((Fragment)frag).commit();
-	    }
-	}
+        public void kill() {
+            for(Fragment frag : fragMap.values()) {
+                getSupportFragmentManager().beginTransaction().remove((Fragment)frag).commit();
+            }
+        }
 
-	public void clearImages() {
-	    for(PageFragment frag : fragMap.values()) {
-		frag.setImage(null, mViewPager);
-	    }
-	}
+        public void clearImages() {
+            for(PageFragment frag : fragMap.values()) {
+                frag.setImage(null, mViewPager);
+            }
+        }
 
-	public PageFragment getFragment(int pos) {
-	    return fragMap.get(pos);
-	}
+        public PageFragment getFragment(int pos) {
+            return fragMap.get(pos);
+        }
 
-	public void clean(int pos) {
-	}
-
-        @Override
-	public Fragment getItem(int index) {
-	    PageFragment ret;
-	    ret = PageFragment.newInstance();
-	    fragMap.put(index, ret);
-	    return ret;
-	}
+        public void clean(int pos) {
+        }
 
         @Override
-	public int getCount() {
-	    return Integer.MAX_VALUE;
-	}
+        public Fragment getItem(int index) {
+            PageFragment ret;
+            ret = PageFragment.newInstance();
+            fragMap.put(index, ret);
+            return ret;
+        }
+
+        @Override
+        public int getCount() {
+            return Integer.MAX_VALUE;
+        }
     }
 
     /* Helper for grabbing a random comic */
     public void grabRandomComic(String url) {
-	clearComics();
-	//grabComicCold(url);
+        clearComics();
+        //grabComicCold(url);
     }
 
     /* Shows a loading dialog.
        Use when the current view page is waiting on a comic to load. */
     public void showLoadingDialog() {
-	loadingDialog = new ProgressDialog(this);
-	loadingDialog.setMessage("Grabbing comic...");
-	loadingDialog.setCancelable(false);
+        loadingDialog = new ProgressDialog(this);
+        loadingDialog.setMessage("Grabbing comic...");
+        loadingDialog.setCancelable(false);
 
-	loadingDialog.setButton(-1, "Cancel", new DialogInterface.OnClickListener() {
+        loadingDialog.setButton(-1, "Cancel", new DialogInterface.OnClickListener() {
                 @Override
-	        public void onClick(DialogInterface dialog, int which) {
-		    dialog.dismiss();
-		    handleComicCancel();
-		}
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    handleComicCancel();
+                }
             });
-	loadingDialog.show();
+        loadingDialog.show();
     }
 
     /* Handles a click of the prev button. */
     protected OnClickListener prevListener = new OnClickListener() {
             public void onClick(View v) {
-		if(prevEnabled && !curComic.curInd.equals(firstInd)) {
-		    mViewPager.setCurrentItem(prevPos - 1);
-		}
+                if(prevEnabled && (curComic.curInd != null) && !curComic.curInd.equals(firstInd)) {
+                    mViewPager.setCurrentItem(prevPos - 1);
+                }
             }
         };
 
     /* Handles a click of the prev button. */
     protected OnClickListener nextListener = new OnClickListener() {
             public void onClick(View v) {
-		if(nextEnabled && !curComic.curInd.equals(maxInd)) {
-		    mViewPager.setCurrentItem(prevPos + 1);
-		}
+                if(nextEnabled && (curComic.curInd != null) && !curComic.curInd.equals(maxInd)) {
+                    mViewPager.setCurrentItem(prevPos + 1);
+                }
             }
         };
 
     /* Sets a listener for the alt text/image of a comic strip. */
     public void setAltListener(OnClickListener altListener) {
-	Button b = (Button) findViewById(R.id.comic_alt);
-	b.setVisibility(View.VISIBLE);
-	b.setOnClickListener(altListener);
+        Button b = (Button) findViewById(R.id.comic_alt);
+        b.setVisibility(View.VISIBLE);
+        b.setOnClickListener(altListener);
     }
 
     /* Placeholder for method */
     public String handleRawPage(Comic c, String page) throws Exception {
-	throw new Exception("Error - unimplemented.");
+        throw new Exception("Error - unimplemented.");
     }
 
     /* Occurs when the user cancels a loading comic.
        Should re-display whatever was currently showing */
     public void handleComicCancel() {
-	if(curComic.image == null) {
-	    handleComicError(new Comic(curComic));
-	}
+        if(curComic.image == null) {
+            handleComicError(new Comic(curComic));
+        }
     }
 
     /* Shows a dialog for selecting a comic by entering a number. */
     public void selectComic() {
-	selectDialog = new Dialog(this);
-	selectDialog.setContentView(R.layout.select_comic);
-	selectDialog.setTitle(title);
-	selectEdit = (EditText) selectDialog.findViewById(R.id.select_input);
+        selectDialog = new Dialog(this);
+        selectDialog.setContentView(R.layout.select_comic);
+        selectDialog.setTitle(title);
+        selectEdit = (EditText) selectDialog.findViewById(R.id.select_input);
 
-	Button b = (Button) selectDialog.findViewById(R.id.select_enter);
-	b.setOnClickListener(goToComicListener);
-	selectDialog.setCancelable(true);
-	selectDialog.show();
-	selectEdit.requestFocus();
+        Button b = (Button) selectDialog.findViewById(R.id.select_enter);
+        b.setOnClickListener(goToComicListener);
+        selectDialog.setCancelable(true);
+        selectDialog.show();
+        selectEdit.requestFocus();
     }
 
     /* Saves the current comic to /sdcard/comics/<comic strip name>/<comic name> */
     public void saveToSD() {
-	if(!isStorageWritable()) {
-	    showDialog("Warning", "SD card not writable or could not be found.");
-	} else if(curComic.image != null) {
-	    try {
-		String path = sdPath + "/comics/" + title + "/";
-		File dir = new File(path);
-		if(!dir.exists())
-		    dir.mkdirs();
-		String saveTitle;
-		if(curComic.imgTitle != null) {
-		    saveTitle = curComic.imgTitle;
-		} else if(curComic.curInd.equals(maxInd) || curComic.curInd.equals(max)) {
-		    saveTitle = (maxInd == null) ? Double.toString(maxNum) : maxInd;
-		} else {
-		    saveTitle = curComic.curInd;
-		}
-		Log.v("sdpath", saveTitle + ".png");
-		File file = new File(dir, saveTitle + ".png");
-		FileOutputStream fOut = new FileOutputStream(file);
+        if(!isStorageWritable()) {
+            showDialog("Warning", "SD card not writable or could not be found.");
+        } else if(curComic.image != null) {
+            try {
+                String path = sdPath + "/comics/" + title + "/";
+                File dir = new File(path);
+                if(!dir.exists())
+                    dir.mkdirs();
+                String saveTitle;
+                if(curComic.imgTitle != null) {
+                    saveTitle = curComic.imgTitle;
+                } else if(curComic.curInd.equals(maxInd) || curComic.curInd.equals(max)) {
+                    saveTitle = (maxInd == null) ? Integer.toString(maxNum) : maxInd;
+                } else {
+                    saveTitle = curComic.curInd;
+                }
+                DebugLog.v("sdpath", saveTitle + ".png");
+                File file = new File(dir, saveTitle + ".png");
+                FileOutputStream fOut = new FileOutputStream(file);
 
-		curComic.image.compress(Bitmap.CompressFormat.PNG, 85, fOut);
-		fOut.flush();
-		fOut.close();
-	    } catch(Exception e) {
+                curComic.image.compress(Bitmap.CompressFormat.PNG, 85, fOut);
+                fOut.flush();
+                fOut.close();
+            } catch(Exception e) {
 
-		if(e.getMessage() != null) {
-		    Log.v("SDError", e.getMessage());
-		}
-		showDialog("Warning", "Comic could not be saved.");
-	    }
-	} else {
-	    /* Warn that comic could not be saved */
-	    Log.v("SDError", "bitmap was null :(");
-	    showDialog("Warning", "Comic could not be saved.");
-	}
+                if(e.getMessage() != null) {
+                    DebugLog.v("SDError", e.getMessage());
+                }
+                showDialog("Warning", "Comic could not be saved.");
+            }
+        } else {
+            /* Warn that comic could not be saved */
+            DebugLog.v("SDError", "bitmap was null :(");
+            showDialog("Warning", "Comic could not be saved.");
+        }
     }
 
     /* Shows a cancelable dialog with the given title and text. */
     public void showDialog(String title, String text) {
-	final Dialog dialog = new Dialog(this);
-	dialog.setContentView(R.layout.text_alt);
-	dialog.setTitle(title);
-	TextView t = (TextView) dialog.findViewById(R.id.alt_text);
-	t.setText(text);
-	dialog.setCancelable(true);
-	Button done = (Button) dialog.findViewById(R.id.alt_done);
-	done.setOnClickListener(makeDialogCancelListener(dialog));
-	dialog.show();
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.text_alt);
+        dialog.setTitle(title);
+        TextView t = (TextView) dialog.findViewById(R.id.alt_text);
+        t.setText(text);
+        dialog.setCancelable(true);
+        Button done = (Button) dialog.findViewById(R.id.alt_done);
+        done.setOnClickListener(makeDialogCancelListener(dialog));
+        dialog.show();
     }
 
     /* Displays alt text for a comic. */
     public void dispAltText(String text, String title) {
-	if(text != null) {
-	    text = text.replaceAll("&#39;", "'");
-	    text = text.replaceAll("&quot", "\"");
-	    showDialog(title, text);
-	} else {
-	    showDialog(title, "No alt text to display.");
-	}
+        if(text != null) {
+            text = text.replaceAll("&#39;", "'");
+            text = text.replaceAll("&quot", "\"");
+            showDialog(title, text);
+        } else {
+            showDialog(title, "No alt text to display.");
+        }
     }
 
     /* Displays the alt image for a comic. */
     public void dispAltImage(String url, String title) {
-	final Dialog dialog = new Dialog(this);
+        final Dialog dialog = new Dialog(this);
 
-	dialog.setContentView(R.layout.image_alt);
-	dialog.setTitle("Loading");
-	rm.displayAltImage(dialog, url, title);
-	dialog.setCancelable(true);
-	Button done = (Button) dialog.findViewById(R.id.alt_done);
-	done.setOnClickListener(makeDialogCancelListener(dialog));
-	dialog.show();
+        dialog.setContentView(R.layout.image_alt);
+        dialog.setTitle("Loading");
+        rm.displayAltImage(dialog, url, title);
+        dialog.setCancelable(true);
+        Button done = (Button) dialog.findViewById(R.id.alt_done);
+        done.setOnClickListener(makeDialogCancelListener(dialog));
+        dialog.show();
     }
 
     /* Set the index of the last available comic.
-     Only do this once -- hacky solution for SMBC where it looks like second to last is last. */
+       Only do this once -- hacky solution for SMBC where it looks like second to last is last. */
     public void setMaxIndex(String ind) {
-	if(maxInd == null) {
-	    this.maxInd = ind;
-	    curComic.curInd = ind;
-	}
+        if(maxInd == null) {
+            this.maxInd = ind;
+            curComic.curInd = ind;
+        }
     }
 
     /* To account for sites like Feel Afraid where the index has a trailing .php, etc */
     public void setMaxNum(String ind) {
-	if(maxNum == null)
-	    this.maxNum = Double.parseDouble(ind);
+        if(maxNum == -1)
+            this.maxNum = (int)Double.parseDouble(ind);
     }
 
     /* Returns whether the max has been recorded. */
     public boolean haveMax() {
-	return maxNum != null || maxInd != null;
+        return maxNum != -1 || maxInd != null;
     }
 
     /* Sets the next index of the comic being grabbed. */
     public void setNextInd(String next) {
-	curComic.nextInd = next;
+        curComic.nextInd = next;
     }
 
     /* Sets the previous index of the comic being grabbed. */
     public void setPrevInd(String prev) {
-	curComic.prevInd = prev;
+        curComic.prevInd = prev;
     }
 
     /* Handles a click of the first button. */
     protected OnClickListener firstListener = new OnClickListener() {
             public void onClick(View v) {
-		if(curComic.curInd == null) {
-		    showDialog("Error", "Cannot connect to the internet.");
-		} else if(curComic.curInd == null || !curComic.curInd.equals(firstInd)) {
-		    clearComics();
-		    clearVisible();
-		    comicMap.put(firstInd, curComic);
-		    loadComic(firstInd);
-		    errorInd = firstInd;
-		    showLoadingDialog();
-		}
+                if(curComic.curInd == null) {
+                    showDialog("Error", "Cannot connect to the internet.");
+                } else if(curComic.curInd == null || !curComic.curInd.equals(firstInd)) {
+                    clearComics();
+                    clearVisible();
+                    comicMap.put(firstInd, curComic);
+                    loadComic(firstInd);
+                    errorInd = firstInd;
+                    showLoadingDialog();
+                }
             }
         };
 
     /* Handles a click of the last button. */
     protected OnClickListener lastListener = new OnClickListener() {
             public void onClick(View v) {
-		if(curComic.curInd == null) {
-		    showDialog("Error", "Cannot connect to the internet.");
-		} else if(curComic.curInd == null || !curComic.curInd.equals(maxInd)) {
-		    clearComics();
-		    clearVisible();
-		    loadInitial(max);
-		}
-	    }
+                if(curComic.curInd == null) {
+                    showDialog("Error", "Cannot connect to the internet.");
+                } else if(curComic.curInd == null || !curComic.curInd.equals(maxInd)) {
+                    clearComics();
+                    clearVisible();
+                    loadLast(max);
+                }
+            }
         };
 
     /* To be overidden if the comic id similar, but not exactly equal to the index. */
     public String getIndFromNum(String num) {
-	return num;
+        return num;
     }
 
     /* Clears the current and cached comics. */
     public void clearComics() {
-	prevComic.clear();
-	curComic.clear();
-	nextComic.clear();
-	comicMap.clear();
-	loadingInds.clear();
+        prevComic.clear();
+        curComic.clear();
+        nextComic.clear();
+        comicMap.clear();
+        loadingInds.clear();
     }
 
     /* Clears visible comic */
     public void clearVisible() {
-	mReaderPagerAdapter.clearImages();
+        mReaderPagerAdapter.clearImages();
     }
 
     /* General click listener for getting a random comic.
        To be used when the comic as integer indices that increment by 1. */
     protected OnClickListener randomListener = new OnClickListener() {
             public void onClick(View v) {
-		if(haveMax()) {
-		    int n = (int)(Math.random() * maxNum);
-		    String ind = getIndFromNum(Integer.toString(n));
+                if(maxNum != -1) {
+                    int n = (int)(Math.random() * maxNum);
+                    String ind = getIndFromNum(Integer.toString(n));
 
-		    clearComics();
-		    clearVisible();
-		    comicMap.put(ind, curComic);
-		    loadComic(ind);
-		    errorInd = ind;
-		    showLoadingDialog();
-		} else {
-		    showDialog("Error", "Could not resolve random comic.");
-		}
+                    clearComics();
+                    clearVisible();
+                    comicMap.put(ind, curComic);
+                    loadComic(ind);
+                    errorInd = ind;
+                    showLoadingDialog();
+                } else {
+                    showDialog("Error", "Could not resolve random comic.");
+                }
             }
         };
 
     /* Listener for the store button. Opens a browser window with the strip's store. */
     protected OnClickListener storeListener = new OnClickListener() {
             public void onClick(View v) {
-		Intent i = new Intent(Intent.ACTION_VIEW);
-		i.setData(Uri.parse(storeUrl));
-		startActivity(i);
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(storeUrl));
+                startActivity(i);
             }
         };
 
     public void removeError() {
-	ViewGroup ll = (ViewGroup) findViewById(R.id.comic_wrapper);
-	if(errorText != null && ll.findViewById(R.id.error_text) != null) {
-	    ll.removeView(errorText);
-	    errorText = null;
-	}
+        ViewGroup ll = (ViewGroup) findViewById(R.id.comic_wrapper);
+        if(errorText != null && ll.findViewById(R.id.error_text) != null) {
+            ll.removeView(errorText);
+            errorText = null;
+        }
     }
 
     protected OnClickListener reloadListener = new OnClickListener() {
             public void onClick(View v) {
-		removeError();
-		if(curComic.loaded) return;
-		if(errorInd != null) {
-		    comicMap.put(errorInd, curComic);
-		    loadComic(errorInd);
-		    showLoadingDialog();
-		} else if(curComic.curInd == null || curComic.curInd.equals(max)) {
-		    curComic.curInd = maxInd;
-		    clearComics();
-		    clearVisible();
-		    loadInitial(max);
-		} else {
-		    comicMap.put(curComic.curInd, curComic);
-		    loadComic(curComic.curInd);
-		    showLoadingDialog();
-		}
+                removeError();
+                if(curComic.loaded) return;
+                if(errorInd != null) {
+                    comicMap.put(errorInd, curComic);
+                    loadComic(errorInd);
+                    showLoadingDialog();
+                } else if(curComic.curInd == null || curComic.curInd.equals(max)) {
+                    curComic.curInd = maxInd;
+                    clearComics();
+                    clearVisible();
+                    loadLast(max);
+                } else {
+                    comicMap.put(curComic.curInd, curComic);
+                    loadComic(curComic.curInd);
+                    showLoadingDialog();
+                }
             }
         };
 
     /* Listener for the ok button on the 'go to' input dialog. */
     protected OnClickListener goToComicListener = new OnClickListener() {
             public void onClick(View v) {
-		if(selectEdit != null) {
-		    String index = selectEdit.getText().toString();
-		    selectDialog.cancel();
-		    String newInd = getIndFromNum(index);
-		    clearComics();
-		    clearVisible();
-		    comicMap.put(newInd, curComic);
-		    loadComic(newInd);
-		    errorInd = newInd;
-		    showLoadingDialog();
-		    selectEdit = null;
-		}
+                if(selectEdit != null) {
+                    String index = selectEdit.getText().toString();
+                    selectDialog.cancel();
+                    String newInd = getIndFromNum(index);
+                    clearComics();
+                    clearVisible();
+                    comicMap.put(newInd, curComic);
+                    loadComic(newInd);
+                    errorInd = newInd;
+                    showLoadingDialog();
+                    selectEdit = null;
+                }
             }
         };
 
     /* Cancels the input dialog when clicked. */
     public OnClickListener makeDialogCancelListener(final Dialog d) {
-	return new OnClickListener() {
-	    public void onClick(View v) {
-		d.dismiss();
-	    }
-	};
+        return new OnClickListener() {
+            public void onClick(View v) {
+                d.dismiss();
+            }
+        };
     }
 
     /* Determines whether the sdcard is writable. TODO - probably not perfect. */
     public static boolean isStorageWritable() {
-	boolean storageWriteable  = false;
-	String state = Environment.getExternalStorageState();
+        boolean storageWriteable  = false;
+        String state = Environment.getExternalStorageState();
 
-	if (Environment.MEDIA_MOUNTED.equals(state)) {
-	    storageWriteable = true;
-	}
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            storageWriteable = true;
+        }
 
-	return storageWriteable;
+        return storageWriteable;
     }
 
     public void setSwipe(boolean on) {
-	swipe = on;
-	mViewPager.setSwipeEnabled(on);
-	SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-	SharedPreferences.Editor editor = settings.edit();
-	editor.putBoolean("swipe", swipe);
-	editor.commit();
+        swipe = on;
+        mViewPager.setSwipeEnabled(on);
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        Editor editor = settings.edit();
+        editor.putBoolean("swipe", swipe);
+        editor.commit();
     }
 
     /* Inflates the options menu. TODO -convert menu stuff to action bar */
@@ -688,19 +730,19 @@ public class Reader extends FragmentActivity {
     /* Updates the swipe option title */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-	MenuItem item = (MenuItem) menu.findItem(R.id.comic_swipe);
-	if(swipe) {
-	    item.setTitle("Disable Swipe");
-	} else {
-	    item.setTitle("Enable Swipe");
-	}
+        MenuItem item = (MenuItem) menu.findItem(R.id.comic_swipe);
+        if(swipe) {
+            item.setTitle("Disable Swipe");
+        } else {
+            item.setTitle("Enable Swipe");
+        }
         return true;
     }
 
     /* Handles the selection of a menu item. */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-	switch (item.getItemId()) {
+        switch (item.getItemId()) {
         case R.id.comic_select:
             selectComic();
             break;

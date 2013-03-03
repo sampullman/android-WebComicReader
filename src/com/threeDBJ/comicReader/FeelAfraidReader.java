@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -32,6 +31,7 @@ public class FeelAfraidReader extends Reader {
 	this.max = "http://feelafraidcomic.com/index.php";
 
 	this.title = "FeelAfraid";
+    this.shortTitle = title;
 	this.storeUrl = "http://feelafraidcomic.com/store/";
 
 	this.firstInd = "1.php";
@@ -69,7 +69,7 @@ public class FeelAfraidReader extends Reader {
 		c.setNextInd(mNext.group(1));
 	    } else {
 		/* Anomaly, this should not happen */
-		Log.v("FeelAfraid", "Grevious error");
+		DebugLog.v("FeelAfraid", "Grevious error");
 	    }
 	}
 	if(mImages.find()) {

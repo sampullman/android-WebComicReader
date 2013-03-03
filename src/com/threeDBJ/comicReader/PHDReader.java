@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -32,6 +31,7 @@ public class PHDReader extends Reader {
 	this.max = "http://www.phdcomics.com/comics.php";
 
 	this.title = "PHD";
+    this.shortTitle = title;
 	this.storeUrl = "http://www.phdcomics.com/store/mojostore.php";
 
 	loadInitial(max);

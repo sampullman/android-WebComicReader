@@ -8,7 +8,6 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -36,6 +35,7 @@ public class PennyArcadeReader extends Reader {
 	this.max = "http://penny-arcade.com/comic/";
 
 	this.title = "PennyArcade";
+    this.shortTitle = "Penny";
 	this.storeUrl = "http://store.penny-arcade.com/";
 
 	this.firstInd = "1998/11/18";
@@ -69,9 +69,7 @@ public class PennyArcadeReader extends Reader {
 		    Matcher mMax = pMax.matcher(page);
 		    mMax.find();
 		    setMaxIndex(mMax.group(1));
-		    Log.e("wat", "found max");
 		} else {
-		    Log.e("wat", "not the max");
 		    c.setNextInd(mNext.group(1));
 		}
 	    }
@@ -84,7 +82,7 @@ public class PennyArcadeReader extends Reader {
 		/* Anomaly, this should not happen */
 	    }
 	}
-	Log.e("ahmmmh", "max: "+maxInd);
+	DebugLog.e("ahmmmh", "max: "+maxInd);
 	return imgUrl;
     }
 

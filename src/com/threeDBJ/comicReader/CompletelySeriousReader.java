@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.util.Log;
 import android.graphics.Bitmap;
 
 import java.util.regex.Pattern;
@@ -37,6 +36,7 @@ public class CompletelySeriousReader extends Reader {
 	this.firstInd = "6";
 
 	this.title = "Completely Serious";
+    this.shortTitle = "Completely";
 	this.storeUrl = "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=BAT2CLMHSCR36&lc=CA&currency_code=CAD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted";
 
 	loadInitial(max);

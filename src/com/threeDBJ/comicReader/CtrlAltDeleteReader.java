@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -37,6 +36,7 @@ public class CtrlAltDeleteReader extends Reader {
 	this.firstInd = "20021023";
 
 	this.title = "CtrlAltDelete";
+    this.shortTitle = "Ctrl";
 	this.storeUrl = "http://www.splitreason.com/cad-comic/";
 
 	Button b = (Button) findViewById(R.id.comic_random);

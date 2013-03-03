@@ -24,8 +24,6 @@ import java.net.MalformedURLException;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import android.util.Log;
-
 public class RequestManager {
 
     Pattern unichar = Pattern.compile("&#[0-9]+");
@@ -38,168 +36,171 @@ public class RequestManager {
 
     /* Start a background task that grabs a comic. */
     public void grabComic(Reader context, Comic c) {
-	new GetComicTask(context).execute(c);
+        new GetComicTask(context).execute(c);
     }
 
     /* Start a background task that grabs a comic's alt image. */
     public void displayAltImage(Dialog context, String imgUrl, String title) {
-	new DisplayAltImageTask(context, title).execute(imgUrl);
+        new DisplayAltImageTask(context, title).execute(imgUrl);
     }
 
     public char to_unichr(String val) {
-	return (char)Integer.parseInt(val);
+        return (char)Integer.parseInt(val);
     }
 
     /* Makes multiple attempts to retrieve an image if the first one doesn't work */
     public Bitmap retrieveImage(String addr) {
-	Bitmap result = getImageFromURL(addr);
-	if(result != null) return result;
-	result = getImageFromURL(addr);
-	if(result != null) return result;
-	result = getImageFromURL(addr);
-	return result;
+        Bitmap result = getImageFromURL(addr);
+        if(result != null) return result;
+        result = getImageFromURL(addr);
+        if(result != null) return result;
+        result = getImageFromURL(addr);
+        return result;
     }
 
     /* Grabs an image from the input url String and returns it in Bitmap form
-         -Do not pass a null url */
+       -Do not pass a null url */
     public Bitmap getImageFromURL(String addr) {
-	// This check should probably be somewhere else
-	if(addr == null) {
-	    return null;
-	}
-	try {
-	    URL url = new URL(addr);
-	    URLConnection conn = url.openConnection();
-	    InputStream inp = conn.getInputStream();
-	    return BitmapFactory.decodeStream(inp);
-	} catch (MalformedURLException e) {
-	    Log.v("getImage-malfy", addr);
-	} catch (IOException e) {
-	    Log.v("getImage-io", addr);
-	}
-	return null;
+        // This check should probably be somewhere else
+        if(addr == null) {
+            return null;
+        }
+        try {
+            URL url = new URL(addr);
+            URLConnection conn = url.openConnection();
+            InputStream inp = conn.getInputStream();
+            return BitmapFactory.decodeStream(inp);
+        } catch (MalformedURLException e) {
+            DebugLog.v("getImage-malfy", addr);
+        } catch (IOException e) {
+            DebugLog.v("getImage-io", addr);
+        }
+        return null;
     }
 
     /* Retrieves the web page at the input url.
        On 302 response, go to redirect. */
     public String makeQuery (String url) {
         try {
-	    Log.e("make-query", url);
+            DebugLog.e("make-query", url);
             URL addr = new URL (url);
             HttpURLConnection con=null;
-	    int response = -1, i=0;
-	    /* Try a few times before giving up. */
-	    while(response == -1) {
-		if(i == 3) {
-		    return null;
-		}
-		con = (HttpURLConnection)(addr.openConnection ());
-		con.setInstanceFollowRedirects(true);
-		con.connect();
-		response = con.getResponseCode();
-		i += 1;
-	    }
-	    if(response == 302) {
-		con = (HttpURLConnection)(new URL(url.substring(0,url.length()-8)+
-						  con.getHeaderField("Location")).openConnection());
-		con.connect();
-	    }
-	    InputStream inputStream = con.getInputStream();
-	    response = con.getResponseCode();
+            int response = -1, i=0;
+            /* Try a few times before giving up. */
+            while(response == -1) {
+                if(i == 3) {
+                    return null;
+                }
+                con = (HttpURLConnection)(addr.openConnection ());
+                con.setInstanceFollowRedirects(true);
+                con.connect();
+                response = con.getResponseCode();
+                i += 1;
+            }
+            if(response == 302) {
+                con = (HttpURLConnection)(new URL(url.substring(0,url.length()-8)+
+                                                  con.getHeaderField("Location")).openConnection());
+                con.connect();
+            }
+            InputStream inputStream = con.getInputStream();
+            response = con.getResponseCode();
 
-	    BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
-	    StringBuilder res = new StringBuilder();
-	    String line;
-	    while((line = in.readLine()) != null) {
-		res.append(line);
-	    }
-	    in.close();
-	    return res.toString();
-	} catch (MalformedURLException e) {
-            Log.v ("make_query_malformed",e.getMessage ());
+            BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuilder res = new StringBuilder();
+            String line;
+            while((line = in.readLine()) != null) {
+                res.append(line);
+            }
+            in.close();
+            return res.toString();
+        } catch (MalformedURLException e) {
+            DebugLog.v ("make_query_malformed",e.getMessage ());
             return null;
         } catch (IOException e) {
-            Log.v ("make_query_io",e.getMessage ());
+            DebugLog.v ("make_query_io",e.getMessage ());
             return null;
         } catch (Exception e) {
-	    Log.v("unknown", e.getMessage());
-	    return null;
-	}
+            DebugLog.v("unknown", e.getMessage());
+            return null;
+        }
     }
 
     /* Background task for displaying an alt image. */
     private class DisplayAltImageTask extends AsyncTask<String,Integer,Bitmap> {
-	protected Dialog context;
-	protected String title;
+        protected Dialog context;
+        protected String title;
 
-	public DisplayAltImageTask (Dialog context, String title) {
-	    this.context = context;
-	    this.title = title;
-	}
+        public DisplayAltImageTask (Dialog context, String title) {
+            this.context = context;
+            this.title = title;
+        }
 
-	protected Bitmap doInBackground (String... data) {
-	    Bitmap alt = null;
-	    if(data[0] != null) {
-		alt = retrieveImage(data[0]);
-	    }
-	    return alt;
-	}
+        protected Bitmap doInBackground (String... data) {
+            Bitmap alt = null;
+            if(data[0] != null) {
+                alt = retrieveImage(data[0]);
+            }
+            return alt;
+        }
 
-	protected void onPreExecute() {
-	    super.onPreExecute();
-	}
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
 
-	protected void onProgressUpdate (Integer... prog) {
-	}
+        protected void onProgressUpdate (Integer... prog) {
+        }
 
-	protected void onPostExecute (Bitmap result) {
-	    if(context.isShowing()) {
-		ImageView image = (ImageView) context.findViewById(R.id.alt_image);
-		image.setImageBitmap(result);
-		context.setTitle(title);
-	    }
-	}
+        protected void onPostExecute (Bitmap result) {
+            if(context.isShowing()) {
+                ImageView image = (ImageView) context.findViewById(R.id.alt_image);
+                image.setImageBitmap(result);
+                context.setTitle(title);
+            }
+        }
     }
 
     /* Background task for grabbing a comic. */
     private class GetComicTask extends AsyncTask<Comic,Integer,Comic> {
-	protected Reader context;
+        protected Reader context;
 
-	public GetComicTask(Reader context) {
-	    this.context = context;
-	}
-
-	protected void onPreExecute() {
-	    running += 1;
-	}
-
-	protected Comic doInBackground (Comic... data) {
-	    String page, imgUrl;
-	    try{
-		page = makeQuery(data[0].getUrl());
-		if(page == null) {
-		    return null;
-		}
-		imgUrl = this.context.handleRawPage(data[0], page);
-		Log.e("comic", "url: "+imgUrl);
-		data[0].setComic(retrieveImage(imgUrl));
-		return data[0];
-	    }catch(Exception e) {
-		if(e.getMessage() != null)
-		    Log.v("doInBg", e.getMessage());
-	    }
-	    return null;
+        public GetComicTask(Reader context) {
+            this.context = context;
         }
 
-	/* Decide what to do with the comic according to the loading state. */
-	protected void onPostExecute (Comic comic) {
-	    running -= 1;
-	    if(comic != null) {
-		context.notifyComicLoaded(comic);
-	    } else {
-	        context.handleComicError(comic);
-	    }
-	}
+        protected void onPreExecute() {
+            running += 1;
+        }
+
+        protected Comic doInBackground (Comic... data) {
+            String page, imgUrl;
+            Comic comic = data[0];
+            try{
+                page = makeQuery(comic.getUrl());
+                if(page == null) {
+                    comic.setError(true);
+                } else {
+                    imgUrl = this.context.handleRawPage(comic, page);
+                    DebugLog.e("comic", "url: "+imgUrl);
+                    comic.setComic(retrieveImage(imgUrl));
+                }
+            } catch(Exception e) {
+                if(e.getMessage() != null) {
+                    DebugLog.v("doInBg", e.getMessage());
+                }
+                comic.setError(true);
+            }
+            return comic;
+        }
+
+        /* Decide what to do with the comic according to the loading state. */
+        protected void onPostExecute (Comic comic) {
+            running -= 1;
+            if(comic.getError()) {
+                context.handleComicError(comic);
+            } else {
+                context.notifyComicLoaded(comic);
+            }
+        }
 
     }
 

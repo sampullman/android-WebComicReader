@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -35,6 +34,7 @@ public class ButtersafeReader extends Reader {
 	this.max = "http://buttersafe.com";
 
 	this.title = "Buttersafe";
+    this.shortTitle = title;
 	this.storeUrl = "http://buttersafe.com/store/";
 
 	this.firstInd = "2007/04/03/breakfast-sad-turtle/";

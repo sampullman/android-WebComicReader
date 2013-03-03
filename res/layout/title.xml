@@ -6,130 +6,18 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-  <ScrollView
-      android:layout_width="match_parent"
-      android:layout_height="match_parent">
-    <LinearLayout
-	android:orientation="vertical"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent">
-      <TextView
+  <TextView
 	  android:id="@+id/title"
 	  android:layout_width="match_parent"
-	  android:layout_height="match_parent"
-	  android:layout_weight="0.8"
+	  android:layout_height="0dp"
+	  android:layout_weight="0.15"
 	  android:padding="10dp"
 	  android:background="@drawable/reader_title" />
-      <LinearLayout
+  <LinearLayout
 	  android:orientation="horizontal"
 	  android:layout_width="match_parent"
-	  android:layout_height="match_parent"
-	  android:layout_weight="1" >
-	<Button
-	    android:id="@+id/smbc"
-	    style="@style/ComicButton"
-	    android:text="SMBC"/>
-	<Button
-	    android:id="@+id/xkcd"
-	    style="@style/ComicButton"
-	    android:text="XKCD"/>
-      </LinearLayout>
-      <LinearLayout
-	  android:orientation="horizontal"
-	  android:layout_width="match_parent"
-	  android:layout_height="match_parent"
-	  android:layout_weight="1" >
-	<Button
-	    android:id="@+id/explosm"
-	    style="@style/ComicButton"
-	    android:text="Cyanide &amp; Happiness"/>
-	<Button
-	    android:id="@+id/feelafraid"
-	    style="@style/ComicButton"
-	    android:text="Feel Afraid"/>
-	</LinearLayout>
-	<LinearLayout
-	  android:orientation="horizontal"
-	  android:layout_width="match_parent"
-	  android:layout_height="match_parent"
-	  android:layout_weight="1" >
-	<Button
-	    android:id="@+id/phd"
-	    style="@style/ComicButton"
-	    android:text="PHD Comics" />
-	<Button
-	    android:id="@+id/buttersafe"
-	    style="@style/ComicButton"
-	    android:text="Buttersafe" />
-      </LinearLayout>
-      <LinearLayout
-	  android:orientation="horizontal"
-	  android:layout_width="match_parent"
-	  android:layout_height="match_parent"
-	  android:layout_weight="1" >
-	<Button
-	    android:id="@+id/cad"
-	    style="@style/ComicButton"
-	    android:text="Ctrl Alt Delete"
-	    android:textSize="16sp" />
-	<Button
-	    android:id="@+id/pennyarcade"
-	    style="@style/ComicButton"
-	    android:text="Penny Arcade"
-	    android:textSize="16sp" />
-      </LinearLayout>
-      <LinearLayout
-	  android:orientation="horizontal"
-	  android:layout_width="match_parent"
-	  android:layout_height="match_parent"
-	  android:layout_weight="1" >
-	<Button
-	    android:id="@+id/abstrusegoose"
-	    style="@style/ComicButton"
-	    android:text="Abstruse Goose"
-	    android:textSize="16sp" />
-	<Button
-	    android:id="@+id/manlyguys"
-	    style="@style/ComicButton"
-	    android:text="Manly Guys" />
-      </LinearLayout>
-      <LinearLayout
-	  android:orientation="horizontal"
-	  android:layout_width="match_parent"
-	  android:layout_height="match_parent"
-	  android:layout_weight="1" >
-	<Button
-	    android:id="@+id/completelyserious"
-	    style="@style/ComicButton"
-	    android:text="Completely Serious"
-	    android:textSize="16sp" />
-	<Button
-	    android:id="@+id/mongreldesigns"
-	    style="@style/ComicButton"
-	    android:text="Mongrel Designs" />
-      </LinearLayout>
-      <RelativeLayout
-	  android:layout_width="match_parent"
-	  android:layout_height="match_parent"
-	  android:layout_weight="0.8">
-	<Button
-	    android:id="@+id/saved_comics"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_centerInParent="true"
-	    android:text="Saved Comic Reader"
-	    android:textSize="17sp"
-	    android:textColor="#FFAAAAAA"
-	    android:layout_marginTop="4dp"
-	    android:paddingLeft="12dp"
-	    android:paddingRight="12dp"
-	    android:background="@drawable/btn_transparent"/>
-      </RelativeLayout>
-      <LinearLayout
-	  android:orientation="horizontal"
-	  android:layout_width="match_parent"
-	  android:layout_height="match_parent"
-	  android:layout_weight="1" >
+	  android:layout_height="0dp"
+	  android:layout_weight="0.1" >
 	<com.google.ads.AdView
 	    android:id="@+id/ad"
 	    android:layout_width="match_parent"
@@ -142,7 +30,47 @@
 	    app:secondaryTextColor="#CCCCCC"
 	    android:gravity="center"
 	    app:keywords="comic reader smbc xkcd"/>
-      </LinearLayout>
-    </LinearLayout>
-  </ScrollView>
+  </LinearLayout>
+  <LinearLayout
+	  android:orientation="horizontal"
+	  android:layout_width="match_parent"
+	  android:layout_height="0dp"
+	  android:layout_weight="0.07" >
+    <TextView
+        android:id="@+id/comic_latest"
+        style="@style/comic_title"
+        android:textStyle="bold"
+        android:textColor="#0eabf2"
+        android:text="Latest Comic" />
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.2" />
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.2"
+        android:gravity="center"
+        android:textSize="18sp"
+        android:textColor="#0eabf2"
+        android:textStyle="bold"
+        android:paddingRight="8dp"
+        android:text="Last Viewed"/>
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.2"
+        android:gravity="center"
+        android:textSize="18sp"
+        android:textColor="#0eabf2"
+        android:textStyle="bold"
+        android:paddingRight="8dp"
+        android:text="Saved"/>
+  </LinearLayout>
+  <fragment
+      android:name="com.threeDBJ.comicReader.ComicSelectListFragment"
+      android:id="@+id/comic_select"
+      android:layout_weight="0.68"
+      android:layout_width="match_parent"
+      android:layout_height="0dp" />
 </LinearLayout>
