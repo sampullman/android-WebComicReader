@@ -54,145 +54,158 @@ public class SavedComicReader extends FragmentActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-	Configuration config = this.getResources().getConfiguration();
-	if(config.orientation == 1) {
+        Configuration config = this.getResources().getConfiguration();
+        if(config.orientation == 1) {
             setContentView(R.layout.reader);
-	} else if(config.orientation == 2) {
+        } else if(config.orientation == 2) {
             setContentView(R.layout.reader_wide);
-	}
-	mViewPager = (MyViewPager) findViewById(R.id.reader_pager);
-	SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-	setSwipe(settings.getBoolean("swipe", false));
+        }
+        mViewPager = (MyViewPager) findViewById(R.id.reader_pager);
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        setSwipe(settings.getBoolean("swipe", false));
 
-	Intent intent = getIntent();
-	this.title = intent.getExtras().getString("comic");
-	rand = new Random();
+        Intent intent = getIntent();
+        this.title = intent.getExtras().getString("comic");
+        rand = new Random();
 
-	this.storeIndex = intent.getExtras().getInt("index");
-	setupUI();
-	if(Reader.isStorageWritable()) {
-	    String path = sdPath + "/comics/" + title + "/";
-	    DebugLog.e("scr", path);
-	    File dir = new File(path);
-	    if (dir != null) {
-		images = dir.listFiles();
-		if(images == null || images.length == 0) {
-		    setResult(1);
-		    finish();
-		    return;
-		}
-	    } else {
-		setResult(1);
-		finish();
-		return;
-	    }
-	} else {
-	    setResult(2);
-	    finish();
-	    return;
-	}
+        this.storeIndex = intent.getExtras().getInt("index");
+        setupUI();
+        if(Reader.isStorageWritable()) {
+            String path = sdPath + "/comics/" + title + "/";
+            DebugLog.e("comic", path);
+            File dir = new File(path);
+            if (dir != null) {
+                images = dir.listFiles();
+                if(images == null || images.length == 0) {
+                    setResult(1);
+                    finish();
+                    return;
+                }
+            } else {
+                setResult(1);
+                finish();
+                return;
+            }
+        } else {
+            setResult(2);
+            finish();
+            return;
+        }
 
-	setResult(0);
-	DebugLog.v("scr", "" + images.length);
-	mViewPager.setOnPageChangeListener(pageListener);
-	mReaderPagerAdapter = new ReaderPagerAdapter(getSupportFragmentManager(), images.length);
-	mViewPager.setAdapter(mReaderPagerAdapter);
-	cur = images.length - 1;
-	mViewPager.setCurrentItem(cur);
+        setResult(0);
+        DebugLog.v("scr", "" + images.length);
+        mViewPager.setOnPageChangeListener(pageListener);
+        mReaderPagerAdapter = new ReaderPagerAdapter(getSupportFragmentManager(), images.length);
+        mViewPager.setAdapter(mReaderPagerAdapter);
+        cur = images.length - 1;
+        mViewPager.setCurrentItem(cur);
     }
 
     OnPageChangeListener pageListener = new OnPageChangeListener() {
 
-	    @Override
-	    public void onPageScrollStateChanged (int state) {
-	    }
-	    @Override
-	    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-	    }
+            @Override
+            public void onPageScrollStateChanged (int state) {
+            }
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
 
-	    @Override
-	    public void onPageSelected (int position) {
-		DebugLog.v("onPageSelected", "" + position);
-	    }
-	};
+            @Override
+            public void onPageSelected (int position) {
+                DebugLog.v("onPageSelected", "" + position);
+            }
+        };
 
     private class ReaderPagerAdapter extends FragmentPagerAdapter {
 
-	private int count;
+        private int count;
 
-	public ReaderPagerAdapter(FragmentManager fm, int count) {
-	    super(fm);
-	    this.count = count;
-	}
-
-        @Override
-	public Fragment getItem(int index) {
-	    DebugLog.v("getItem", "" + index);
-	    PageFragment ret;
-	    Bitmap image = BitmapFactory.decodeFile(images[index].getAbsolutePath());
-	    ret = PageFragment.newInstance(image);
-	    return ret;
-	}
+        public ReaderPagerAdapter(FragmentManager fm, int count) {
+            super(fm);
+            this.count = count;
+        }
 
         @Override
-	public int getCount() {
-	    return count;
-	}
+        public Fragment getItem(int index) {
+            String path = images[index].getAbsolutePath();
+            PageFragment ret;
+
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+
+            //Returns null, sizes are in the options variable
+            BitmapFactory.decodeFile(path, options);
+            int width = options.outWidth;
+            int height = options.outHeight;
+
+            options = new BitmapFactory.Options();
+            if(width*height > 2000000) {
+                options.inSampleSize = 2;
+            }
+            Bitmap image = BitmapFactory.decodeFile(path, options);
+            ret = PageFragment.newInstance(image);
+            return ret;
+        }
+
+        @Override
+        public int getCount() {
+            return count;
+        }
     }
 
     public void setSwipe(boolean on) {
-	swipe = on;
-	mViewPager.setSwipeEnabled(on);
-	SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-	SharedPreferences.Editor editor = settings.edit();
-	editor.putBoolean("swipe", swipe);
-	editor.commit();
+        swipe = on;
+        mViewPager.setSwipeEnabled(on);
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean("swipe", swipe);
+        editor.commit();
     }
 
     public OnClickListener prevListener = new OnClickListener() {
-	    public void onClick(View v) {
-		if(cur > 0) {
-		    cur -= 1;
-		    mViewPager.setCurrentItem(cur);
-		}
-	    }
-	};
+            public void onClick(View v) {
+                if(cur > 0) {
+                    cur -= 1;
+                    mViewPager.setCurrentItem(cur);
+                }
+            }
+        };
 
     public OnClickListener nextListener = new OnClickListener() {
-	    public void onClick(View v) {
-		if(cur < images.length - 1) {
-		    cur += 1;
-		    mViewPager.setCurrentItem(cur);
-		}
-	    }
-	};
+            public void onClick(View v) {
+                if(cur < images.length - 1) {
+                    cur += 1;
+                    mViewPager.setCurrentItem(cur);
+                }
+            }
+        };
 
 
     public OnClickListener firstListener = new OnClickListener() {
-	    public void onClick(View v) {
-		mViewPager.setCurrentItem(0);
-	    }
-	};
+            public void onClick(View v) {
+                mViewPager.setCurrentItem(0);
+            }
+        };
 
     public OnClickListener lastListener = new OnClickListener() {
-	    public void onClick(View v) {
-		mViewPager.setCurrentItem(images.length - 1);
-	    }
-	};
+            public void onClick(View v) {
+                mViewPager.setCurrentItem(images.length - 1);
+            }
+        };
 
     public OnClickListener randomListener = new OnClickListener() {
-	    public void onClick(View v) {
-		if(images.length > 1) {
-		    mViewPager.setCurrentItem(rand.nextInt(images.length));
-		}
-	    }
-	};
+            public void onClick(View v) {
+                if(images.length > 1) {
+                    mViewPager.setCurrentItem(rand.nextInt(images.length));
+                }
+            }
+        };
 
     protected OnClickListener storeListener = new OnClickListener() {
             public void onClick(View v) {
-		Intent i = new Intent(Intent.ACTION_VIEW);
-		i.setData(Uri.parse(storeUrls[storeIndex]));
-		startActivity(i);
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(storeUrls[storeIndex]));
+                startActivity(i);
             }
         };
 
@@ -204,22 +217,22 @@ public class SavedComicReader extends FragmentActivity {
     }
 
     public void setupUI() {
-	Button b = (Button) findViewById(R.id.comic_first);
-	b.setOnClickListener(firstListener);
-	b = (Button) findViewById(R.id.comic_prev);
-	b.setOnClickListener(prevListener);
-	b = (Button) findViewById(R.id.comic_next);
-	b.setOnClickListener(nextListener);
-	b = (Button) findViewById(R.id.comic_last);
-	b.setOnClickListener(lastListener);
-	b = (Button) findViewById(R.id.comic_random);
-	b.setOnClickListener(randomListener);
-	b = (Button) findViewById(R.id.comic_store);
-	b.setOnClickListener(storeListener);
-	b = (Button) findViewById(R.id.comic_alt);
-	b.setVisibility(View.GONE);
+        Button b = (Button) findViewById(R.id.comic_first);
+        b.setOnClickListener(firstListener);
+        b = (Button) findViewById(R.id.comic_prev);
+        b.setOnClickListener(prevListener);
+        b = (Button) findViewById(R.id.comic_next);
+        b.setOnClickListener(nextListener);
+        b = (Button) findViewById(R.id.comic_last);
+        b.setOnClickListener(lastListener);
+        b = (Button) findViewById(R.id.comic_random);
+        b.setOnClickListener(randomListener);
+        b = (Button) findViewById(R.id.comic_store);
+        b.setOnClickListener(storeListener);
+        b = (Button) findViewById(R.id.comic_alt);
+        b.setVisibility(View.GONE);
 
-	sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+        sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 
 }

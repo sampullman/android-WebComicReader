@@ -477,7 +477,7 @@ public class Reader extends FragmentActivity {
                 } else {
                     saveTitle = curComic.curInd;
                 }
-                DebugLog.v("sdpath", saveTitle + ".png");
+                DebugLog.v("comic", dir+" "+saveTitle + ".png");
                 File file = new File(dir, saveTitle + ".png");
                 FileOutputStream fOut = new FileOutputStream(file);
 

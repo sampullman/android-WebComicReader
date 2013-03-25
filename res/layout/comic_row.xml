@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:descendantFocusability="blocksDescendants">
+  <TextView
+      android:id="@+id/comic_title"
+      style="@style/comic_title"/>
+  <TextView
+      android:id="@+id/comic_space"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:layout_weight="0.2"
+      android:textSize="18sp"/>
+  <ImageButton
+      android:id="@+id/comic_last"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:maxHeight="55dp"
+      android:gravity="center"
+      android:layout_weight="0.2"
+      android:scaleType="fitCenter"
+      android:background="@null"
+      android:padding="12dp"
+      android:src="@drawable/bino"/>
+  <ImageButton
+      android:id="@+id/comic_saved"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      android:maxHeight="55dp"
+      android:gravity="center"
+      android:layout_weight="0.2"
+      android:scaleType="fitCenter"
+      android:background="@null"
+      android:padding="10dp"
+      android:src="@drawable/saved"/>
+</LinearLayout>
+      
