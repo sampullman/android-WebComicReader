@@ -37,6 +37,7 @@ public class MongrelDesignsReader extends Reader {
 
         this.title = "Mongrel Designs";
         this.shortTitle = "Mongrel";
+        this.storeUrl = "http://webcomic.mongreldesigns.com/p/support.html";
 
         Button b = (Button) findViewById(R.id.comic_random);
         LinearLayout nav = (LinearLayout) findViewById(R.id.nav_bar);

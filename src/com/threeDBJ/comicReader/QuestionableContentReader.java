@@ -29,6 +29,7 @@ public class QuestionableContentReader extends Reader {
 
         this.title = "Questionable Content";
         this.shortTitle = "Questionable";
+        this.storeUrl = "http://www.topatoco.com/merchant.mvc?Screen=CTGY&Store_Code=TO&Category_Code=QC";
 
         loadInitial(max);
     }

@@ -29,6 +29,7 @@ public class DinosaurReader extends Reader {
 
         this.title = "Dinosaur Comics";
         this.shortTitle = "Dinosaur";
+        this.storeUrl = "http://www.qwantz.com/merchandise.php";
 
         loadInitial(max);
     }
