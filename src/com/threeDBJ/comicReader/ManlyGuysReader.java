@@ -62,6 +62,7 @@ public class ManlyGuysReader extends Reader {
 
         if(mImages.groupCount() == 2) {
             c.setAlt( mImages.group(2));
+            DebugLog.e("comic", c.altData+"");
         } else {
             c.setAlt(null);
         }
@@ -94,7 +95,7 @@ public class ManlyGuysReader extends Reader {
 
     protected OnClickListener altListener = new OnClickListener() {
             public void onClick(View v) {
-                dispAltText(curComic.altData, "Abstruse Goose Hover Text");
+                dispAltText(curComic.altData, "Manly Guys Hover Text");
             }
         };
 

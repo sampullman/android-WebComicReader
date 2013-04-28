@@ -98,16 +98,16 @@ public class MongrelDesignsReader extends Reader {
 
     protected OnClickListener altListener = new OnClickListener() {
             public void onClick(View v) {
-                dispAltText(curComic.altData, "Completely Serious Hover Text");
+                dispAltText(curComic.altData, "Mongrel Designs Hover Text");
             }
         };
 
     protected OnClickListener storeListener = new OnClickListener() {
             public void onClick(View v) {
                 dispAltText("There is virtually no way to buy anything from this author, but if you "+
-                            "would like to support him you can promote his comments. Some other support "+
+                            "would like to support him you can promote his comics. Some other support "+
                             "suggestions can be found here: http://webcomic.mongreldesigns.com/p/support.html",
-                            "Completely Serious Support");
+                            "Mongrel Designs Support");
             }
         };
 

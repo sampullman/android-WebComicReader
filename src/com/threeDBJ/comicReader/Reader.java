@@ -25,6 +25,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.preference.PreferenceManager;
+import android.text.Html;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -498,25 +499,32 @@ public class Reader extends FragmentActivity {
         }
     }
 
-    /* Shows a cancelable dialog with the given title and text. */
-    public void showDialog(String title, String text) {
+    /* Creats a dialog and returns it's body TextView to fill */
+    public Dialog createEmptyDialog(String title) {
         final Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.text_alt);
-        dialog.setTitle(title);
-        TextView t = (TextView) dialog.findViewById(R.id.alt_text);
-        t.setText(text);
-        dialog.setCancelable(true);
+        dialog.setContentView(R.layout.text_alt);  
+        dialog.setTitle(title);     
+        dialog.setCancelable(true); 
         Button done = (Button) dialog.findViewById(R.id.alt_done);
         done.setOnClickListener(makeDialogCancelListener(dialog));
+        return dialog;
+    }
+
+    /* Shows a cancelable dialog with the given title and text. */
+    public void showDialog(String title, String text) {
+        final Dialog dialog = createEmptyDialog(title);
+        TextView t = (TextView) dialog.findViewById(R.id.alt_text);
+        t.setText(text);
         dialog.show();
     }
 
     /* Displays alt text for a comic. */
     public void dispAltText(String text, String title) {
         if(text != null) {
-            text = text.replaceAll("&#39;", "'");
-            text = text.replaceAll("&quot", "\"");
-            showDialog(title, text);
+            final Dialog dialog = createEmptyDialog(title);
+            TextView t = (TextView) dialog.findViewById(R.id.alt_text);
+            t.setText(Html.fromHtml(text));
+            dialog.show();
         } else {
             showDialog(title, "No alt text to display.");
         }
