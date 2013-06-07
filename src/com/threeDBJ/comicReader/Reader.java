@@ -349,7 +349,7 @@ public class Reader extends FragmentActivity {
         public void destroyItem(ViewGroup container, int position, Object object) {
             super.destroyItem(container, position, object);
             PageFragment frag = fragMap.remove(position);
-            frag.clean();
+            if(frag != null) frag.clean();
         }
 
         public void kill() {
