@@ -437,7 +437,8 @@ public class Reader extends FragmentActivity {
     /* Handles a click of the prev button. */
     protected OnClickListener nextListener = new OnClickListener() {
             public void onClick(View v) {
-                if(nextEnabled && (curComic.ind != null) && !curComic.ind.equals(maxInd)) {
+		String ind = curComic.getInd();
+                if(nextEnabled && ind != null && !ind.equals(maxInd) && !ind.equals(max)) {
                     mViewPager.setCurrentItem(prevPos + 1);
                 }
             }
