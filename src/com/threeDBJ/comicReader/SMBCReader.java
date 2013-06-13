@@ -12,20 +12,24 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 public class SMBCReader extends Reader {
+    public static String indPat = "(?:.*?href=\"/index.php\\?db=comics&id=([0-9]+).*?)";
+    public static String imgPat = "\"(http://www[.]smbc-comics[.]com/comics/.*?)\"";
+    public static String altPat = "<img src='(http://.*?[.]smbc-comics[.]com/comics/.*?after[.]gif)'>";
+    public static String maxPat = "function jumpToRandom[(][)] [{].*?var num = Math.floor[(]Math.random[(][)].([0-9]*?)[)]";
 
     String altURL;
-    Pattern pImages, pIndices, pMax, pAlt;
     String[] indices = new String[3];
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+	init();
 
-        String indPat = "(?:.*?href=\"/index.php\\?db=comics&id=([0-9]+).*?)";
-        String imgPat = "\"(http://www[.]smbc-comics[.]com/comics/.*?)\"";
-        String altPat = "<img src='(http://.*?[.]smbc-comics[.]com/comics/.*?after[.]gif)'>";
-        String maxPat = "function jumpToRandom[(][)] [{].*?var num = Math.floor[(]Math.random[(][)].([0-9]*?)[)]";
-        this.pImages = Pattern.compile(imgPat, Pattern.DOTALL | Pattern.UNIX_LINES);
+        loadInitial(max);
+    }
+
+    public void init() {
+	this.pImages = Pattern.compile(imgPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pIndices = Pattern.compile(indPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pMax = Pattern.compile(maxPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pAlt = Pattern.compile(altPat, Pattern.DOTALL | Pattern.UNIX_LINES);
@@ -35,8 +39,6 @@ public class SMBCReader extends Reader {
         this.title = "SMBC";
         this.shortTitle = title;
         this.storeUrl = "http://smbc.myshopify.com/";
-
-        loadInitial(max);
     }
 
     public void UISetup() {

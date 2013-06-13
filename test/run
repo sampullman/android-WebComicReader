@@ -1,0 +1,6 @@
+ant debug
+adb install -r bin/ComicReaderTest-debug.apk
+if [ $# -ne 0 ]
+  then
+  ant test
+fi

@@ -9,29 +9,40 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 public class QuestionableContentReader extends Reader {
-
-    Pattern pImages, pPrev, pNext, pMax;
+    public static String prevPat = "<a href=\"view.php[?]comic=([0-9]+)\">Previous</a>";
+    public static String nextPat = "<a href=\"view.php[?]comic=([0-9]+)\">Next</a>";
+    public static String imgPat = "<img id=\"strip\" src=.*?/comics/([0-9]+)([.][a-zA-Z]+?)\">";
+    public static String comicBase = "http://questionablecontent.net/view.php?comic=";
+    public static String comicMax = "http://questionablecontent.net/index.php";
+    public static String comicFirstInd = "1";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String prevPat = "<a href=\"view.php[?]comic=([0-9]+)\">Previous</a>";
-        String nextPat = "<a href=\"view.php[?]comic=([0-9]+)\">Next</a>";
-        String imgPat = "<img id=\"strip\" src=.*?/comics/([0-9]+).png\">";
+	init();
+        loadInitial(getMax());
+    }
 
+    public void init() {
         this.pPrev = Pattern.compile(prevPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pNext = Pattern.compile(nextPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pImages = Pattern.compile(imgPat, Pattern.DOTALL | Pattern.UNIX_LINES);
 
-        this.base = "http://questionablecontent.net/view.php?comic=";
-        this.max = "http://questionablecontent.net/index.php";
-        this.firstInd = "1";
-
         this.title = "Questionable Content";
         this.shortTitle = "Questionable";
         this.storeUrl = "http://www.topatoco.com/merchant.mvc?Screen=CTGY&Store_Code=TO&Category_Code=QC";
+    }
 
-        loadInitial(max);
+    public String getBase() {
+	return comicBase;
+    }
+
+    public String getMax() {
+	return comicMax;
+    }
+
+    public String getFirstInd() {
+	return comicFirstInd;
     }
 
     public String handleRawPage(Comic c, String page) {
@@ -40,7 +51,7 @@ public class QuestionableContentReader extends Reader {
         Matcher mNext = pNext.matcher(page);
 
         boolean success = mImages.find();
-        String imgUrl = "http://questionablecontent.net/comics/"+mImages.group(1)+".png";
+        String imgUrl = "http://questionablecontent.net/comics/"+mImages.group(1)+mImages.group(2);
         if(mPrev.find()) {
             DebugLog.e("comic", "prev: "+mPrev.group(1));
             c.setPrevInd(mPrev.group(1));

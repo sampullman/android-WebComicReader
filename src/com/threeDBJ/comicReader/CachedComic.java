@@ -2,10 +2,7 @@ package com.threeDBJ.comicReader;
 
 import android.graphics.Bitmap;
 
-public class CachedComic {
-
-    public Bitmap image;
-    public String prevInd, nextInd, curInd, altData, imgTitle;
+public class CachedComic extends Comic {
     public int size = 0;
     boolean loaded = false;
 
@@ -22,14 +19,14 @@ public class CachedComic {
         }
         this.image = image;
         this.prevInd = prevInd;
-        this.curInd = curInd;
+        this.ind = curInd;
         this.nextInd = nextInd;
         this.altData = altData;
         this.imgTitle = imgTitle;
     }
 
     public void load(Comic c) {
-        set(c.comic, c.prevInd, c.ind, c.nextInd, c.altData, c.imgTitle);
+        set(c.image, c.prevInd, c.ind, c.nextInd, c.altData, c.imgTitle);
         loaded = true;
     }
 
@@ -37,12 +34,8 @@ public class CachedComic {
         return size;
     }
 
-    public void setComic(Bitmap comic) {
-        this.image = comic;
-    }
-
     public void become(CachedComic other) {
-        set(other.image, other.prevInd, other.curInd, other.nextInd, other.altData, other.imgTitle);
+        set(other.image, other.prevInd, other.ind, other.nextInd, other.altData, other.imgTitle);
         loaded = other.loaded;
     }
 

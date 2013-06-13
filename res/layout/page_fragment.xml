@@ -1,14 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res/com.threeDBJ.comicReader"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical" >
   <com.threeDBJ.comicReader.TouchImageView
       android:id="@+id/comic"
-      android:layout_width="fill_parent"
-      android:layout_height="fill_parent"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
       android:adjustViewBounds="true"
       android:scaleType="fitStart" />
-</LinearLayout>
+  <TextView
+      android:id="@+id/placeholder"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:visibility="invisible"
+      android:textColor="#DDDDDD"
+      android:gravity="center"
+      android:paddingLeft="20dp"
+      android:paddingRight="20dp"
+      android:textSize="32sp"
+      android:text="@string/comic_placeholder" />
+</FrameLayout>

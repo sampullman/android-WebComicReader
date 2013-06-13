@@ -4,7 +4,7 @@ import android.util.Log;
 
 public final class DebugLog {
 
-    private static boolean loggingEnabled = false;
+    private static boolean loggingEnabled = true;
 
     private DebugLog() {
     }

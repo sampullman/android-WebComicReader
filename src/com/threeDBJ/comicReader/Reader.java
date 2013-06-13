@@ -49,6 +49,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.regex.Pattern;
 
 public class Reader extends FragmentActivity {
 
@@ -56,6 +57,7 @@ public class Reader extends FragmentActivity {
 
     String prevPat, nextPat, imgPat, base, max, errorInd,
         firstInd="1", maxInd, storeUrl,	sdPath, title, shortTitle;
+    Pattern pImages, pPrev, pNext, pIndices, pMax, pAlt;
 
     static String aboutText = "Created by 3DBJ developers. Please email questions, comments, or " +
         "concerns to 3dbj.dev@gmail.com";
@@ -105,6 +107,24 @@ public class Reader extends FragmentActivity {
         setSwipe(settings.getBoolean("swipe", false));
     }
 
+    /* Get the base (prefix) for comic queries */
+    public String getBase() {
+	return base;
+    }
+
+    /* Get the url for the latest comic. */
+    public String getMax() {
+	return max;
+    }
+
+    /* Get the index of the first comic */
+    public String getFirstInd() {
+	return firstInd;
+    }
+
+    public void init() {
+    }
+
     /* Set up click listeners and initialize the view pager */
     public void UISetup() {
         Button b = (Button) findViewById(R.id.comic_first);
@@ -142,18 +162,16 @@ public class Reader extends FragmentActivity {
         }
         setPager = prevPos;
         this.UISetup();
-        if(curComic.image != null) {
-            mReaderPagerAdapter.getFragment(mViewPager.getCurrentItem()).setImage(curComic.image, mViewPager);
-        }
+	mReaderPagerAdapter.getFragment(mViewPager.getCurrentItem()).setComic(curComic, mViewPager);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if(curComic.curInd != null) {
+        if(curComic.ind != null) {
             Editor edit = prefs.edit();
-            edit.putString(shortTitle, curComic.curInd);
+            edit.putString(shortTitle, curComic.ind);
             if(maxNum != -1) {
                 edit.putInt(shortTitle+"-max", maxNum);
             }
@@ -191,7 +209,7 @@ public class Reader extends FragmentActivity {
         removeError();
         if(ind != null && !loadingInds.contains(ind)) {
             loadingInds.add(ind);
-            rm.grabComic(this, new Comic(base, ind));
+            rm.grabComic(this, new Comic(getBase(), ind));
         }
     }
 
@@ -202,7 +220,6 @@ public class Reader extends FragmentActivity {
         CachedComic cached = comicMap.remove(c.getInd());
         if(cached != null) {
             cached.load(c);
-            //DebugLog.e("comic", cached.prevInd+" "+cached.curInd+" "+cached.nextInd+" : "+maxInd);
             if(cached == curComic) {
                 errorInd = null;
                 if(loadingDialog != null && loadingDialog.isShowing()) {
@@ -212,7 +229,7 @@ public class Reader extends FragmentActivity {
                 if(frag == null) {
                     handleComicCancel();
                 } else {
-                    frag.setImage(c.getComic(), mViewPager);
+                    frag.setComic(c, mViewPager);
                     prevEnabled = true;
                     nextEnabled = true;
                 }
@@ -238,7 +255,7 @@ public class Reader extends FragmentActivity {
     public void handleComicError(Comic c) {
         loadingInds.remove(c.getInd());
         CachedComic cached = comicMap.remove(c.getInd());
-        if(c.getInd() == null && curComic.curInd == null) {
+        if(c.getInd() == null && curComic.ind == null) {
             comicMap.clear();
             loadingInds.clear();
             cached = curComic;
@@ -247,7 +264,7 @@ public class Reader extends FragmentActivity {
             loadingDialog.cancel();
         }
         errorCount += 1;
-        //DebugLog.e("comic", "error:"+c.getInd()+" "+curComic.curInd);
+        //DebugLog.e("comic", "error:"+c.getInd()+" "+curComic.ind);
         if(cached == curComic && !curComic.loaded) {
             //DebugLog.e("comic", "error: errTextNull = "+(errorText == null));
             ViewGroup ll = (ViewGroup) findViewById(R.id.comic_wrapper);
@@ -288,9 +305,9 @@ public class Reader extends FragmentActivity {
                 /* Load the next comic. */
                 String newInd = "";
                 if(position > prevPos) {
-                    if(curComic.curInd == null && nextEnabled) {
-                    } else if(curComic.curInd == null || !nextEnabled || curComic.curInd.equals(maxInd) ||
-                              curComic.curInd.equals(max)) {
+                    if(curComic.ind == null && nextEnabled) {
+                    } else if(curComic.ind == null || !nextEnabled || curComic.ind.equals(maxInd) ||
+                              curComic.ind.equals(getMax())) {
                         mViewPager.setCurrentItem(prevPos);
                         return;
                     }
@@ -305,8 +322,8 @@ public class Reader extends FragmentActivity {
                     }
                     /* Load the previous comic. */
                 } else if(position < prevPos) {
-                    if(curComic.curInd == null && prevEnabled) {
-                    } else if(curComic.curInd == null || !prevEnabled || curComic.curInd.equals(firstInd)) {
+                    if(curComic.ind == null && prevEnabled) {
+                    } else if(curComic.ind == null || !prevEnabled || curComic.ind.equals(getFirstInd())) {
                         mViewPager.setCurrentItem(prevPos);
                         return;
                     }
@@ -315,7 +332,7 @@ public class Reader extends FragmentActivity {
                     prevComic.clear();
 
                     newInd = nextComic.prevInd;
-                    if(curComic.loaded && !curComic.curInd.equals(firstInd)) {
+                    if(curComic.loaded && !curComic.ind.equals(getFirstInd())) {
                         comicMap.put(curComic.prevInd, prevComic);
                         loadComic(curComic.prevInd);
                     }
@@ -331,7 +348,7 @@ public class Reader extends FragmentActivity {
                     loadComic(newInd);
                     errorInd = newInd;
                 } else {
-                    mReaderPagerAdapter.getFragment(mViewPager.getCurrentItem()).setImage(curComic.image, mViewPager);
+                    mReaderPagerAdapter.getFragment(mViewPager.getCurrentItem()).setComic(curComic, mViewPager);
                 }
                 prevPos = position;
             }
@@ -360,7 +377,7 @@ public class Reader extends FragmentActivity {
 
         public void clearImages() {
             for(PageFragment frag : fragMap.values()) {
-                frag.setImage(null, mViewPager);
+                frag.setComic(null, mViewPager);
             }
         }
 
@@ -411,7 +428,7 @@ public class Reader extends FragmentActivity {
     /* Handles a click of the prev button. */
     protected OnClickListener prevListener = new OnClickListener() {
             public void onClick(View v) {
-                if(prevEnabled && (curComic.curInd != null) && !curComic.curInd.equals(firstInd)) {
+                if(prevEnabled && (curComic.ind != null) && !curComic.ind.equals(getFirstInd())) {
                     mViewPager.setCurrentItem(prevPos - 1);
                 }
             }
@@ -420,7 +437,7 @@ public class Reader extends FragmentActivity {
     /* Handles a click of the prev button. */
     protected OnClickListener nextListener = new OnClickListener() {
             public void onClick(View v) {
-                if(nextEnabled && (curComic.curInd != null) && !curComic.curInd.equals(maxInd)) {
+                if(nextEnabled && (curComic.ind != null) && !curComic.ind.equals(maxInd)) {
                     mViewPager.setCurrentItem(prevPos + 1);
                 }
             }
@@ -473,10 +490,10 @@ public class Reader extends FragmentActivity {
                 String saveTitle;
                 if(curComic.imgTitle != null) {
                     saveTitle = curComic.imgTitle;
-                } else if(curComic.curInd.equals(maxInd) || curComic.curInd.equals(max)) {
+                } else if(curComic.ind.equals(maxInd) || curComic.ind.equals(getMax())) {
                     saveTitle = (maxInd == null) ? Integer.toString(maxNum) : maxInd;
                 } else {
-                    saveTitle = curComic.curInd;
+                    saveTitle = curComic.ind;
                 }
                 DebugLog.v("comic", dir+" "+saveTitle + ".png");
                 File file = new File(dir, saveTitle + ".png");
@@ -548,7 +565,7 @@ public class Reader extends FragmentActivity {
     public void setMaxIndex(String ind) {
         if(maxInd == null) {
             this.maxInd = ind;
-            curComic.curInd = ind;
+            curComic.ind = ind;
         }
     }
 
@@ -576,9 +593,10 @@ public class Reader extends FragmentActivity {
     /* Handles a click of the first button. */
     protected OnClickListener firstListener = new OnClickListener() {
             public void onClick(View v) {
-                if(curComic.curInd == null) {
+		String firstInd = getFirstInd();
+                if(curComic.ind == null) {
                     showDialog("Error", "Cannot connect to the internet.");
-                } else if(curComic.curInd == null || !curComic.curInd.equals(firstInd)) {
+                } else if(curComic.ind == null || !curComic.ind.equals(firstInd)) {
                     clearComics();
                     clearVisible();
                     comicMap.put(firstInd, curComic);
@@ -592,12 +610,12 @@ public class Reader extends FragmentActivity {
     /* Handles a click of the last button. */
     protected OnClickListener lastListener = new OnClickListener() {
             public void onClick(View v) {
-                if(curComic.curInd == null) {
+                if(curComic.ind == null) {
                     showDialog("Error", "Cannot connect to the internet.");
-                } else if(curComic.curInd == null || !curComic.curInd.equals(maxInd)) {
+                } else if(curComic.ind == null || !curComic.ind.equals(maxInd)) {
                     clearComics();
                     clearVisible();
-                    loadLast(max);
+                    loadLast(getMax());
                 }
             }
         };
@@ -666,14 +684,14 @@ public class Reader extends FragmentActivity {
                     comicMap.put(errorInd, curComic);
                     loadComic(errorInd);
                     showLoadingDialog();
-                } else if(curComic.curInd == null || curComic.curInd.equals(max)) {
-                    curComic.curInd = maxInd;
+                } else if(curComic.ind == null || curComic.ind.equals(getMax())) {
+                    curComic.ind = maxInd;
                     clearComics();
                     clearVisible();
-                    loadLast(max);
+                    loadLast(getMax());
                 } else {
-                    comicMap.put(curComic.curInd, curComic);
-                    loadComic(curComic.curInd);
+                    comicMap.put(curComic.ind, curComic);
+                    loadComic(curComic.ind);
                     showLoadingDialog();
                 }
             }

@@ -12,17 +12,19 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 public class ExplosmReader extends Reader {
-
+    public static String prevPat = "a rel=\"prev\".*?href=\"/comics/([0-9]+)/\"";
+    public static String nextPat = "a rel=\"next\".*?href=\"/comics/([0-9]+)/\"";
+    public static String imgPat = "src=\"(http://w?w?w?.?explosm.net/db/files/(?!comic-authors).*?)\"";
     String altUrl;
-    Pattern pImages, pPrev, pNext;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String prevPat = "a rel=\"prev\".*?href=\"/comics/([0-9]+)/\"";
-	String nextPat = "a rel=\"next\".*?href=\"/comics/([0-9]+)/\"";
-	String imgPat = "src=\"(http://w?w?w?.?explosm.net/db/files/Comics.*?)\"";
+	init();
+	loadInitial(max);
+    }
 
+    public void init() {
 	this.pImages = Pattern.compile(imgPat,Pattern.DOTALL | Pattern.UNIX_LINES);
 	this.pPrev = Pattern.compile(prevPat,Pattern.DOTALL | Pattern.UNIX_LINES);
 	this.pNext = Pattern.compile(nextPat, Pattern.DOTALL | Pattern.UNIX_LINES);
@@ -31,14 +33,11 @@ public class ExplosmReader extends Reader {
 	this.max = "http://explosm.net/comics/";
 
 	this.title = "Explosm";
-    this.shortTitle = title;
+	this.shortTitle = title;
 	this.storeUrl = "http://store.explosm.net/";
 
 	/* Wierd, but true */
 	this.firstInd = "15";
-
-	loadInitial(max);
-
     }
 
     public String handleRawPage(Comic c, String page) {
@@ -65,12 +64,7 @@ public class ExplosmReader extends Reader {
 		/* Anomaly, this should not happen */
 	    }
 	}
-	if(mImages.find()) {
-	    String imgUrl = mImages.group(1);
-	    return imgUrl;
-	} else {
-	    return null;
-	}
+	return mImages.find() ? mImages.group(1) : null;
     }
 
 }

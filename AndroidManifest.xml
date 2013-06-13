@@ -20,6 +20,11 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
+	<activity android:name=".Reader"
+              android:label="@string/app_name"
+              android:theme="@android:style/Theme.NoTitleBar"
+              android:configChanges="keyboardHidden|orientation|screenSize">
+	</activity>
 	<activity android:name=".SMBCReader"
               android:label="@string/app_name"
               android:theme="@android:style/Theme.NoTitleBar"

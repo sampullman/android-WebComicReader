@@ -160,7 +160,7 @@ public class RequestManager {
     }
 
     /* Background task for grabbing a comic. */
-    private class GetComicTask extends AsyncTask<Comic,Integer,Comic> {
+   class GetComicTask extends AsyncTask<Comic,Integer,Comic> {
         protected Reader context;
 
         public GetComicTask(Reader context) {
@@ -180,12 +180,15 @@ public class RequestManager {
                     comic.setError(true);
                 } else {
                     imgUrl = this.context.handleRawPage(comic, page);
-                    DebugLog.e("comic", "url: "+imgUrl);
-                    comic.setComic(retrieveImage(imgUrl));
+		    if(imgUrl == null) {
+			DebugLog.e("cmreader", "url: "+comic.getInd());
+		    } else {
+			comic.setComic(retrieveImage(imgUrl));
+		    }
                 }
             } catch(Exception e) {
                 if(e.getMessage() != null) {
-                    DebugLog.v("doInBg", e.getMessage());
+                    DebugLog.v("cmreader", e.getMessage());
                 }
                 comic.setError(true);
             }

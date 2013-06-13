@@ -4,9 +4,12 @@ import android.graphics.Bitmap;
 
 public class Comic {
 
-    Bitmap comic;
+    public Bitmap image;
     String url, ind, prevInd, nextInd, altData, imgTitle;
     boolean error=false;
+
+    public Comic() {
+    }
 
     public Comic(String base, String ind) {
         this.url = base + ind;
@@ -14,9 +17,9 @@ public class Comic {
     }
 
     public Comic(CachedComic c) {
-        comic = c.image;
+        image = c.image;
         url = "";
-        ind = c.curInd;
+        ind = c.ind;
         prevInd = c.prevInd;
         nextInd = c.nextInd;
         altData = c.altData;
@@ -31,12 +34,12 @@ public class Comic {
         return ind;
     }
 
-    public void setComic(Bitmap comic) {
-        this.comic = comic;
+    public Bitmap getComic() {
+        return image;
     }
 
-    public Bitmap getComic() {
-        return comic;
+    public void setComic(Bitmap comic) {
+        this.image = comic;
     }
 
     public void setNextInd(String ind) {
