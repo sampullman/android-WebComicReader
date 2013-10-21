@@ -1,7 +1,5 @@
 package com.threeDBJ.comicReader;
 
-import com.google.ads.*;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
@@ -26,6 +24,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.text.Spanned;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,8 +59,9 @@ public class Reader extends FragmentActivity {
         firstInd="1", maxInd, storeUrl,	sdPath, title, shortTitle;
     Pattern pImages, pPrev, pNext, pIndices, pMax, pAlt;
 
-    static String aboutText = "Created by 3DBJ developers. Please email questions, comments, or " +
-        "concerns to 3dbj.dev@gmail.com";
+    Spanned aboutHtml;
+    String aboutText = "Created by 3DBJ developers. Please email questions, comments, or concerns to "+
+	"<a href=\"mailto:3dbj.dev@gmail.com\">3dbj.dev@gmail.com</a>";
 
     HashSet<String> loadingInds = new HashSet<String>();
     HashMap<String, CachedComic> comicMap = new HashMap<String, CachedComic>();
@@ -89,6 +90,7 @@ public class Reader extends FragmentActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+	this.aboutHtml = Html.fromHtml(aboutText);
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
         Configuration config = this.getResources().getConfiguration();
@@ -536,6 +538,15 @@ public class Reader extends FragmentActivity {
         dialog.show();
     }
 
+    /* Shows a cancelable dialog with the given title and text. */
+    public void showDialog(String title, Spanned html) {
+        final Dialog dialog = createEmptyDialog(title);
+        TextView t = (TextView) dialog.findViewById(R.id.alt_text);
+        t.setText(html);
+	t.setMovementMethod(LinkMovementMethod.getInstance());
+        dialog.show();
+    }
+
     /* Displays alt text for a comic. */
     public void dispAltText(String text, String title) {
         if(text != null) {
@@ -777,7 +788,7 @@ public class Reader extends FragmentActivity {
             saveToSD();
             break;
         case R.id.comic_about:
-            showDialog("About", this.aboutText);
+            showDialog("About", this.aboutHtml);
             break;
         case R.id.comic_swipe:
             setSwipe(!swipe);

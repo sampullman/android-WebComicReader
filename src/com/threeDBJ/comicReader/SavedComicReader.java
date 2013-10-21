@@ -1,7 +1,5 @@
 package com.threeDBJ.comicReader;
 
-import com.google.ads.*;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;

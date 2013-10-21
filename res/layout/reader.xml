@@ -10,8 +10,8 @@
   <RelativeLayout
       android:orientation="vertical"
       android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:layout_weight="0.21"
+      android:layout_height="0dp"
+      android:layout_weight="0.9"
       android:id="@+id/comic_wrapper">
     <com.threeDBJ.comicReader.MyViewPager
         android:layout_width="match_parent"
@@ -22,8 +22,8 @@
       android:id="@+id/nav_bar"
       android:orientation="horizontal"
       android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:layout_weight="0.95">
+      android:layout_height="0dp"
+      android:layout_weight="0.1">
     <Button
         android:id="@+id/comic_first"
         style="@style/btn"
@@ -48,7 +48,7 @@
         android:id="@+id/comic_alt"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="0.85"
+        android:layout_weight="0.9"
         android:text="Alt"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -61,23 +61,5 @@
         android:layout_height="match_parent"
         android:layout_weight="0.93"
         android:background="@drawable/comic_store"/>
-  </LinearLayout>
-  <LinearLayout
-      android:orientation="vertical"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:layout_weight="0.93">
-    <com.google.ads.AdView
-        android:id="@+id/ad"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        ads:adUnitId="a14faafe97d9753"
-        ads:adSize="BANNER"
-        ads:loadAdOnCreate="true"
-        app:backgroundColor="#000000"
-        app:primaryTextColor="#FFFFFF"
-        app:secondaryTextColor="#CCCCCC"
-        android:gravity="center"
-        app:keywords="comic reader smbc xkcd viewer web"/>
   </LinearLayout>
 </LinearLayout>

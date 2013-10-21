@@ -12,13 +12,13 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 public class SMBCReader extends Reader {
-    public static String indPat = "(?:.*?href=\"/index.php\\?db=comics&id=([0-9]+).*?)";
-    public static String imgPat = "\"(http://www[.]smbc-comics[.]com/comics/.*?)\"";
-    public static String altPat = "<img src='(http://.*?[.]smbc-comics[.]com/comics/.*?after[.]gif)'>";
+    public static String prevPat = "<!-- Back button--><a href=\"[?]id=([0-9]+).*?class=\"backRollover\">";
+    public static String nextPat = "<!-- Next button --><a href=\"[?]id=([0-9]+).*?class=\"nextRollover\">";
+    public static String imgPat = "<div id=\"comicimage\">.*?<img src='(http://www[.]smbc-comics[.]com/comics/.*?)'>.*?</div>";
+    public static String altPat = "<div id=\"aftercomic\".*?<img src='(http://www[.]smbc-comics[.]com/comics/.*?after[.]gif)'>";
     public static String maxPat = "function jumpToRandom[(][)] [{].*?var num = Math.floor[(]Math.random[(][)].([0-9]*?)[)]";
 
     String altURL;
-    String[] indices = new String[3];
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -30,7 +30,8 @@ public class SMBCReader extends Reader {
 
     public void init() {
 	this.pImages = Pattern.compile(imgPat, Pattern.DOTALL | Pattern.UNIX_LINES);
-        this.pIndices = Pattern.compile(indPat, Pattern.DOTALL | Pattern.UNIX_LINES);
+	this.pPrev = Pattern.compile(prevPat, Pattern.DOTALL | Pattern.UNIX_LINES);
+	this.pNext = Pattern.compile(nextPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pMax = Pattern.compile(maxPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pAlt = Pattern.compile(altPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.base = "http://www.smbc-comics.com/index.php?db=comics&id=";
@@ -51,9 +52,9 @@ public class SMBCReader extends Reader {
        Last comic has a first and a previous
        All other comics have a first, previous, and next */
     public String handleRawPage(Comic c, String page) {
-        int nIndices=0;
         Matcher mImages = pImages.matcher(page);
-        Matcher mIndices = pIndices.matcher(page);
+	Matcher mPrev = pPrev.matcher(page);
+	Matcher mNext = pNext.matcher(page);
         String imgUrl;
         try {
             mImages.find();
@@ -67,30 +68,24 @@ public class SMBCReader extends Reader {
         } catch(Exception e) {
             imgUrl = "http://cdn.shopify.com/s/files/1/0066/2852/products/science_large_grande.jpg?100646";
         }
-        while(mIndices.find() && nIndices < indices.length) {
-            indices[nIndices] = mIndices.group(1);
-            nIndices += 1;
-        }
+	
+	boolean haveNext = mNext.find();
+	boolean havePrev = mPrev.find();
         /* First comic */
-        if(nIndices == 1) {
-            c.setNextInd(indices[0]);
-        } else if(nIndices == 2) {
-            if(haveMax() && indices[1].equals(Integer.toString(Integer.parseInt(maxInd)-2))) {
-                c.setNextInd(Integer.toString(Integer.parseInt(indices[1])+2));
-            } else if(!haveMax()) {
+        if(!havePrev) {
+            c.setNextInd(mNext.group(1));
+        } else if(!haveNext) {
+            if(!haveMax()) {
                 Matcher mMax = pMax.matcher(page);
                 mMax.find();
                 String temp = mMax.group(1);
                 setMaxIndex(temp);
                 setMaxNum(temp);
-            } else {
-            }
-            c.setPrevInd(indices[1]);
-        } else if(nIndices == 3){
-            c.setPrevInd(indices[1]);
-            c.setNextInd(indices[2]);
+	    }
+            c.setPrevInd(mPrev.group(1));
         } else {
-            DebugLog.v("smbc", "error - invalid comic");
+            c.setPrevInd(mPrev.group(1));
+            c.setNextInd(mNext.group(1));
         }
         return imgUrl;
     }

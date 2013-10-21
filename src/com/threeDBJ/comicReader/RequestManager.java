@@ -174,7 +174,7 @@ public class RequestManager {
         protected Comic doInBackground (Comic... data) {
             String page, imgUrl;
             Comic comic = data[0];
-            try{
+            try {
                 page = makeQuery(comic.getUrl());
                 if(page == null) {
                     comic.setError(true);
@@ -187,9 +187,7 @@ public class RequestManager {
 		    }
                 }
             } catch(Exception e) {
-                if(e.getMessage() != null) {
-                    DebugLog.v("cmreader", e.getMessage());
-                }
+		DebugLog.v("cmreader", "Comic error: "+e.getMessage());
                 comic.setError(true);
             }
             return comic;

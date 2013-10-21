@@ -1,7 +1,5 @@
 package com.threeDBJ.comicReader;
 
-import com.google.ads.*;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
@@ -20,10 +18,6 @@ public class comicReader extends FragmentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.title);
-
-        AdRequest req = new AdRequest ();
-        AdView ad = (AdView) findViewById(R.id.ad);
-        ad.loadAd (req);
     }
 
     @Override
