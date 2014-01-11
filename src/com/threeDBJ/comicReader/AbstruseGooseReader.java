@@ -84,7 +84,7 @@ public class AbstruseGooseReader extends Reader {
 
     protected OnClickListener altListener = new OnClickListener() {
             public void onClick(View v) {
-                dispAltText(curComic.altData, "Abstruse Goose Hover Text");
+                dispAltText(state.curComic.altData, "Abstruse Goose Hover Text");
             }
         };
 

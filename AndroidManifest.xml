@@ -10,11 +10,11 @@
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
   <application android:label="@string/app_name"
-               android:icon="@drawable/ic_main">
+               android:icon="@drawable/ic_main"
+	       android:name="ComicReaderApp">
     <activity android:name=".comicReader"
               android:label="@string/app_name"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
@@ -22,84 +22,67 @@
     </activity>
     <activity android:name=".Reader"
               android:label="@string/app_name"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
     </activity>
     <activity android:name=".SMBCReader"
               android:label="@string/app_name"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
     </activity>
     <activity android:name=".XKCDReader"
               android:label="@string/app_name"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
     </activity>
     <activity android:name=".FeelAfraidReader"
               android:label="@string/app_name"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
     </activity>
     <activity android:name=".ExplosmReader"
               android:label="@string/app_name"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
     </activity>
     <activity android:name=".PHDReader"
               android:label="@string/app_name"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
     </activity>
     <activity android:name=".ButtersafeReader"
               android:label="@string/app_name"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
     </activity>
     <activity android:name=".QuestionableContentReader"
               android:label="@string/app_name"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
     </activity>
     <activity android:name=".DinosaurReader"
               android:label="@string/app_name"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
     </activity>
     <activity android:name=".CtrlAltDeleteReader"
               android:label="@string/app_name"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
     </activity>
     <activity android:name=".PennyArcadeReader"
               android:label="@string/app_name"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
     </activity>
     <activity android:name=".SavedComicMenu"
               android:label="@string/app_name"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
     </activity>
     <activity android:name=".SavedComicReader"
               android:label="@string/app_name"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
     </activity>
     <activity android:name=".AbstruseGooseReader"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
     </activity>
     <activity android:name=".ManlyGuysReader"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
     </activity>
     <activity android:name=".CompletelySeriousReader"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
     </activity>
     <activity android:name=".MongrelDesignsReader"
-              android:theme="@android:style/Theme.NoTitleBar"
-              android:configChanges="keyboardHidden|orientation|screenSize">
+              android:theme="@android:style/Theme.NoTitleBar">
     </activity>
     <activity
 	android:name="com.google.ads.AdActivity"

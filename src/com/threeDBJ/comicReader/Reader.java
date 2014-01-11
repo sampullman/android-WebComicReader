@@ -51,9 +51,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.regex.Pattern;
 
-public class Reader extends FragmentActivity {
+import com.threeDBJ.comicReader.ComicReaderApp.ComicState;
 
+public class Reader extends FragmentActivity {
     public static final String PREFS_NAME = "ComicPrefsFile";
+    ComicReaderApp app;
+    ComicState state;
 
     String prevPat, nextPat, imgPat, base, max, errorInd,
         firstInd="1", maxInd, storeUrl,	sdPath, title, shortTitle;
@@ -75,7 +78,7 @@ public class Reader extends FragmentActivity {
     Dialog selectDialog;
     TextView errorText;
 
-    int setPager=20000, errorCount=0, accessed=0;
+    int errorCount=0, accessed=0;
     boolean firstRun=false, error=false, swipe=false,
         nextEnabled=true, prevEnabled=false, loadLastViewed;
 
@@ -90,15 +93,12 @@ public class Reader extends FragmentActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+	app = (ComicReaderApp)getApplicationContext();
+	state = app.getComicState();
 	this.aboutHtml = Html.fromHtml(aboutText);
 
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-        Configuration config = this.getResources().getConfiguration();
-        if(config.orientation == 1) {
-            setContentView(R.layout.reader);
-        } else if(config.orientation == 2) {
-            setContentView(R.layout.reader_wide);
-        }
+        setContentView(R.layout.reader);
+
         sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
         this.UISetup();
 
@@ -107,24 +107,6 @@ public class Reader extends FragmentActivity {
 
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         setSwipe(settings.getBoolean("swipe", false));
-    }
-
-    /* Get the base (prefix) for comic queries */
-    public String getBase() {
-	return base;
-    }
-
-    /* Get the url for the latest comic. */
-    public String getMax() {
-	return max;
-    }
-
-    /* Get the index of the first comic */
-    public String getFirstInd() {
-	return firstInd;
-    }
-
-    public void init() {
     }
 
     /* Set up click listeners and initialize the view pager */
@@ -149,36 +131,51 @@ public class Reader extends FragmentActivity {
         mViewPager.setAdapter(mReaderPagerAdapter);
         mViewPager.setOffscreenPageLimit(1);
         mViewPager.setOnPageChangeListener(pageListener);
-        mViewPager.setCurrentItem(setPager);
-        mViewPager.setCurrentItem(setPager);
+        mViewPager.setCurrentItem(state.setPager);
+        mViewPager.setCurrentItem(state.setPager);
+	PageFragment frag = mReaderPagerAdapter.getFragment(state.setPager);
+	if(state.curComic != null && frag != null) {
+	    frag.setComic(state.curComic, mViewPager);
+	}
     }
 
-    /* Handle a change in orientation */
-    @Override
-    public void onConfigurationChanged(Configuration config) {
-        super.onConfigurationChanged(config);
-        if(config.orientation == 1) {
-            setContentView(R.layout.reader);
-        } else if(config.orientation == 2) {
-            setContentView(R.layout.reader_wide);
-        }
-        setPager = prevPos;
-        this.UISetup();
-	mReaderPagerAdapter.getFragment(mViewPager.getCurrentItem()).setComic(curComic, mViewPager);
+    /* Get the base (prefix) for comic queries */
+    public String getBase() {
+	return base;
+    }
+
+    /* Get the url for the latest comic. */
+    public String getMax() {
+	return max;
+    }
+
+    /* Get the index of the first comic */
+    public String getFirstInd() {
+	return firstInd;
+    }
+
+    public void init() {
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+	app.setReader(null);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if(curComic.ind != null) {
+        if(state.curComic.ind != null) {
             Editor edit = prefs.edit();
-            edit.putString(shortTitle, curComic.ind);
+            edit.putString(shortTitle, state.curComic.ind);
             if(maxNum != -1) {
                 edit.putInt(shortTitle+"-max", maxNum);
             }
             edit.commit();
         }
+    }
+
+    @Override
+    public void onResume() {
+	super.onResume();
+	app.setReader(this);
     }
 
     public void loadInitial(String url) {
@@ -189,7 +186,7 @@ public class Reader extends FragmentActivity {
                 maxNum = prefs.getInt(shortTitle+"-max", -1);
                 loadLast(url);
             } else {
-                comicMap.put(lastInd, curComic);
+                comicMap.put(lastInd, state.curComic);
                 showLoadingDialog();
                 loadComic(lastInd);
             }
@@ -201,7 +198,7 @@ public class Reader extends FragmentActivity {
     public void loadLast(String url) {
         removeError();
         loadingInds.add(url);
-        comicMap.put(url, curComic);
+        comicMap.put(url, state.curComic);
         rm.grabComic(this, new Comic("", url));
         errorInd = null;
         showLoadingDialog();
@@ -222,31 +219,31 @@ public class Reader extends FragmentActivity {
         CachedComic cached = comicMap.remove(c.getInd());
         if(cached != null) {
             cached.load(c);
-            if(cached == curComic) {
+            if(cached == state.curComic) {
                 errorInd = null;
                 if(loadingDialog != null && loadingDialog.isShowing()) {
                     loadingDialog.dismiss();
                 }
                 PageFragment frag = mReaderPagerAdapter.getFragment(mViewPager.getCurrentItem());
                 if(frag == null) {
-                    handleComicCancel();
+                    state.handleComicCancel();
                 } else {
                     frag.setComic(c, mViewPager);
                     prevEnabled = true;
                     nextEnabled = true;
                 }
-            } else if(cached == prevComic) {
+            } else if(cached == state.prevComic) {
                 prevEnabled = true;
-            } else if(cached == nextComic) {
+            } else if(cached == state.nextComic) {
                 nextEnabled = true;
             }
-            if(curComic.loaded) {
-                if(!prevComic.loaded && !loadingInds.contains(curComic.prevInd)) {
-                    comicMap.put(curComic.prevInd, prevComic);
-                    loadComic(curComic.prevInd);
-                } else if(!nextComic.loaded && !loadingInds.contains(curComic.nextInd)) {
-                    comicMap.put(curComic.nextInd, nextComic);
-                    loadComic(curComic.nextInd);
+            if(state.curComic.loaded) {
+                if(!state.prevComic.loaded && !loadingInds.contains(state.curComic.prevInd)) {
+                    comicMap.put(state.curComic.prevInd, state.prevComic);
+                    loadComic(state.curComic.prevInd);
+                } else if(!state.nextComic.loaded && !loadingInds.contains(state.curComic.nextInd)) {
+                    comicMap.put(state.curComic.nextInd, state.nextComic);
+                    loadComic(state.curComic.nextInd);
                 }
             }
         }
@@ -257,17 +254,17 @@ public class Reader extends FragmentActivity {
     public void handleComicError(Comic c) {
         loadingInds.remove(c.getInd());
         CachedComic cached = comicMap.remove(c.getInd());
-        if(c.getInd() == null && curComic.ind == null) {
+        if(c.getInd() == null && state.curComic.ind == null) {
             comicMap.clear();
             loadingInds.clear();
-            cached = curComic;
+            cached = state.curComic;
         }
         if(loadingDialog != null && loadingDialog.isShowing()) {
             loadingDialog.cancel();
         }
         errorCount += 1;
-        //DebugLog.e("comic", "error:"+c.getInd()+" "+curComic.ind);
-        if(cached == curComic && !curComic.loaded) {
+        //DebugLog.e("comic", "error:"+c.getInd()+" "+state.curComic.ind);
+        if(cached == state.curComic && !state.curComic.loaded) {
             //DebugLog.e("comic", "error: errTextNull = "+(errorText == null));
             ViewGroup ll = (ViewGroup) findViewById(R.id.comic_wrapper);
             if(errorText == null) {
@@ -277,13 +274,11 @@ public class Reader extends FragmentActivity {
                 ll.addView(errorText, 0);
                 ll.bringChildToFront(errorText);
             }
-            prevEnabled = prevComic.loaded;
-            nextEnabled = nextComic.loaded;
+            prevEnabled = state.prevComic.loaded;
+            nextEnabled = state.nextComic.loaded;
             error = true;
         }
     }
-
-    int prevPos = 20000;
 
     /* Swipe listener for the view pager. */
     OnPageChangeListener pageListener = new OnPageChangeListener() {
@@ -306,53 +301,53 @@ public class Reader extends FragmentActivity {
                 mReaderPagerAdapter.clean(position);
                 /* Load the next comic. */
                 String newInd = "";
-                if(position > prevPos) {
-                    if(curComic.ind == null && nextEnabled) {
-                    } else if(curComic.ind == null || !nextEnabled || curComic.ind.equals(maxInd) ||
-                              curComic.ind.equals(getMax())) {
-                        mViewPager.setCurrentItem(prevPos);
+                if(position > state.prevPos) {
+                    if(state.curComic.ind == null && nextEnabled) {
+                    } else if(state.curComic.ind == null || !nextEnabled || state.curComic.ind.equals(maxInd) ||
+                              state.curComic.ind.equals(getMax())) {
+                        mViewPager.setCurrentItem(state.prevPos);
                         return;
                     }
-                    prevComic.become(curComic);
-                    curComic.become(nextComic);
-                    nextComic.clear();
+                    state.prevComic.become(state.curComic);
+                    state.curComic.become(state.nextComic);
+                    state.nextComic.clear();
 
-                    newInd = prevComic.nextInd;
-                    if(curComic.loaded) {
-                        comicMap.put(curComic.nextInd, nextComic);
-                        loadComic(curComic.nextInd);
+                    newInd = state.prevComic.nextInd;
+                    if(state.curComic.loaded) {
+                        comicMap.put(state.curComic.nextInd, state.nextComic);
+                        loadComic(state.curComic.nextInd);
                     }
                     /* Load the previous comic. */
-                } else if(position < prevPos) {
-                    if(curComic.ind == null && prevEnabled) {
-                    } else if(curComic.ind == null || !prevEnabled || curComic.ind.equals(getFirstInd())) {
-                        mViewPager.setCurrentItem(prevPos);
+                } else if(position < state.prevPos) {
+                    if(state.curComic.ind == null && prevEnabled) {
+                    } else if(state.curComic.ind == null || !prevEnabled || state.curComic.ind.equals(getFirstInd())) {
+                        mViewPager.setCurrentItem(state.prevPos);
                         return;
                     }
-                    nextComic.become(curComic);
-                    curComic.become(prevComic);
-                    prevComic.clear();
+                    state.nextComic.become(state.curComic);
+                    state.curComic.become(state.prevComic);
+                    state.prevComic.clear();
 
-                    newInd = nextComic.prevInd;
-                    if(curComic.loaded && !curComic.ind.equals(getFirstInd())) {
-                        comicMap.put(curComic.prevInd, prevComic);
-                        loadComic(curComic.prevInd);
+                    newInd = state.nextComic.prevInd;
+                    if(state.curComic.loaded && !state.curComic.ind.equals(getFirstInd())) {
+                        comicMap.put(state.curComic.prevInd, state.prevComic);
+                        loadComic(state.curComic.prevInd);
                     }
                 }
                 removeError();
                 prevEnabled = true; nextEnabled = true;
-                comicMap.put(newInd, curComic);
+                comicMap.put(newInd, state.curComic);
                 if(loadingInds.contains(newInd)) {
                     showLoadingDialog();
                     errorInd = newInd;
-                } else if(!curComic.loaded) {
+                } else if(!state.curComic.loaded) {
                     showLoadingDialog();
                     loadComic(newInd);
                     errorInd = newInd;
                 } else {
-                    mReaderPagerAdapter.getFragment(mViewPager.getCurrentItem()).setComic(curComic, mViewPager);
+                    mReaderPagerAdapter.getFragment(mViewPager.getCurrentItem()).setComic(state.curComic, mViewPager);
                 }
-                prevPos = position;
+                state.prevPos = position;
             }
         };
 
@@ -421,7 +416,7 @@ public class Reader extends FragmentActivity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.dismiss();
-                    handleComicCancel();
+                    state.handleComicCancel();
                 }
             });
         loadingDialog.show();
@@ -430,8 +425,8 @@ public class Reader extends FragmentActivity {
     /* Handles a click of the prev button. */
     protected OnClickListener prevListener = new OnClickListener() {
             public void onClick(View v) {
-                if(prevEnabled && (curComic.ind != null) && !curComic.ind.equals(getFirstInd())) {
-                    mViewPager.setCurrentItem(prevPos - 1);
+                if(prevEnabled && (state.curComic.ind != null) && !state.curComic.ind.equals(getFirstInd())) {
+                    mViewPager.setCurrentItem(state.prevPos - 1);
                 }
             }
         };
@@ -439,9 +434,9 @@ public class Reader extends FragmentActivity {
     /* Handles a click of the prev button. */
     protected OnClickListener nextListener = new OnClickListener() {
             public void onClick(View v) {
-		String ind = curComic.getInd();
+		String ind = state.curComic.getInd();
                 if(nextEnabled && ind != null && !ind.equals(maxInd) && !ind.equals(max)) {
-                    mViewPager.setCurrentItem(prevPos + 1);
+                    mViewPager.setCurrentItem(state.prevPos + 1);
                 }
             }
         };
@@ -456,14 +451,6 @@ public class Reader extends FragmentActivity {
     /* Placeholder for method */
     public String handleRawPage(Comic c, String page) throws Exception {
         throw new Exception("Error - unimplemented.");
-    }
-
-    /* Occurs when the user cancels a loading comic.
-       Should re-display whatever was currently showing */
-    public void handleComicCancel() {
-        if(curComic.image == null) {
-            handleComicError(new Comic(curComic));
-        }
     }
 
     /* Shows a dialog for selecting a comic by entering a number. */
@@ -484,25 +471,25 @@ public class Reader extends FragmentActivity {
     public void saveToSD() {
         if(!isStorageWritable()) {
             showDialog("Warning", "SD card not writable or could not be found.");
-        } else if(curComic.image != null) {
+        } else if(state.curComic.image != null) {
             try {
                 String path = sdPath + "/comics/" + title + "/";
                 File dir = new File(path);
                 if(!dir.exists())
                     dir.mkdirs();
                 String saveTitle;
-                if(curComic.imgTitle != null) {
-                    saveTitle = curComic.imgTitle;
-                } else if(curComic.ind.equals(maxInd) || curComic.ind.equals(getMax())) {
+                if(state.curComic.imgTitle != null) {
+                    saveTitle = state.curComic.imgTitle;
+                } else if(state.curComic.ind.equals(maxInd) || state.curComic.ind.equals(getMax())) {
                     saveTitle = (maxInd == null) ? Integer.toString(maxNum) : maxInd;
                 } else {
-                    saveTitle = curComic.ind;
+                    saveTitle = state.curComic.ind;
                 }
                 DebugLog.v("comic", dir+" "+saveTitle + ".png");
                 File file = new File(dir, saveTitle + ".png");
                 FileOutputStream fOut = new FileOutputStream(file);
 
-                curComic.image.compress(Bitmap.CompressFormat.PNG, 85, fOut);
+                state.curComic.image.compress(Bitmap.CompressFormat.PNG, 85, fOut);
                 fOut.flush();
                 fOut.close();
             } catch(Exception e) {
@@ -577,7 +564,7 @@ public class Reader extends FragmentActivity {
     public void setMaxIndex(String ind) {
         if(maxInd == null) {
             this.maxInd = ind;
-            curComic.ind = ind;
+            state.curComic.ind = ind;
         }
     }
 
@@ -594,24 +581,24 @@ public class Reader extends FragmentActivity {
 
     /* Sets the next index of the comic being grabbed. */
     public void setNextInd(String next) {
-        curComic.nextInd = next;
+        state.curComic.nextInd = next;
     }
 
     /* Sets the previous index of the comic being grabbed. */
     public void setPrevInd(String prev) {
-        curComic.prevInd = prev;
+        state.curComic.prevInd = prev;
     }
 
     /* Handles a click of the first button. */
     protected OnClickListener firstListener = new OnClickListener() {
             public void onClick(View v) {
 		String firstInd = getFirstInd();
-                if(curComic.ind == null) {
+                if(state.curComic.ind == null) {
                     showDialog("Error", "Cannot connect to the internet.");
-                } else if(curComic.ind == null || !curComic.ind.equals(firstInd)) {
+                } else if(state.curComic.ind == null || !state.curComic.ind.equals(firstInd)) {
                     clearComics();
                     clearVisible();
-                    comicMap.put(firstInd, curComic);
+                    comicMap.put(firstInd, state.curComic);
                     loadComic(firstInd);
                     errorInd = firstInd;
                     showLoadingDialog();
@@ -622,9 +609,9 @@ public class Reader extends FragmentActivity {
     /* Handles a click of the last button. */
     protected OnClickListener lastListener = new OnClickListener() {
             public void onClick(View v) {
-                if(curComic.ind == null) {
+                if(state.curComic.ind == null) {
                     showDialog("Error", "Cannot connect to the internet.");
-                } else if(curComic.ind == null || !curComic.ind.equals(maxInd)) {
+                } else if(state.curComic.ind == null || !state.curComic.ind.equals(maxInd)) {
                     clearComics();
                     clearVisible();
                     loadLast(getMax());
@@ -639,9 +626,9 @@ public class Reader extends FragmentActivity {
 
     /* Clears the current and cached comics. */
     public void clearComics() {
-        prevComic.clear();
-        curComic.clear();
-        nextComic.clear();
+        state.prevComic.clear();
+        state.curComic.clear();
+        state.nextComic.clear();
         comicMap.clear();
         loadingInds.clear();
     }
@@ -661,7 +648,7 @@ public class Reader extends FragmentActivity {
 
                     clearComics();
                     clearVisible();
-                    comicMap.put(ind, curComic);
+                    comicMap.put(ind, state.curComic);
                     loadComic(ind);
                     errorInd = ind;
                     showLoadingDialog();
@@ -691,19 +678,19 @@ public class Reader extends FragmentActivity {
     protected OnClickListener reloadListener = new OnClickListener() {
             public void onClick(View v) {
                 removeError();
-                if(curComic.loaded) return;
+                if(state.curComic.loaded) return;
                 if(errorInd != null) {
-                    comicMap.put(errorInd, curComic);
+                    comicMap.put(errorInd, state.curComic);
                     loadComic(errorInd);
                     showLoadingDialog();
-                } else if(curComic.ind == null || curComic.ind.equals(getMax())) {
-                    curComic.ind = maxInd;
+                } else if(state.curComic.ind == null || state.curComic.ind.equals(getMax())) {
+                    state.curComic.ind = maxInd;
                     clearComics();
                     clearVisible();
                     loadLast(getMax());
                 } else {
-                    comicMap.put(curComic.ind, curComic);
-                    loadComic(curComic.ind);
+                    comicMap.put(state.curComic.ind, state.curComic);
+                    loadComic(state.curComic.ind);
                     showLoadingDialog();
                 }
             }
@@ -718,7 +705,7 @@ public class Reader extends FragmentActivity {
                     String newInd = getIndFromNum(index);
                     clearComics();
                     clearVisible();
-                    comicMap.put(newInd, curComic);
+                    comicMap.put(newInd, state.curComic);
                     loadComic(newInd);
                     errorInd = newInd;
                     showLoadingDialog();

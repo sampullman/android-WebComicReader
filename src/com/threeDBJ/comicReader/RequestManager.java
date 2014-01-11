@@ -24,6 +24,8 @@ import java.net.MalformedURLException;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import com.threeDBJ.comicReader.ComicReaderApp.ComicState;
+
 public class RequestManager {
 
     Pattern unichar = Pattern.compile("&#[0-9]+");
@@ -161,10 +163,12 @@ public class RequestManager {
 
     /* Background task for grabbing a comic. */
    class GetComicTask extends AsyncTask<Comic,Integer,Comic> {
-        protected Reader context;
+        Reader context;
+	ComicState state;
 
         public GetComicTask(Reader context) {
             this.context = context;
+	    this.state = context.state;
         }
 
         protected void onPreExecute() {
@@ -180,6 +184,7 @@ public class RequestManager {
                     comic.setError(true);
                 } else {
                     imgUrl = this.context.handleRawPage(comic, page);
+		    this.context = null; // Hack so that the Reader is cleaned up quickly on orientation change
 		    if(imgUrl == null) {
 			DebugLog.e("cmreader", "url: "+comic.getInd());
 		    } else {
@@ -197,9 +202,9 @@ public class RequestManager {
         protected void onPostExecute (Comic comic) {
             running -= 1;
             if(comic.getError()) {
-                context.handleComicError(comic);
+                state.comicError(comic);
             } else {
-                context.notifyComicLoaded(comic);
+                state.comicLoaded(comic);
             }
         }
 

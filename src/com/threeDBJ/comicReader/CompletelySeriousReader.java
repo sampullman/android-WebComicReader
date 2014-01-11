@@ -89,7 +89,7 @@ public class CompletelySeriousReader extends Reader {
 
     protected OnClickListener altListener = new OnClickListener() {
             public void onClick(View v) {
-		dispAltText(curComic.altData, "Completely Serious Hover Text");
+		dispAltText(state.curComic.altData, "Completely Serious Hover Text");
             }
         };
 

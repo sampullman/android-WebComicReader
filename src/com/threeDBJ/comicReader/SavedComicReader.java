@@ -52,12 +52,8 @@ public class SavedComicReader extends FragmentActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Configuration config = this.getResources().getConfiguration();
-        if(config.orientation == 1) {
-            setContentView(R.layout.reader);
-        } else if(config.orientation == 2) {
-            setContentView(R.layout.reader_wide);
-        }
+        setContentView(R.layout.reader);
+
         mViewPager = (MyViewPager) findViewById(R.id.reader_pager);
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         setSwipe(settings.getBoolean("swipe", false));
