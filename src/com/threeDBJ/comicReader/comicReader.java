@@ -11,13 +11,17 @@ import android.content.Intent;
 
 import 	android.support.v4.app.FragmentActivity;
 
+import com.threeDBJ.comicReader.ComicReaderApp.ComicState;
+
 public class comicReader extends FragmentActivity {
+    ComicState state;
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.title);
+	state = ((ComicReaderApp)getApplicationContext()).getComicState();
     }
 
     @Override
@@ -28,6 +32,12 @@ public class comicReader extends FragmentActivity {
             showDialog("Warning", "SD card not readable or could not be found.");
         }
 
+    }
+
+    @Override
+    public void onResume() {
+	super.onResume();
+	state.clearComics();
     }
 
     public void showDialog(String title, String text) {

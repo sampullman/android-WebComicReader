@@ -84,13 +84,13 @@ public class AbstruseGooseReader extends Reader {
 
     protected OnClickListener altListener = new OnClickListener() {
             public void onClick(View v) {
-                dispAltText(state.curComic.altData, "Abstruse Goose Hover Text");
+                dispAltText(getCurComic().altData, "Abstruse Goose Hover Text");
             }
         };
 
     protected OnClickListener randomListener = new OnClickListener() {
             public void onClick(View v) {
-                clearComics();
+                state.clearComics();
                 clearVisible();
                 loadInitial(max + "random.php");
             }

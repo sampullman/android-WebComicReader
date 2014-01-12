@@ -13,12 +13,15 @@ import android.widget.TextView;
 
 public class PageFragment extends Fragment {
     ViewGroup vg;
+    Bitmap image;
 
     public static PageFragment newInstance(Bitmap image) {
+	DebugLog.e("Made PageFragment");
 	PageFragment pageFragment = new PageFragment();
-	Bundle bundle = new Bundle();
-	bundle.putParcelable("image", image);
-	pageFragment.setArguments(bundle);
+	//Bundle bundle = new Bundle();
+	//bundle.putParcelable("image", image);
+	//pageFragment.setArguments(bundle);
+	pageFragment.image = image;
 	return pageFragment;
     }
 
@@ -26,16 +29,13 @@ public class PageFragment extends Fragment {
 	return newInstance(null);
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-	super.onCreate(savedInstanceState);
-    }
-
     public void setImage(Bitmap image, MyViewPager mvp) {
 	if(vg != null) {
 	    TouchImageView imageView = (TouchImageView) vg.findViewById(R.id.comic);
 	    imageView.setPager(mvp);
 	    imageView.setImageBitmap(image);
+	} else {
+	    DebugLog.e("Could not set image, view not inflated");
 	}
     }
 
@@ -83,13 +83,30 @@ public class PageFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(Bundle state) {
+	super.onCreate(state);
+	if(state != null) image = state.getParcelable("image");
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 	View view = inflater.inflate(R.layout.page_fragment, container, false);
 	vg = (ViewGroup) view;
-	Bitmap image = (Bitmap)getArguments().getParcelable("image");
 	if(image != null) {
+	    DebugLog.e("Page fragment created with bitmap");
 	    setImage(image, null);
+	    image = null;
 	}
 	return view;
+    }
+
+    @Override
+    public void onDestroy() {
+	super.onDestroy();
+    }
+
+    @Override
+    public void onPause() {
+	super.onPause();
     }
 }

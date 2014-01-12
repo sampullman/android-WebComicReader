@@ -50,7 +50,7 @@ public class FeelAfraidReader extends Reader {
 	if(mPrev.find()) {
 	    c.setPrevInd(mPrev.group(1));
 	    // TODO -- figure out better solution
-	    //if(c.curComic.prevInd.equals("75.php"))
+	    //if(getCurComic().prevInd.equals("75.php"))
 	    //c.setNextInd("77.php");
 	    /* Normal comic */
 	    if(mNext.find()) {

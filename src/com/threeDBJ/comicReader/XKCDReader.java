@@ -77,7 +77,7 @@ public class XKCDReader extends Reader {
 
     protected OnClickListener altListener = new OnClickListener() {
             public void onClick(View v) {
-                dispAltText(curComic.altData, "XKCD Hover Text");
+                dispAltText(getCurComic().altData, "XKCD Hover Text");
             }
         };
 

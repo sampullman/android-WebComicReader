@@ -92,8 +92,8 @@ public class SMBCReader extends Reader {
 
     protected OnClickListener altListener = new OnClickListener() {
             public void onClick(View v) {
-                if(curComic.altData != null) {
-                    dispAltImage(curComic.altData, "SMBC Red Button");
+                if(getCurComic().altData != null) {
+                    dispAltImage(getCurComic().altData, "SMBC Red Button");
                 } else {
                     dispAltText("No Red Button Available!", "SMBC Red Button");
                 }

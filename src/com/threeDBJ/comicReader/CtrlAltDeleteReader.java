@@ -89,7 +89,7 @@ public class CtrlAltDeleteReader extends Reader {
 
     protected OnClickListener randomListener = new OnClickListener() {
             public void onClick(View v) {
-		clearComics();
+		state.clearComics();
 		clearVisible();
 		loadInitial(base + "random");
             }

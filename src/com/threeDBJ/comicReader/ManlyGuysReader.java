@@ -95,7 +95,7 @@ public class ManlyGuysReader extends Reader {
 
     protected OnClickListener altListener = new OnClickListener() {
             public void onClick(View v) {
-                dispAltText(curComic.altData, "Manly Guys Hover Text");
+                dispAltText(getCurComic().altData, "Manly Guys Hover Text");
             }
         };
 

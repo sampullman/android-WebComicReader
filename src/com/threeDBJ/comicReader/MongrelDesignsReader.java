@@ -98,7 +98,7 @@ public class MongrelDesignsReader extends Reader {
 
     protected OnClickListener altListener = new OnClickListener() {
             public void onClick(View v) {
-                dispAltText(curComic.altData, "Mongrel Designs Hover Text");
+                dispAltText(getCurComic().altData, "Mongrel Designs Hover Text");
             }
         };
 

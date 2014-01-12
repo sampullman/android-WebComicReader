@@ -84,7 +84,7 @@ public class ButtersafeReader extends Reader {
 
     protected OnClickListener randomListener = new OnClickListener() {
             public void onClick(View v) {
-		clearComics();
+		state.clearComics();
 		clearVisible();
 		loadInitial(randComic);
             }

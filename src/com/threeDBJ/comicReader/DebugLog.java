@@ -3,6 +3,7 @@ package com.threeDBJ.comicReader;
 import android.util.Log;
 
 public final class DebugLog {
+    static final String TAG = "webComicReader";
 
     private static boolean loggingEnabled = true;
 
@@ -83,6 +84,10 @@ public final class DebugLog {
             result = Log.w(tag, tr);
         }
         return result;
+    }
+
+    public static int e(String msg) {
+	return e(TAG, msg);
     }
 
     public static int e(String tag, String msg) {

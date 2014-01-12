@@ -89,13 +89,13 @@ public class CompletelySeriousReader extends Reader {
 
     protected OnClickListener altListener = new OnClickListener() {
             public void onClick(View v) {
-		dispAltText(state.curComic.altData, "Completely Serious Hover Text");
+		dispAltText(getCurComic().altData, "Completely Serious Hover Text");
             }
         };
 
     protected OnClickListener randomListener = new OnClickListener() {
             public void onClick(View v) {
-		clearComics();
+		state.clearComics();
 		clearVisible();
 		loadInitial(max + "/?randomcomic&nocache=1");
             }
