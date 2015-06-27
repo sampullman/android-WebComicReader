@@ -1,4 +1,4 @@
-package com.threeDBJ.comicReader;
+package com.threeDBJ.comicReader.reader;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -6,13 +6,16 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.graphics.Bitmap;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-public class PennyArcadeReader extends Reader {
+import com.threeDBJ.comicReader.Comic;
+import com.threeDBJ.comicReader.DebugLog;
+import com.threeDBJ.comicReader.R;
+
+public class CtrlAltDeleteReader extends Reader {
 
     String altUrl;
     Pattern pImages, pPrev, pNext, pMax;
@@ -21,30 +24,29 @@ public class PennyArcadeReader extends Reader {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String prevPat = "<a class=\"btnPrev btn\" href=\"http://penny-arcade.com/comic/(.*?)\" title=\"Previous\">Previous</a>";
-        String nextPat = "<a class=\"btnNext btn\" href=\"http://penny-arcade.com/comic/(.*?)\" title=\"Next\">Next</a>";
-        String imgPat = "<img src=\"(http://art.penny-arcade.com/photos/(.*?))\" alt=\"";
-        String maxPat = "<input type=\"hidden\" name=\"return_to\" value=\"http://penny-arcade[.]com/comic/(.*?)#added\" />";
+        String prevPat = "href=\"/cad/([0-9]*?)\" class=\"nav-back\">Back</a>";
+        String nextPat = "href=\"/cad/([0-9]*?)\" class=\"nav-next\">Next</a>";
+        String imgPat = "src=\"(http://v\\.cdn\\.cad-comic\\.com/comics/(.*?))\" alt=";
+        String maxPat = "addthis:url=\"http://www[.]cad-comic[.]com/cad/(.*?)\">";
 
         this.pImages = Pattern.compile(imgPat,Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pPrev = Pattern.compile(prevPat,Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pNext = Pattern.compile(nextPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pMax = Pattern.compile(maxPat, Pattern.DOTALL | Pattern.UNIX_LINES);
 
-        this.base = "http://penny-arcade.com/comic/";
-        this.max = "http://penny-arcade.com/comic/";
+        this.base = "http://www.cad-comic.com/cad/";
+        this.max = "http://www.cad-comic.com/cad/";
 
-        this.title = "PennyArcade";
-        this.shortTitle = "Penny";
-        this.storeUrl = "http://store.penny-arcade.com/";
+        this.firstInd = "20021023";
 
-        this.firstInd = "1998/11/18";
+        this.title = "CtrlAltDelete";
+        this.shortTitle = "Ctrl";
+        this.storeUrl = "http://www.splitreason.com/cad-comic/";
+
         Button b = (Button) findViewById(R.id.comic_random);
-        LinearLayout nav = (LinearLayout) findViewById(R.id.nav_bar);
-        nav.removeView(b);
+        b.setOnClickListener(randomListener);
 
         loadInitial(max);
-
     }
 
     public String handleRawPage(Comic c, String page) {
@@ -56,24 +58,24 @@ public class PennyArcadeReader extends Reader {
         String imgUrl = mImages.group(1);
         String imgTitle = mImages.group(2);
         int dotInd = imgTitle.indexOf(".");
-        int slashInd = imgTitle.lastIndexOf("/");
-        if(dotInd != -1) {
-            imgTitle = imgTitle.substring(slashInd+1, dotInd);
-        }
+        if(dotInd != -1)
+            imgTitle = imgTitle.substring(0, dotInd);
         c.setImageTitle(imgTitle);
+
         if(mPrev.find()) {
             c.setPrevInd(mPrev.group(1));
             /* Normal comic */
             if(mNext.find()) {
-                if(mNext.group(1).equals("") && !haveMax()) {
-                    Matcher mMax = pMax.matcher(page);
-                    mMax.find();
-                    setMaxIndex(mMax.group(1));
-                } else {
+                if(mNext.group(1).equals(""))
+                    c.setNextInd(maxInd);
+                else
                     c.setNextInd(mNext.group(1));
-                }
+                /* Last comic */
+            } else {
+                Matcher mMax = pMax.matcher(page);
+                mMax.find();
+                setMaxIndex(mMax.group(1));
             }
-            /* No easy way to detect last comic */
             /* First comic */
         } else {
             if(mNext.find(1)) {
@@ -82,7 +84,6 @@ public class PennyArcadeReader extends Reader {
                 /* Anomaly, this should not happen */
             }
         }
-        DebugLog.e("ahmmmh", "max: "+maxInd);
         return imgUrl;
     }
 

@@ -34,6 +34,10 @@ public class Comic {
         return ind;
     }
 
+    public void setInd(String ind) {
+        this.ind = ind;
+    }
+
     public Bitmap getComic() {
         return image;
     }
@@ -46,16 +50,32 @@ public class Comic {
         this.nextInd = ind;
     }
 
+    public String getNextInd() {
+        return this.nextInd;
+    }
+
     public void setPrevInd(String ind) {
         this.prevInd = ind;
+    }
+
+    public String getPrevInd() {
+        return this.prevInd;
     }
 
     public void setAlt(String alt) {
         this.altData = alt;
     }
 
+    public String getAlt() {
+        return this.altData;
+    }
+
     public void setImageTitle(String title) {
         this.imgTitle = title;
+    }
+
+    public String getImageTitle() {
+        return this.imgTitle;
     }
 
     public boolean getError() {

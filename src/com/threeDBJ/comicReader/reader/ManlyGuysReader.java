@@ -1,4 +1,4 @@
-package com.threeDBJ.comicReader;
+package com.threeDBJ.comicReader.reader;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -11,6 +11,10 @@ import android.graphics.Bitmap;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+
+import com.threeDBJ.comicReader.Comic;
+import com.threeDBJ.comicReader.DebugLog;
+import com.threeDBJ.comicReader.R;
 
 public class ManlyGuysReader extends Reader {
 
@@ -62,7 +66,7 @@ public class ManlyGuysReader extends Reader {
 
         if(mImages.groupCount() == 2) {
             c.setAlt( mImages.group(2));
-            DebugLog.e("comic", c.altData+"");
+            DebugLog.e("comic", c.getAlt()+"");
         } else {
             c.setAlt(null);
         }
@@ -72,7 +76,7 @@ public class ManlyGuysReader extends Reader {
             c.setPrevInd(mPrev.group(1));
             /* Normal comic */
             if(mNext.find()) {
-            DebugLog.e("comic", "next: "+mPrev.group(1));
+                DebugLog.e("comic", "next: "+mPrev.group(1));
                 c.setNextInd(mNext.group(1));
                 /* Last comic */
             } else {
@@ -95,7 +99,7 @@ public class ManlyGuysReader extends Reader {
 
     protected OnClickListener altListener = new OnClickListener() {
             public void onClick(View v) {
-                dispAltText(getCurComic().altData, "Manly Guys Hover Text");
+                dispAltText(getCurComic().getAlt(), "Manly Guys Hover Text");
             }
         };
 

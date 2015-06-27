@@ -1,4 +1,4 @@
-package com.threeDBJ.comicReader;
+package com.threeDBJ.comicReader.reader;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -11,31 +11,37 @@ import android.graphics.Bitmap;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-public class AbstruseGooseReader extends Reader {
+import com.threeDBJ.comicReader.Comic;
+import com.threeDBJ.comicReader.DebugLog;
+import com.threeDBJ.comicReader.R;
 
-    Pattern pImages, pPrev, pNext, pCur;
+public class CompletelySeriousReader extends Reader {
+
+    Pattern pImages, pPrev, pNext, pMax;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        String prevPat = "First.*?<a href=\"http://abstrusegoose.com/(.*?)\">.*?Previous</a>";
-        String nextPat = "Random.*?<a href=\"http://abstrusegoose.com/(.*?)\">Next";
-        String imgPat = "<img.*?src=\"(http://abstrusegoose.com/strips/.*?)\".*?(?:(?:title=\"(.*?)\" />)|(?: /></p>)|(?: /></a>))";
-        String curPat = "<h1 class=\"storytitle\"><a href=\"http://abstrusegoose.com/(.*?)\">";
+        String prevPat = "First</a>.*?<a href=\"http://completelyseriouscomics.com/.p=(.*?)\" class=\"navi navi-prev\"";
+        String nextPat = "<td class=\"comic_navi_right\">.*?<a href=\"http://completelyseriouscomics.com/.p=(.*?)\" class=\"navi navi-next\"";
+        String imgPat = "<img src=\"(http://completelyseriouscomics.com/comics/.*?)\" alt=\"(.*?)\"";
+        // Comic title could be .*? group
+        String maxPat = "<h2 class=\"post-title\"><a href=\"http://completelyseriouscomics.com/.p=([0-9]+)\">.*?</a></h2>";
 
         this.pPrev = Pattern.compile(prevPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pNext = Pattern.compile(nextPat, Pattern.DOTALL | Pattern.UNIX_LINES);
-        this.pCur = Pattern.compile(curPat, Pattern.DOTALL | Pattern.UNIX_LINES);
+        this.pMax = Pattern.compile(maxPat, Pattern.DOTALL | Pattern.UNIX_LINES);
 
         this.pImages = Pattern.compile(imgPat, Pattern.DOTALL | Pattern.UNIX_LINES);
 
-        this.base = "http://abstrusegoose.com/";
-        this.max = "http://abstrusegoose.com/";
+        this.base = "http://completelyseriouscomics.com/?p=";
+        this.max = "http://completelyseriouscomics.com/";
+        this.firstInd = "6";
 
-        this.title = "Abstruse Goose";
-        this.shortTitle = "Abstruse";
-        this.storeUrl = "http://www.cafepress.com/abstrusegoose";
+        this.title = "Completely Serious";
+        this.shortTitle = "Completely";
+        this.storeUrl = "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=BAT2CLMHSCR36&lc=CA&currency_code=CAD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted";
 
         loadInitial(max);
     }
@@ -49,6 +55,7 @@ public class AbstruseGooseReader extends Reader {
         Matcher mImages = pImages.matcher(page);
         Matcher mPrev = pPrev.matcher(page);
         Matcher mNext = pNext.matcher(page);
+
         boolean success = mImages.find();
         String imgUrl = mImages.group(1);
         if(mImages.groupCount() == 2) {
@@ -60,15 +67,17 @@ public class AbstruseGooseReader extends Reader {
         if(mPrev.find()) {
             c.setPrevInd(mPrev.group(1));
             /* Normal comic */
-            if(mNext.find() && mNext.group(1) != null) {
+            if(mNext.find()) {
                 c.setNextInd(mNext.group(1));
                 /* Last comic */
             } else {
-                Matcher mCur = pCur.matcher(page);
-                if(mCur.find()) {
-                    String temp = mCur.group(1);
-                    setMaxIndex(temp);
-                    setMaxNum(temp);
+                if(!haveMax()) {
+                    Matcher mMax = pMax.matcher(page);
+                    if(mMax.find()) {
+                        String maxInd = mMax.group(1);
+                        setMaxIndex(maxInd);
+                        setMaxNum(maxInd);
+                    }
                 }
             }
             /* First comic */
@@ -84,7 +93,7 @@ public class AbstruseGooseReader extends Reader {
 
     protected OnClickListener altListener = new OnClickListener() {
             public void onClick(View v) {
-                dispAltText(getCurComic().altData, "Abstruse Goose Hover Text");
+                dispAltText(getCurComic().getAlt(), "Completely Serious Hover Text");
             }
         };
 
@@ -92,7 +101,7 @@ public class AbstruseGooseReader extends Reader {
             public void onClick(View v) {
                 state.clearComics();
                 clearVisible();
-                loadInitial(max + "random.php");
+                loadInitial(max + "/?randomcomic&nocache=1");
             }
         };
 

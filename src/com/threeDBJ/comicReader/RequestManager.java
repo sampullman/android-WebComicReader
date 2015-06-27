@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 import com.threeDBJ.comicReader.ComicReaderApp.ComicState;
+import com.threeDBJ.comicReader.reader.Reader;
 
 public class RequestManager {
 
@@ -162,13 +163,13 @@ public class RequestManager {
     }
 
     /* Background task for grabbing a comic. */
-   class GetComicTask extends AsyncTask<Comic,Integer,Comic> {
+    class GetComicTask extends AsyncTask<Comic,Integer,Comic> {
         Reader context;
-	ComicState state;
+        ComicState state;
 
         public GetComicTask(Reader context) {
             this.context = context;
-	    this.state = context.state;
+            this.state = context.getState();
         }
 
         protected void onPreExecute() {
@@ -184,15 +185,15 @@ public class RequestManager {
                     comic.setError(true);
                 } else {
                     imgUrl = this.context.handleRawPage(comic, page);
-		    this.context = null; // Hack so that the Reader is cleaned up quickly on orientation change
-		    if(imgUrl == null) {
-			DebugLog.e("cmreader", "url: "+comic.getInd());
-		    } else {
-			comic.setComic(retrieveImage(imgUrl));
-		    }
+                    this.context = null; // Hack so that the Reader is cleaned up quickly on orientation change
+                    if(imgUrl == null) {
+                        DebugLog.e("cmreader", "url: "+comic.getInd());
+                    } else {
+                        comic.setComic(retrieveImage(imgUrl));
+                    }
                 }
             } catch(Exception e) {
-		DebugLog.v("cmreader", "Comic error: "+e.getMessage());
+                DebugLog.v("cmreader", "Comic error: "+e.getMessage());
                 comic.setError(true);
             }
             return comic;

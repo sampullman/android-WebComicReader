@@ -1,4 +1,4 @@
-package com.threeDBJ.comicReader;
+package com.threeDBJ.comicReader.reader;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -11,37 +11,35 @@ import android.graphics.Bitmap;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-public class XKCDReader extends Reader {
+import com.threeDBJ.comicReader.Comic;
+import com.threeDBJ.comicReader.DebugLog;
+import com.threeDBJ.comicReader.R;
 
+public class PHDReader extends Reader {
+
+    String altUrl;
     Pattern pImages, pPrev, pNext;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        String prevPat = "archive.php\\?comicid=([0-9]+).*?prev_button.gif";
+        String nextPat = "<td align=\"left\" valign=\"top\"><a href=archive.php\\?comicid=([0-9]+).*?next_button.gif";
+        String imgPat = "src=(http://www.phdcomics.com/comics/archive/(.*?)\\.gif)";
 
-        String prevPat = "href=\"/([0-9]+)/\" accesskey=\"p\">";
-        String nextPat = "href=\"/([0-9]+)/\" accesskey=\"n\">";
-        String imgPat = "\"(http://imgs.xkcd.com/comics/.*?)\" title=\"(.*?)\"";
-
-        this.pPrev = Pattern.compile(prevPat, Pattern.DOTALL | Pattern.UNIX_LINES);
+        this.pImages = Pattern.compile(imgPat,Pattern.DOTALL | Pattern.UNIX_LINES);
+        this.pPrev = Pattern.compile(prevPat,Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pNext = Pattern.compile(nextPat, Pattern.DOTALL | Pattern.UNIX_LINES);
 
-        this.pImages = Pattern.compile(imgPat, Pattern.DOTALL | Pattern.UNIX_LINES);
+        this.base = "http://www.phdcomics.com/comics/archive.php?comicid=";
+        this.max = "http://www.phdcomics.com/comics.php";
 
-        this.base = "http://xkcd.com/";
-        this.max = "http://xkcd.com/";
-
-        this.title = "XKCD";
+        this.title = "PHD";
         this.shortTitle = title;
-        this.storeUrl = "http://store.xkcd.com/";
+        this.storeUrl = "http://www.phdcomics.com/store/mojostore.php";
 
-        if(getLastCustomNonConfigurationInstance() == null)
-            loadInitial(max);
-    }
+        loadInitial(max);
 
-    public void UISetup() {
-        super.UISetup();
-        setAltListener(altListener);
     }
 
     public String handleRawPage(Comic c, String page) {
@@ -51,7 +49,6 @@ public class XKCDReader extends Reader {
 
         mImages.find();
         String imgUrl = mImages.group(1);
-        c.setAlt(mImages.group(2));
 
         if(mPrev.find()) {
             c.setPrevInd(mPrev.group(1));
@@ -74,11 +71,5 @@ public class XKCDReader extends Reader {
         }
         return imgUrl;
     }
-
-    protected OnClickListener altListener = new OnClickListener() {
-            public void onClick(View v) {
-                dispAltText(getCurComic().altData, "XKCD Hover Text");
-            }
-        };
 
 }

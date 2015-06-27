@@ -46,4 +46,8 @@ public class CachedComic extends Comic {
         loaded = false;
     }
 
+    public boolean isLoaded() {
+        return this.loaded;
+    }
+
 }

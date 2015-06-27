@@ -1,4 +1,4 @@
-package com.threeDBJ.comicReader;
+package com.threeDBJ.comicReader.reader;
 
 import android.os.Bundle;
 
@@ -7,6 +7,10 @@ import android.view.View.OnClickListener;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+
+import com.threeDBJ.comicReader.Comic;
+import com.threeDBJ.comicReader.DebugLog;
+import com.threeDBJ.comicReader.R;
 
 public class QuestionableContentReader extends Reader {
     public static String prevPat = "<a href=\"view.php[?]comic=([0-9]+)\">Previous</a>";
@@ -19,7 +23,7 @@ public class QuestionableContentReader extends Reader {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-	init();
+        init();
         loadInitial(getMax());
     }
 
@@ -34,15 +38,15 @@ public class QuestionableContentReader extends Reader {
     }
 
     public String getBase() {
-	return comicBase;
+        return comicBase;
     }
 
     public String getMax() {
-	return comicMax;
+        return comicMax;
     }
 
     public String getFirstInd() {
-	return comicFirstInd;
+        return comicFirstInd;
     }
 
     public String handleRawPage(Comic c, String page) {
@@ -71,4 +75,3 @@ public class QuestionableContentReader extends Reader {
         return imgUrl;
     }
 }
-

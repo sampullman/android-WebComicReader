@@ -21,7 +21,7 @@ public class comicReader extends FragmentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.title);
-	state = ((ComicReaderApp)getApplicationContext()).getComicState();
+        state = ((ComicReaderApp)getApplicationContext()).getComicState();
     }
 
     @Override
@@ -36,8 +36,8 @@ public class comicReader extends FragmentActivity {
 
     @Override
     public void onResume() {
-	super.onResume();
-	state.clearComics();
+        super.onResume();
+        state.clearComics();
     }
 
     public void showDialog(String title, String text) {

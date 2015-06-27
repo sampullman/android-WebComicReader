@@ -87,7 +87,7 @@ public final class DebugLog {
     }
 
     public static int e(String msg) {
-	return e(TAG, msg);
+        return e(TAG, msg);
     }
 
     public static int e(String tag, String msg) {

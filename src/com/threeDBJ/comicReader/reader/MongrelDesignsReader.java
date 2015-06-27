@@ -1,4 +1,4 @@
-package com.threeDBJ.comicReader;
+package com.threeDBJ.comicReader.reader;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -11,6 +11,10 @@ import android.graphics.Bitmap;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+
+import com.threeDBJ.comicReader.Comic;
+import com.threeDBJ.comicReader.DebugLog;
+import com.threeDBJ.comicReader.R;
 
 public class MongrelDesignsReader extends Reader {
 
@@ -98,7 +102,7 @@ public class MongrelDesignsReader extends Reader {
 
     protected OnClickListener altListener = new OnClickListener() {
             public void onClick(View v) {
-                dispAltText(getCurComic().altData, "Mongrel Designs Hover Text");
+                dispAltText(getCurComic().getAlt(), "Mongrel Designs Hover Text");
             }
         };
 
