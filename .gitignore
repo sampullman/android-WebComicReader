@@ -17,3 +17,7 @@ local.properties
 
 # Some built application files
 *.ap_
+
+# Mac and windows folder files
+desktop.ini
+.DS_Store
