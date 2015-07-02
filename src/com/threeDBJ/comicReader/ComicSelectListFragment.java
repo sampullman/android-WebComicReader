@@ -9,6 +9,7 @@ import android.widget.ListView;
 import android.support.v4.app.ListFragment;
 
 import com.threeDBJ.comicReader.ComicArrayAdapter.ComicListClicker;
+import com.threeDBJ.comicReader.reader.*;
 
 public class ComicSelectListFragment extends ListFragment implements ComicListClicker {
     public static final String[] comicTitles =

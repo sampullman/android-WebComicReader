@@ -145,6 +145,10 @@ public class Reader extends FragmentActivity {
         */
     }
 
+    public MyViewPager getViewPager() {
+        return this.mViewPager;
+    }
+
     public ComicState getState() {
         return this.state;
     }

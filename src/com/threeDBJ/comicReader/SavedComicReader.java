@@ -28,6 +28,8 @@ import android.support.v4.app.FragmentPagerAdapter;
 import java.util.Random;
 import java.io.File;
 
+import com.threeDBJ.comicReader.reader.Reader;
+
 public class SavedComicReader extends FragmentActivity {
 
     public static final String PREFS_NAME = "ComicPrefsFile";
