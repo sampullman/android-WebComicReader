@@ -4,17 +4,9 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
 
-import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.ActivityManager;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.pm.ActivityInfo;
@@ -22,19 +14,31 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.text.Spanned;
-
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
-import android.view.Gravity;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.view.LayoutInflater;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+
+import static butterknife.ButterKnife.findById;
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 import java.io.FileOutputStream;
 import java.io.File;
@@ -58,6 +62,8 @@ public class Reader extends FragmentActivity {
     public static final String PREFS_NAME = "ComicPrefsFile";
     ComicReaderApp app;
     ComicState state;
+    @Bind(R.id.reader_pager) MyViewPager mViewPager;
+    @Bind(R.id.comic_alt) Button altButton;
 
     String prevPat, nextPat, imgPat, base, max, errorInd,
         firstInd="1", maxInd, storeUrl,	sdPath, title, shortTitle;
@@ -77,7 +83,6 @@ public class Reader extends FragmentActivity {
     boolean firstRun=false, error=false, swipe=false,
         nextEnabled=true, prevEnabled=false, loadLastViewed;
 
-    MyViewPager mViewPager;
     ReaderPagerAdapter mReaderPagerAdapter;
 
     RequestManager rm;
@@ -95,6 +100,7 @@ public class Reader extends FragmentActivity {
         this.aboutHtml = Html.fromHtml(aboutText);
 
         setContentView(R.layout.reader);
+        ButterKnife.bind(this);
 
         sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
         this.UISetup();
@@ -115,22 +121,8 @@ public class Reader extends FragmentActivity {
 
     /* Set up click listeners and initialize the view pager */
     public void UISetup() {
-        Button b = (Button) findViewById(R.id.comic_first);
-        b.setOnClickListener(firstListener);
-        b = (Button) findViewById(R.id.comic_prev);
-        b.setOnClickListener(prevListener);
-        b = (Button) findViewById(R.id.comic_last);
-        b.setOnClickListener(lastListener);
-        b = (Button) findViewById(R.id.comic_next);
-        b.setOnClickListener(nextListener);
-        b = (Button) findViewById(R.id.comic_random);
-        b.setOnClickListener(randomListener);
-        b = (Button) findViewById(R.id.comic_store);
-        b.setOnClickListener(storeListener);
-        b = (Button) findViewById(R.id.comic_alt);
-        b.setVisibility(View.GONE);
+        altButton.setVisibility(View.GONE);
         firstRun = true;
-        mViewPager = (MyViewPager) findViewById(R.id.reader_pager);
         mReaderPagerAdapter = new ReaderPagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mReaderPagerAdapter);
         mViewPager.setOffscreenPageLimit(1);
@@ -488,29 +480,26 @@ public class Reader extends FragmentActivity {
     }
 
     /* Handles a click of the prev button. */
-    protected OnClickListener prevListener = new OnClickListener() {
-            public void onClick(View v) {
-                if(prevEnabled && (state.curComic.getInd() != null) && !state.curComic.getInd().equals(getFirstInd())) {
-                    mViewPager.setCurrentItem(state.prevPos - 1);
-                }
-            }
-        };
+    @OnClick(R.id.comic_prev)
+    public void prevClicked() {
+        if(prevEnabled && (state.curComic.getInd() != null) && !state.curComic.getInd().equals(getFirstInd())) {
+            mViewPager.setCurrentItem(state.prevPos - 1);
+        }
+    }
 
     /* Handles a click of the prev button. */
-    protected OnClickListener nextListener = new OnClickListener() {
-            public void onClick(View v) {
-                String ind = state.curComic.getInd();
-                if(nextEnabled && ind != null && !ind.equals(maxInd) && !ind.equals(max)) {
-                    mViewPager.setCurrentItem(state.prevPos + 1);
-                }
-            }
-        };
+    @OnClick(R.id.comic_last)
+    public void lastClicked() {
+        String ind = state.curComic.getInd();
+        if(nextEnabled && ind != null && !ind.equals(maxInd) && !ind.equals(max)) {
+            mViewPager.setCurrentItem(state.prevPos + 1);
+        }
+    }
 
     /* Sets a listener for the alt text/image of a comic strip. */
     public void setAltListener(OnClickListener altListener) {
-        Button b = (Button) findViewById(R.id.comic_alt);
-        b.setVisibility(View.VISIBLE);
-        b.setOnClickListener(altListener);
+        altButton.setVisibility(View.VISIBLE);
+        altButton.setOnClickListener(altListener);
     }
 
     /* Placeholder for method */
@@ -655,34 +644,32 @@ public class Reader extends FragmentActivity {
     }
 
     /* Handles a click of the first button. */
-    protected OnClickListener firstListener = new OnClickListener() {
-            public void onClick(View v) {
-                String firstInd = getFirstInd();
-                if(state.curComic.getInd() == null) {
-                    showDialog("Error", "Cannot connect to the internet.");
-                } else if(state.curComic.getInd() == null || !state.curComic.getInd().equals(firstInd)) {
-                    state.clearComics();
-                    clearVisible();
-                    state.comicMap.put(firstInd, state.curComic);
-                    loadComic(firstInd);
-                    errorInd = firstInd;
-                    showLoadingDialog();
-                }
-            }
-        };
+    @OnClick(R.id.comic_first)
+    public void firstClicked() {
+        String firstInd = getFirstInd();
+        if(state.curComic.getInd() == null) {
+            showDialog("Error", "Cannot connect to the internet.");
+        } else if(state.curComic.getInd() == null || !state.curComic.getInd().equals(firstInd)) {
+            state.clearComics();
+            clearVisible();
+            state.comicMap.put(firstInd, state.curComic);
+            loadComic(firstInd);
+            errorInd = firstInd;
+            showLoadingDialog();
+        }
+    }
 
     /* Handles a click of the last button. */
-    protected OnClickListener lastListener = new OnClickListener() {
-            public void onClick(View v) {
-                if(state.curComic.getInd() == null) {
-                    showDialog("Error", "Cannot connect to the internet.");
-                } else if(state.curComic.getInd() == null || !state.curComic.getInd().equals(maxInd)) {
-                    state.clearComics();
-                    clearVisible();
-                    loadLast(getMax());
-                }
-            }
-        };
+    @OnClick(R.id.comic_last)
+    public void lastClicked(View v) {
+        if(state.curComic.getInd() == null) {
+            showDialog("Error", "Cannot connect to the internet.");
+        } else if(state.curComic.getInd() == null || !state.curComic.getInd().equals(maxInd)) {
+            state.clearComics();
+            clearVisible();
+            loadLast(getMax());
+        }
+    }
 
     /* To be overidden if the comic id similar, but not exactly equal to the index. */
     public String getIndFromNum(String num) {
@@ -696,32 +683,30 @@ public class Reader extends FragmentActivity {
 
     /* General click listener for getting a random comic.
        To be used when the comic as integer indices that increment by 1. */
-    protected OnClickListener randomListener = new OnClickListener() {
-            public void onClick(View v) {
-                if(maxNum != -1) {
-                    int n = (int)(Math.random() * maxNum);
-                    String ind = getIndFromNum(Integer.toString(n));
+    @OnClick(R.id.comic_random)
+    public void randomClicked() {
+        if(maxNum != -1) {
+            int n = (int)(Math.random() * maxNum);
+            String ind = getIndFromNum(Integer.toString(n));
 
-                    state.clearComics();
-                    clearVisible();
-                    state.comicMap.put(ind, state.curComic);
-                    loadComic(ind);
-                    errorInd = ind;
-                    showLoadingDialog();
-                } else {
-                    showDialog("Error", "Could not resolve random comic.");
-                }
-            }
-        };
+            state.clearComics();
+            clearVisible();
+            state.comicMap.put(ind, state.curComic);
+            loadComic(ind);
+            errorInd = ind;
+            showLoadingDialog();
+        } else {
+            showDialog("Error", "Could not resolve random comic.");
+        }
+    }
 
     /* Listener for the store button. Opens a browser window with the strip's store. */
-    protected OnClickListener storeListener = new OnClickListener() {
-            public void onClick(View v) {
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse(storeUrl));
-                startActivity(i);
-            }
-        };
+    @OnClick(R.id.comic_store)
+    public void storeClicked(View v) {
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(storeUrl));
+        startActivity(i);
+    }
 
     public void removeError() {
         ViewGroup ll = (ViewGroup) findViewById(R.id.comic_wrapper);
