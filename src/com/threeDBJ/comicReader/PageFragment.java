@@ -13,7 +13,13 @@ import android.widget.TextView;
 
 import com.threeDBJ.comicReader.reader.Reader;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 public class PageFragment extends Fragment {
+    @Bind(R.id.comic) TouchImageView imageView;
+    @Bind(R.id.placeholder) TextView placeholder;
     ViewGroup vg;
     Bitmap image;
 
@@ -32,8 +38,7 @@ public class PageFragment extends Fragment {
     }
 
     public void setImage(Bitmap image, MyViewPager mvp) {
-        if(vg != null) {
-            TouchImageView imageView = (TouchImageView) vg.findViewById(R.id.comic);
+        if(imageView != null) {
             imageView.setPager(mvp);
             imageView.setImageBitmap(image);
         } else {
@@ -44,12 +49,11 @@ public class PageFragment extends Fragment {
     public void setComic(Comic comic, MyViewPager mvp) {
         Bitmap image = (comic == null) ? null : comic.getComic();
         setImage(image, mvp);
-        if(vg != null) {
-            TextView text = (TextView)vg.findViewById(R.id.placeholder);
+        if(placeholder != null) {
             if(comic != null && image == null) {
-                text.setVisibility(View.VISIBLE);
+                placeholder.setVisibility(View.VISIBLE);
                 final String url = ((Reader)getActivity()).getBase() + comic.getInd();
-                text.setOnClickListener(new OnClickListener() {
+                placeholder.setOnClickListener(new OnClickListener() {
                         public void onClick(View v) {
                             Intent i = new Intent(Intent.ACTION_VIEW);
 
@@ -58,8 +62,8 @@ public class PageFragment extends Fragment {
                         }
                     });
             } else {
-                text.setVisibility(View.INVISIBLE);
-                text.setOnClickListener(null);
+                placeholder.setVisibility(View.INVISIBLE);
+                placeholder.setOnClickListener(null);
             }
         }
     }
@@ -75,17 +79,14 @@ public class PageFragment extends Fragment {
     }
 
     public void clean() {
-        if(vg != null) {
-            TouchImageView comic = (TouchImageView) vg.findViewById(R.id.comic);
-            comic.setImageBitmap(null);
-            comic.setPager(null);
-            TextView text = (TextView)vg.findViewById(R.id.placeholder);
-            text.setVisibility(View.INVISIBLE);
+        if(imageView != null) {
+            imageView.setImageBitmap(null);
+            imageView.setPager(null);
+            placeholder.setVisibility(View.INVISIBLE);
         }
     }
 
-    @Override
-    public void onCreate(Bundle state) {
+    @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         if(state != null) image = state.getParcelable("image");
     }
@@ -93,6 +94,7 @@ public class PageFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.page_fragment, container, false);
+        ButterKnife.bind(this, view);
         vg = (ViewGroup) view;
         if(image != null) {
             DebugLog.e("Page fragment created with bitmap");
@@ -102,13 +104,8 @@ public class PageFragment extends Fragment {
         return view;
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
+    @Override public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
     }
 }

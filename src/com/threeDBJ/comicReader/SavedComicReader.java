@@ -18,6 +18,10 @@ import android.view.MenuItem;
 import android.view.MenuInflater;
 import android.net.Uri;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
@@ -36,11 +40,12 @@ public class SavedComicReader extends FragmentActivity {
 
     File[] images;
     int cur, storeIndex;
-    Random rand;
+    Random rand = new Random();
     String sdPath, title;
     boolean swipe = false;
 
-    MyViewPager mViewPager;
+    @Bind(R.id.reader_pager) MyViewPager mViewPager;
+    @Bind(R.id.comic_alt) Button altButton;
     ReaderPagerAdapter mReaderPagerAdapter;
 
     static final String[] storeUrls = new String[] {
@@ -55,17 +60,18 @@ public class SavedComicReader extends FragmentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.reader);
+        ButterKnife.bind(this);
 
-        mViewPager = (MyViewPager) findViewById(R.id.reader_pager);
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         setSwipe(settings.getBoolean("swipe", false));
 
         Intent intent = getIntent();
         this.title = intent.getExtras().getString("comic");
-        rand = new Random();
 
         this.storeIndex = intent.getExtras().getInt("index");
-        setupUI();
+        altButton.setVisibility(View.GONE);
+
+        sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
         if(Reader.isStorageWritable()) {
             String path = sdPath + "/comics/" + title + "/";
             DebugLog.e("comic", path);
@@ -158,77 +164,52 @@ public class SavedComicReader extends FragmentActivity {
         editor.commit();
     }
 
-    public OnClickListener prevListener = new OnClickListener() {
-            public void onClick(View v) {
-                if(cur > 0) {
-                    cur -= 1;
-                    mViewPager.setCurrentItem(cur);
-                }
-            }
-        };
+    @OnClick(R.id.comic_prev)
+    public void prevClick(View v) {
+        if(cur > 0) {
+            cur -= 1;
+            mViewPager.setCurrentItem(cur);
+        }
+    }
 
-    public OnClickListener nextListener = new OnClickListener() {
-            public void onClick(View v) {
-                if(cur < images.length - 1) {
-                    cur += 1;
-                    mViewPager.setCurrentItem(cur);
-                }
-            }
-        };
+    @OnClick(R.id.comic_next)
+    public void nextClicked(View v) {
+        if(cur < images.length - 1) {
+            cur += 1;
+            mViewPager.setCurrentItem(cur);
+        }
+    }
 
 
-    public OnClickListener firstListener = new OnClickListener() {
-            public void onClick(View v) {
-                mViewPager.setCurrentItem(0);
-            }
-        };
+    @OnClick(R.id.comic_first)
+    public void firstClicked(View v) {
+        mViewPager.setCurrentItem(0);
+    }
 
-    public OnClickListener lastListener = new OnClickListener() {
-            public void onClick(View v) {
-                mViewPager.setCurrentItem(images.length - 1);
-            }
-        };
+    @OnClick(R.id.comic_last)
+    public void lastClicked(View v) {
+        mViewPager.setCurrentItem(images.length - 1);
+    }
 
-    public OnClickListener randomListener = new OnClickListener() {
-            public void onClick(View v) {
-                if(images.length > 1) {
-                    mViewPager.setCurrentItem(rand.nextInt(images.length));
-                }
-            }
-        };
+    @OnClick(R.id.comic_random)
+    public void randomClicked(View v) {
+        if(images.length > 1) {
+            mViewPager.setCurrentItem(rand.nextInt(images.length));
+        }
+    }
 
-    protected OnClickListener storeListener = new OnClickListener() {
-            public void onClick(View v) {
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse(storeUrls[storeIndex]));
-                startActivity(i);
-            }
-        };
+    @OnClick(R.id.comic_store)
+    public void storeClicked(View v) {
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(storeUrls[storeIndex]));
+        startActivity(i);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.saved_menu, menu);
         return true;
-    }
-
-    public void setupUI() {
-        Button b = (Button) findViewById(R.id.comic_first);
-        b.setOnClickListener(firstListener);
-        b = (Button) findViewById(R.id.comic_prev);
-        b.setOnClickListener(prevListener);
-        b = (Button) findViewById(R.id.comic_next);
-        b.setOnClickListener(nextListener);
-        b = (Button) findViewById(R.id.comic_last);
-        b.setOnClickListener(lastListener);
-        b = (Button) findViewById(R.id.comic_random);
-        b.setOnClickListener(randomListener);
-        b = (Button) findViewById(R.id.comic_store);
-        b.setOnClickListener(storeListener);
-        b = (Button) findViewById(R.id.comic_alt);
-        b.setVisibility(View.GONE);
-
-        sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 
 }

@@ -64,11 +64,11 @@
               android:label="@string/app_name"
               android:theme="@android:style/Theme.NoTitleBar">
     </activity>
-    <activity android:name=".reader.SavedComicMenu"
+    <activity android:name=".SavedComicMenu"
               android:label="@string/app_name"
               android:theme="@android:style/Theme.NoTitleBar">
     </activity>
-    <activity android:name=".reader.SavedComicReader"
+    <activity android:name=".SavedComicReader"
               android:label="@string/app_name"
               android:theme="@android:style/Theme.NoTitleBar">
     </activity>

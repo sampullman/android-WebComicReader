@@ -35,7 +35,6 @@ import android.widget.TextView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-import static butterknife.ButterKnife.findById;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
