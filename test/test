@@ -1,7 +1,0 @@
-ARG="com.threeDBJ.comicReader.comicReaderTest"
-if [ $# -ne 0 ]
-  then
-  ARG=$ARG"#"$1
-fi
-
-adb shell am instrument -w -e class $ARG com.threeDBJ.comicReader.tests/android.test.InstrumentationTestRunner
