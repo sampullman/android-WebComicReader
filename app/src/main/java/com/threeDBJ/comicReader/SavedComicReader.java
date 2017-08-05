@@ -1,32 +1,32 @@
 package com.threeDBJ.comicReader;
 
-import android.os.Bundle;
-import android.os.Environment;
-
-import android.view.View;
-import android.widget.Button;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.net.Uri;
+import android.view.View;
+import android.widget.Button;
+
+import com.threeDBJ.comicReader.reader.Reader;
+import com.threeDBJ.comicReader.view.ComicPager;
+
+import java.io.File;
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-
-import java.util.Random;
-import java.io.File;
-
-import com.threeDBJ.comicReader.reader.Reader;
+import timber.log.Timber;
 
 public class SavedComicReader extends FragmentActivity {
 
@@ -38,17 +38,17 @@ public class SavedComicReader extends FragmentActivity {
     String sdPath, title;
     boolean swipe = false;
 
-    @BindView(R.id.reader_pager) MyViewPager mViewPager;
+    @BindView(R.id.reader_pager) ComicPager mViewPager;
     @BindView(R.id.comic_alt) Button altButton;
     ReaderPagerAdapter mReaderPagerAdapter;
 
-    static final String[] storeUrls = new String[] {
-        "http://smbc.myshopify.com/", "http://store.xkcd.com/",
-        "http://store.explosm.net/", "http://www.phdcomics.com/store/mojostore.php", "http://buttersafe.com/store/",
-        "http://www.splitreason.com/cad-comic/", "http://store.penny-arcade.com/",
-        "http://www.cafepress.com/abstrusegoose", "http://www.dreamhost.com/donate.cgi?id=13906",
-        "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=BAT2CLMHSCR36&lc=CA&currency_code=CAD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted",
-        "http://webcomic.mongreldesigns.com/p/support.html", "http://feelafraidcomic.com/store/" };
+    static final String[] storeUrls = new String[]{
+            "http://smbc.myshopify.com/", "http://store.xkcd.com/",
+            "http://store.explosm.net/", "http://www.phdcomics.com/store/mojostore.php", "http://buttersafe.com/store/",
+            "http://www.splitreason.com/cad-comic/", "http://store.penny-arcade.com/",
+            "http://www.cafepress.com/abstrusegoose", "http://www.dreamhost.com/donate.cgi?id=13906",
+            "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=BAT2CLMHSCR36&lc=CA&currency_code=CAD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted",
+            "http://webcomic.mongreldesigns.com/p/support.html", "http://feelafraidcomic.com/store/"};
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,16 +68,10 @@ public class SavedComicReader extends FragmentActivity {
         sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
         if(Reader.isStorageWritable()) {
             String path = sdPath + "/comics/" + title + "/";
-            DebugLog.e("comic", path);
+            Timber.e("comic %s", path);
             File dir = new File(path);
-            if (dir != null) {
-                images = dir.listFiles();
-                if(images == null || images.length == 0) {
-                    setResult(1);
-                    finish();
-                    return;
-                }
-            } else {
+            images = dir.listFiles();
+            if(images == null || images.length == 0) {
                 setResult(1);
                 finish();
                 return;
@@ -89,7 +83,7 @@ public class SavedComicReader extends FragmentActivity {
         }
 
         setResult(0);
-        DebugLog.v("scr", "" + images.length);
+        Timber.v("scr %d", images.length);
         mViewPager.setOnPageChangeListener(pageListener);
         mReaderPagerAdapter = new ReaderPagerAdapter(getSupportFragmentManager(), images.length);
         mViewPager.setAdapter(mReaderPagerAdapter);
@@ -99,18 +93,19 @@ public class SavedComicReader extends FragmentActivity {
 
     OnPageChangeListener pageListener = new OnPageChangeListener() {
 
-            @Override
-            public void onPageScrollStateChanged (int state) {
-            }
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            }
+        @Override
+        public void onPageScrollStateChanged(int state) {
+        }
 
-            @Override
-            public void onPageSelected (int position) {
-                DebugLog.v("onPageSelected", "" + position);
-            }
-        };
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+            Timber.v("onPageSelected %d", position);
+        }
+    };
 
     private class ReaderPagerAdapter extends FragmentPagerAdapter {
 
@@ -135,7 +130,7 @@ public class SavedComicReader extends FragmentActivity {
             int height = options.outHeight;
 
             options = new BitmapFactory.Options();
-            if(width*height > 2000000) {
+            if(width * height > 2000000) {
                 options.inSampleSize = 2;
             }
             Bitmap image = BitmapFactory.decodeFile(path, options);

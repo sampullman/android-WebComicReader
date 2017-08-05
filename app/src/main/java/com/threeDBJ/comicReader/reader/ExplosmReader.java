@@ -1,19 +1,11 @@
 package com.threeDBJ.comicReader.reader;
 
-import android.app.Activity;
 import android.os.Bundle;
 
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.graphics.Bitmap;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
 import com.threeDBJ.comicReader.Comic;
-import com.threeDBJ.comicReader.DebugLog;
-import com.threeDBJ.comicReader.R;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ExplosmReader extends Reader {
     public static String prevPat = "a rel=\"prev\".*?href=\"/comics/([0-9]+)/\"";
@@ -24,13 +16,15 @@ public class ExplosmReader extends Reader {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        init();
+
         loadInitial(max);
     }
 
-    public void init() {
-        this.pImages = Pattern.compile(imgPat,Pattern.DOTALL | Pattern.UNIX_LINES);
-        this.pPrev = Pattern.compile(prevPat,Pattern.DOTALL | Pattern.UNIX_LINES);
+    @Override
+    public void UISetup() {
+        super.UISetup();
+        this.pImages = Pattern.compile(imgPat, Pattern.DOTALL | Pattern.UNIX_LINES);
+        this.pPrev = Pattern.compile(prevPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pNext = Pattern.compile(nextPat, Pattern.DOTALL | Pattern.UNIX_LINES);
 
         this.base = "http://explosm.net/comics/";
@@ -56,7 +50,7 @@ public class ExplosmReader extends Reader {
                 c.setNextInd(mNext.group(1));
                 /* Last comic */
             } else {
-                String temp = Integer.toString(Integer.parseInt(mPrev.group(1))+1);
+                String temp = Integer.toString(Integer.parseInt(mPrev.group(1)) + 1);
                 setMaxIndex(temp);
                 setMaxNum(temp);
             }

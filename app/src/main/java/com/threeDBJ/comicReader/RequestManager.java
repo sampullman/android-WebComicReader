@@ -1,31 +1,25 @@
 package com.threeDBJ.comicReader;
 
-import android.app.Activity;
-import android.os.AsyncTask;
+import android.app.Dialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.view.View;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.app.ProgressDialog;
-
+import android.os.AsyncTask;
 import android.widget.ImageView;
-import android.widget.TextView;
-
-import android.app.Dialog;
-import java.net.URLConnection;
-import java.net.URL;
-import java.net.HttpURLConnection;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 import com.threeDBJ.comicReader.ComicReaderApp.ComicState;
 import com.threeDBJ.comicReader.reader.Reader;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.regex.Pattern;
+
+import timber.log.Timber;
 
 public class RequestManager {
 
@@ -33,7 +27,7 @@ public class RequestManager {
 
     public int running = 0;
 
-    public RequestManager () {
+    public RequestManager() {
 
     }
 
@@ -48,7 +42,7 @@ public class RequestManager {
     }
 
     public char to_unichr(String val) {
-        return (char)Integer.parseInt(val);
+        return (char) Integer.parseInt(val);
     }
 
     /* Makes multiple attempts to retrieve an image if the first one doesn't work */
@@ -73,36 +67,36 @@ public class RequestManager {
             URLConnection conn = url.openConnection();
             InputStream inp = conn.getInputStream();
             return BitmapFactory.decodeStream(inp);
-        } catch (MalformedURLException e) {
-            DebugLog.v("getImage-malfy", addr);
-        } catch (IOException e) {
-            DebugLog.v("getImage-io", addr);
+        } catch(MalformedURLException e) {
+            Timber.v("getImage-malfy %s", addr);
+        } catch(IOException e) {
+            Timber.v("getImage-io %s", addr);
         }
         return null;
     }
 
     /* Retrieves the web page at the input url.
        On 302 response, go to redirect. */
-    public String makeQuery (String url) {
+    public String makeQuery(String url) {
         try {
-            DebugLog.e("make-query", url);
-            URL addr = new URL (url);
-            HttpURLConnection con=null;
-            int response = -1, i=0;
+            Timber.e("make-query %s", url);
+            URL addr = new URL(url);
+            HttpURLConnection con = null;
+            int response = -1, i = 0;
             /* Try a few times before giving up. */
             while(response == -1) {
                 if(i == 3) {
                     return null;
                 }
-                con = (HttpURLConnection)(addr.openConnection ());
+                con = (HttpURLConnection) (addr.openConnection());
                 con.setInstanceFollowRedirects(true);
                 con.connect();
                 response = con.getResponseCode();
                 i += 1;
             }
             if(response == 302) {
-                con = (HttpURLConnection)(new URL(url.substring(0,url.length()-8)+
-                                                  con.getHeaderField("Location")).openConnection());
+                con = (HttpURLConnection) (new URL(url.substring(0, url.length() - 8) +
+                        con.getHeaderField("Location")).openConnection());
                 con.connect();
             }
             InputStream inputStream = con.getInputStream();
@@ -116,29 +110,29 @@ public class RequestManager {
             }
             in.close();
             return res.toString();
-        } catch (MalformedURLException e) {
-            DebugLog.v ("make_query_malformed",e.getMessage ());
+        } catch(MalformedURLException e) {
+            Timber.v("make_query_malformed %s", e.getMessage());
             return null;
-        } catch (IOException e) {
-            DebugLog.v ("make_query_io",e.getMessage ());
+        } catch(IOException e) {
+            Timber.v("make_query_io %s", e.getMessage());
             return null;
-        } catch (Exception e) {
-            DebugLog.v("unknown", e.getMessage());
+        } catch(Exception e) {
+            Timber.v("unknown %s", e.getMessage());
             return null;
         }
     }
 
     /* Background task for displaying an alt image. */
-    private class DisplayAltImageTask extends AsyncTask<String,Integer,Bitmap> {
+    private class DisplayAltImageTask extends AsyncTask<String, Integer, Bitmap> {
         protected Dialog context;
         protected String title;
 
-        public DisplayAltImageTask (Dialog context, String title) {
+        public DisplayAltImageTask(Dialog context, String title) {
             this.context = context;
             this.title = title;
         }
 
-        protected Bitmap doInBackground (String... data) {
+        protected Bitmap doInBackground(String... data) {
             Bitmap alt = null;
             if(data[0] != null) {
                 alt = retrieveImage(data[0]);
@@ -150,10 +144,10 @@ public class RequestManager {
             super.onPreExecute();
         }
 
-        protected void onProgressUpdate (Integer... prog) {
+        protected void onProgressUpdate(Integer... prog) {
         }
 
-        protected void onPostExecute (Bitmap result) {
+        protected void onPostExecute(Bitmap result) {
             if(context.isShowing()) {
                 ImageView image = (ImageView) context.findViewById(R.id.alt_image);
                 image.setImageBitmap(result);
@@ -163,7 +157,7 @@ public class RequestManager {
     }
 
     /* Background task for grabbing a comic. */
-    class GetComicTask extends AsyncTask<Comic,Integer,Comic> {
+    class GetComicTask extends AsyncTask<Comic, Integer, Comic> {
         Reader context;
         ComicState state;
 
@@ -176,7 +170,7 @@ public class RequestManager {
             running += 1;
         }
 
-        protected Comic doInBackground (Comic... data) {
+        protected Comic doInBackground(Comic... data) {
             String page, imgUrl;
             Comic comic = data[0];
             try {
@@ -187,20 +181,20 @@ public class RequestManager {
                     imgUrl = this.context.handleRawPage(comic, page);
                     this.context = null; // Hack so that the Reader is cleaned up quickly on orientation change
                     if(imgUrl == null) {
-                        DebugLog.e("cmreader", "url: "+comic.getInd());
+                        Timber.e("cmreader url: %s" + comic.getInd());
                     } else {
                         comic.setComic(retrieveImage(imgUrl));
                     }
                 }
             } catch(Exception e) {
-                DebugLog.v("cmreader", "Comic error: "+e.getMessage());
+                Timber.v("cmreader Comic error: %s", e.getMessage());
                 comic.setError(true);
             }
             return comic;
         }
 
         /* Decide what to do with the comic according to the loading state. */
-        protected void onPostExecute (Comic comic) {
+        protected void onPostExecute(Comic comic) {
             running -= 1;
             if(comic.getError()) {
                 state.comicError(comic);

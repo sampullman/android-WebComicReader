@@ -1,63 +1,68 @@
 package com.threeDBJ.comicReader.reader;
 
-import android.os.Bundle;
-import android.os.Environment;
-
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MenuInflater;
-import android.view.View.OnClickListener;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.EditText;
+import android.widget.TextView;
+
+import com.threeDBJ.comicReader.CachedComic;
+import com.threeDBJ.comicReader.Comic;
+import com.threeDBJ.comicReader.ComicReaderApp;
+import com.threeDBJ.comicReader.ComicReaderApp.ComicState;
+import com.threeDBJ.comicReader.view.ComicPager;
+import com.threeDBJ.comicReader.PageFragment;
+import com.threeDBJ.comicReader.R;
+import com.threeDBJ.comicReader.RequestManager;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.HashMap;
+import java.util.regex.Pattern;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import timber.log.Timber;
 
-import java.io.FileOutputStream;
-import java.io.File;
-
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-
-import java.util.HashMap;
-import java.util.regex.Pattern;
-
-import com.threeDBJ.comicReader.*;
-import com.threeDBJ.comicReader.ComicReaderApp.ComicState;
-
-public class Reader extends FragmentActivity {
-    static final String TAG = "webComicReader";
+public abstract class Reader extends AppCompatActivity {
     public static final String PREFS_NAME = "ComicPrefsFile";
     ComicReaderApp app;
     ComicState state;
-    @BindView(R.id.reader_pager) MyViewPager mViewPager;
+    @BindView(R.id.toolbar) Toolbar toolBar;
+    @BindView(R.id.reader_pager) ComicPager mViewPager;
     @BindView(R.id.comic_alt) Button altButton;
 
     String prevPat, nextPat, imgPat, base, max, errorInd,
         firstInd="1", maxInd, storeUrl,	sdPath, title, shortTitle;
     Pattern pImages, pPrev, pNext, pIndices, pMax, pAlt;
 
-    Spanned aboutHtml;
-    String aboutText = "Created by 3DBJ developers. Please email questions, comments, or concerns to "+
+    Spanned aboutHtml = Html.fromHtml(aboutText);
+    static final String aboutText = "Created by 3DBJ developers. Please email questions, comments, or concerns to "+
         "<a href=\"mailto:3dbj.dev@gmail.com\">3dbj.dev@gmail.com</a>";
 
     int maxNum=-1;
@@ -73,7 +78,6 @@ public class Reader extends FragmentActivity {
     ReaderPagerAdapter mReaderPagerAdapter;
 
     RequestManager rm;
-    SharedPreferences prefs;
 
     ProgressDialog loadingDialog;
 
@@ -84,13 +88,14 @@ public class Reader extends FragmentActivity {
         app.setReader(this);
         state = app.getComicState();
         rm = app.getRequestManager();
-        this.aboutHtml = Html.fromHtml(aboutText);
 
         setContentView(R.layout.reader);
         ButterKnife.bind(this);
+        this.UISetup();
+        toolBar.setTitle(title);
+        setSupportActionBar(toolBar);
 
         sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-        this.UISetup();
 
         Intent intent = getIntent();
         this.loadLastViewed = intent.getExtras().getBoolean("load_last_viewed");
@@ -98,13 +103,6 @@ public class Reader extends FragmentActivity {
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         setSwipe(settings.getBoolean("swipe", false));
     }
-
-    /*
-      @Override
-      public void onSaveInstanceState(Bundle state) {
-      state.putInt
-      }
-    */
 
     /* Set up click listeners and initialize the view pager */
     public void UISetup() {
@@ -124,7 +122,7 @@ public class Reader extends FragmentActivity {
         */
     }
 
-    public MyViewPager getViewPager() {
+    public ComicPager getViewPager() {
         return this.mViewPager;
     }
 
@@ -167,7 +165,7 @@ public class Reader extends FragmentActivity {
             if(maxNum != -1) {
                 edit.putInt(shortTitle+"-max", maxNum);
             }
-            edit.commit();
+            edit.apply();
         }
     }
 
@@ -180,7 +178,7 @@ public class Reader extends FragmentActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        DebugLog.e(TAG, "Comic Reader Destroyed");
+        Timber.e("Comic Reader Destroyed");
     }
 
     public void loadInitial(String url) {
@@ -205,10 +203,10 @@ public class Reader extends FragmentActivity {
 
     public void loadLast(String url) {
         boolean freshComic = shortTitle.equals(state.prevShortTitle);
-        DebugLog.e("Loading last: freshComic="+freshComic+", loading="+state.isLoading()+", running="+rm.running+", curComic null="+(state.curComic.getComic()==null));
+        Timber.e("Loading last: freshComic=%b, loading=%b, running=%b, curComic null=%b", freshComic, state.isLoading(), rm.running, (state.curComic.getComic()==null));
         if(freshComic && state.curComic.getComic() != null) {
             //notifyComicLoaded(state.curComic);
-            DebugLog.e("Loading last comic image");
+            Timber.e("Loading last comic image");
             mReaderPagerAdapter.freshComics = true;
             state.hasUnseenComic = false;
         } else if(state.isLoading() && freshComic) {
@@ -234,7 +232,7 @@ public class Reader extends FragmentActivity {
     /* Notification from the RequestManager that a comic has finished loading.
        Matches comic url with current cur/prev/nextComic */
     public void notifyComicLoaded(CachedComic cached) {
-        DebugLog.e("Notified of comic load, cur? "+(cached == state.curComic));
+        Timber.e("Notified of comic load, cur? %b", (cached == state.curComic));
         if(cached == state.curComic) {
             errorInd = null;
             if(loadingDialog != null && loadingDialog.isShowing()) {
@@ -262,9 +260,9 @@ public class Reader extends FragmentActivity {
             loadingDialog.cancel();
         }
         errorCount += 1;
-        //DebugLog.e(TAG, "error:"+c.getInd()+" "+state.curComic.getInd());
+        //Timber.e("error: %d %d", c.getInd(), state.curComic.getInd());
         if(cached == state.curComic && !state.curComic.isLoaded()) {
-            //DebugLog.e(TAG, "error: errTextNull = "+(errorText == null));
+            //Timber.e("error: errTextNull = %b", (errorText == null));
             ViewGroup ll = (ViewGroup) findViewById(R.id.comic_wrapper);
             if(errorText == null) {
                 errorText = (TextView) getLayoutInflater().inflate(R.layout.error_text_view, ll, false);
@@ -293,7 +291,7 @@ public class Reader extends FragmentActivity {
                either be ignored or marked as the current comic. */
             @Override
             public void onPageSelected (int position) {
-                DebugLog.e("Page selected: "+position);
+                Timber.e("Page selected: %d", position);
                 if(firstRun) {
                     firstRun = false;
                     return;
@@ -302,7 +300,7 @@ public class Reader extends FragmentActivity {
                 /* Load the next comic. */
                 String newInd = "";
                 if(position > state.prevPos) {
-                    DebugLog.e("Next page selected");
+                    Timber.e("Next page selected");
                     if(state.curComic.getInd() == null && nextEnabled) {
                     } else if(state.curComic.getInd() == null || !nextEnabled || state.curComic.getInd().equals(maxInd) ||
                               state.curComic.getInd().equals(getMax())) {
@@ -357,7 +355,7 @@ public class Reader extends FragmentActivity {
     /* Adapter for the view pager. Creates and destroys views when necessary. */
     private class ReaderPagerAdapter extends FragmentPagerAdapter {
         boolean freshComics = false;
-        HashMap<Integer, PageFragment> fragMap = new HashMap<Integer, PageFragment>();
+        HashMap<Integer, PageFragment> fragMap = new HashMap<>();
 
         public ReaderPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -384,7 +382,7 @@ public class Reader extends FragmentActivity {
         @Override
         public Object instantiateItem(ViewGroup container, int pos) {
             PageFragment fragment = (PageFragment) super.instantiateItem(container, pos);
-            DebugLog.e("FragAdapter instantiating at pos: "+pos);
+            Timber.e("FragAdapter instantiating at pos: %d", pos);
             fragMap.put(pos, fragment);
             if(freshComics) {
                 fragment.setComic(state.curComic, mViewPager);
@@ -408,11 +406,11 @@ public class Reader extends FragmentActivity {
             PageFragment frag = fragMap.get(pos);
             if(frag == null) {
                 frag = makePageFragment(pos, comic.image);
-                DebugLog.e("Made fragment with serialized image, mapsize="+fragMap.size());
+                Timber.e("Made fragment with serialized image, mapsize=%d", fragMap.size());
             } else {
                 frag.setComic(comic, mViewPager);
                 frag = makePageFragment(pos, comic.image);
-                DebugLog.e("Set fragment image directly");
+                Timber.e("Set fragment image directly");
             }
             return frag;
         }
@@ -516,8 +514,9 @@ public class Reader extends FragmentActivity {
             try {
                 String path = sdPath + "/comics/" + title + "/";
                 File dir = new File(path);
-                if(!dir.exists())
-                    dir.mkdirs();
+                if(!dir.exists() && !dir.mkdirs()) {
+                    Timber.e("Could not create the save folder");
+                }
                 String saveTitle;
                 if(state.curComic.getImageTitle() != null) {
                     saveTitle = state.curComic.getImageTitle();
@@ -526,7 +525,7 @@ public class Reader extends FragmentActivity {
                 } else {
                     saveTitle = state.curComic.getInd();
                 }
-                DebugLog.v("comic", dir+" "+saveTitle + ".png");
+                Timber.v("SD Save: %s/%s.png", dir.getAbsolutePath(), saveTitle);
                 File file = new File(dir, saveTitle + ".png");
                 FileOutputStream fOut = new FileOutputStream(file);
 
@@ -536,13 +535,13 @@ public class Reader extends FragmentActivity {
             } catch(Exception e) {
 
                 if(e.getMessage() != null) {
-                    DebugLog.v("SDError", e.getMessage());
+                    Timber.v("SDError %s", e.getMessage());
                 }
                 showDialog("Warning", "Comic could not be saved.");
             }
         } else {
             /* Warn that comic could not be saved */
-            DebugLog.v("SDError", "bitmap was null :(");
+            Timber.v("SDError: bitmap was null :(");
             showDialog("Warning", "Comic could not be saved.");
         }
     }
@@ -783,7 +782,7 @@ public class Reader extends FragmentActivity {
     /* Updates the swipe option title */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem item = (MenuItem) menu.findItem(R.id.comic_swipe);
+        MenuItem item = menu.findItem(R.id.comic_swipe);
         if(swipe) {
             item.setTitle("Disable Swipe");
         } else {

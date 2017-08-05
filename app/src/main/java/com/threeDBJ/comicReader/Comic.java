@@ -6,7 +6,7 @@ public class Comic {
 
     public Bitmap image;
     String url, ind, prevInd, nextInd, altData, imgTitle;
-    boolean error=false;
+    boolean error = false;
 
     public Comic() {
     }

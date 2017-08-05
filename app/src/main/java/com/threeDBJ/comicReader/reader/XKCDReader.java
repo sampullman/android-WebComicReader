@@ -1,19 +1,13 @@
 package com.threeDBJ.comicReader.reader;
 
-import android.app.Activity;
 import android.os.Bundle;
-
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.graphics.Bitmap;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 import com.threeDBJ.comicReader.Comic;
-import com.threeDBJ.comicReader.DebugLog;
-import com.threeDBJ.comicReader.R;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class XKCDReader extends Reader {
 
@@ -22,6 +16,12 @@ public class XKCDReader extends Reader {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        loadInitial(max);
+    }
+
+    public void UISetup() {
+        super.UISetup();
 
         String prevPat = "href=\"/([0-9]+)/\" accesskey=\"p\">";
         String nextPat = "href=\"/([0-9]+)/\" accesskey=\"n\">";
@@ -38,13 +38,6 @@ public class XKCDReader extends Reader {
         this.title = "XKCD";
         this.shortTitle = title;
         this.storeUrl = "http://store.xkcd.com/";
-
-        if(getLastCustomNonConfigurationInstance() == null)
-            loadInitial(max);
-    }
-
-    public void UISetup() {
-        super.UISetup();
         setAltListener(altListener);
     }
 
@@ -64,7 +57,7 @@ public class XKCDReader extends Reader {
                 c.setNextInd(mNext.group(1));
                 /* Last comic */
             } else {
-                String temp = Integer.toString(Integer.parseInt(mPrev.group(1))+1);
+                String temp = Integer.toString(Integer.parseInt(mPrev.group(1)) + 1);
                 setMaxIndex(temp);
                 setMaxNum(temp);
             }
@@ -80,9 +73,9 @@ public class XKCDReader extends Reader {
     }
 
     protected OnClickListener altListener = new OnClickListener() {
-            public void onClick(View v) {
-                dispAltText(getCurComic().getAlt(), "XKCD Hover Text");
-            }
-        };
+        public void onClick(View v) {
+            dispAltText(getCurComic().getAlt(), "XKCD Hover Text");
+        }
+    };
 
 }

@@ -1,24 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <style name="ComicButton">
-    <item name="android:layout_width">match_parent</item>
-    <item name="android:layout_height">match_parent</item>
-    <item name="android:background">@drawable/btn_grey</item>
-    <item name="android:layout_weight">1</item>
-    <item name="android:textSize">18sp</item>
-    <item name="android:textColor">#FFAAAAAA</item>
-    <item name="android:layout_margin">4dp</item>
-  </style>
-  <style name="btn">
-    <item name="android:layout_width">match_parent</item>
-    <item name="android:layout_height">match_parent</item>
-    <item name="android:layout_weight">1</item>
-  </style>
-  <style name="comic_title">
-    <item name="android:layout_width">0dp</item>
-    <item name="android:layout_height">match_parent</item>
-    <item name="android:gravity">center</item>
-    <item name="android:layout_weight">0.4</item>
-    <item name="android:textSize">18sp</item>
-  </style>
+
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/text_primary</item>
+        <item name="colorPrimaryDark">@color/black</item>
+        <item name="colorAccent">#888</item>
+    </style>
+
+    <style name="ToolbarTheme" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        <!-- android:textColorPrimary is the color of the title text in the Toolbar  -->
+        <item name="android:textColorPrimary">@android:color/holo_blue_light</item>
+        <!-- actionMenuTextColor is the color of the text of action (menu) items  -->
+        <item name="actionMenuTextColor">@android:color/holo_green_light</item>
+        <!-- Tints the input fields like checkboxes and text fields -->
+        <item name="colorAccent">#777</item>
+        <!-- Applies to views in their normal state. -->
+        <item name="colorControlNormal">#666</item>
+        <!-- Applies to views in their activated state (i.e checked or switches) -->
+        <item name="colorControlActivated">#555</item>
+        <!-- Applied to framework control highlights (i.e ripples or list selectors) -->
+        <item name="colorControlHighlight">#888</item>
+    </style>
+
+    <style name="view_wrap">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+    <style name="view_full">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+    <style name="linear_vertical_full" parent="@style/view_full">
+        <item name="android:orientation">vertical</item>
+    </style>
+    <style name="linear_horizontal_full" parent="@style/view_full">
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="toolbar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@color/bar_background</item>
+        <item name="android:minHeight">?attr/actionBarSize</item>
+    </style>
+    <style name="toolbar_title" parent="@style/view_wrap">
+        <item name="android:layout_gravity">center</item>
+        <item name="android:textSize">22sp</item>
+    </style>
+
+    <style name="comic_button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">@drawable/btn_grey</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">#FFAAAAAA</item>
+        <item name="android:layout_margin">4dp</item>
+    </style>
+    <style name="btn">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+    <style name="comic_title">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_gravity">left</item>
+        <item name="android:gravity">left|center</item>
+        <item name="android:paddingLeft">32dp</item>
+        <item name="android:textSize">18sp</item>
+    </style>
 </resources>

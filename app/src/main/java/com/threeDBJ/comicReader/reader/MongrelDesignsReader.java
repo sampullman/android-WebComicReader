@@ -1,20 +1,16 @@
 package com.threeDBJ.comicReader.reader;
 
-import android.app.Activity;
 import android.os.Bundle;
-
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.LinearLayout;
 import android.widget.Button;
-import android.graphics.Bitmap;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import android.widget.LinearLayout;
 
 import com.threeDBJ.comicReader.Comic;
-import com.threeDBJ.comicReader.DebugLog;
 import com.threeDBJ.comicReader.R;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MongrelDesignsReader extends Reader {
 
@@ -23,6 +19,13 @@ public class MongrelDesignsReader extends Reader {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        loadInitial(max);
+    }
+
+    @Override
+    public void UISetup() {
+        super.UISetup();
 
         String prevPat = "First Comic.*?href=\"(?:http://.*?/)?http://webcomic.mongreldesigns.com/(.*?)\">Previous Comic</a>";
         String nextPat = "Previous Comic.*?href=\"http://webcomic.mongreldesigns.com/(.*?)\">Next Comic</a>";
@@ -46,12 +49,6 @@ public class MongrelDesignsReader extends Reader {
         Button b = (Button) findViewById(R.id.comic_random);
         LinearLayout nav = (LinearLayout) findViewById(R.id.nav_bar);
         nav.removeView(b);
-
-        loadInitial(max);
-    }
-
-    public void UISetup() {
-        super.UISetup();
         setAltListener(altListener);
     }
 
@@ -93,7 +90,7 @@ public class MongrelDesignsReader extends Reader {
         }
         int ind = title.lastIndexOf("/");
         if(ind != -1) {
-            c.setImageTitle(title.substring(ind, title.length()-1));
+            c.setImageTitle(title.substring(ind, title.length() - 1));
         } else {
             c.setImageTitle(title);
         }
@@ -101,18 +98,18 @@ public class MongrelDesignsReader extends Reader {
     }
 
     protected OnClickListener altListener = new OnClickListener() {
-            public void onClick(View v) {
-                dispAltText(getCurComic().getAlt(), "Mongrel Designs Hover Text");
-            }
-        };
+        public void onClick(View v) {
+            dispAltText(getCurComic().getAlt(), "Mongrel Designs Hover Text");
+        }
+    };
 
     protected OnClickListener storeListener = new OnClickListener() {
-            public void onClick(View v) {
-                dispAltText("There is virtually no way to buy anything from this author, but if you "+
-                            "would like to support him you can promote his comics. Some other support "+
+        public void onClick(View v) {
+            dispAltText("There is virtually no way to buy anything from this author, but if you " +
+                            "would like to support him you can promote his comics. Some other support " +
                             "suggestions can be found here: http://webcomic.mongreldesigns.com/p/support.html",
-                            "Mongrel Designs Support");
-            }
-        };
+                    "Mongrel Designs Support");
+        }
+    };
 
 }

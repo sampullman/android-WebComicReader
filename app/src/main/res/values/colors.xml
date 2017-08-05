@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="title_blue">#0DABF2</color>
+    <color name="black">#000</color>
+    <color name="text_primary">#888</color>
+    <color name="text_primary_on">#999</color>
+    <color name="text_primary_disabled">#555</color>
+    <color name="bar_background">#111</color>
+</resources>

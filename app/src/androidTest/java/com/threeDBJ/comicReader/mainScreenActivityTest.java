@@ -1,6 +1,6 @@
 package com.threeDBJ.comicReader;
 
-//import com.threeDBJ.comicReader.tests.QuestionableContentReaderTest;
+//import com.threeDBJ.ComicSelectActivity.tests.QuestionableContentReaderTest;
 
 import android.content.Intent;
 import android.widget.Button;
@@ -22,15 +22,15 @@ import com.threeDBJ.comicReader.reader.SMBCReader;
  * <p/>
  * To run this test, you can type:
  * adb shell am instrument -w \
- * -e class com.threeDBJ.comicReader.comicReaderTest \
- * com.threeDBJ.comicReader.tests/android.test.InstrumentationTestRunner
+ * -e class com.threeDBJ.ComicSelectActivity.mainScreenActivityTest \
+ * com.threeDBJ.ComicSelectActivity.tests/android.test.InstrumentationTestRunner
  */
-public class comicReaderTest extends ActivityInstrumentationTestCase2<comicReader> {
-    comicReader activity;
+public class mainScreenActivityTest extends ActivityInstrumentationTestCase2<ComicSelectActivity> {
+    ComicSelectActivity activity;
     CountDownLatch signal;
 
-    public comicReaderTest() {
-        super("com.threeDBJ.comicReader", comicReader.class);
+    public mainScreenActivityTest() {
+        super("com.threeDBJ.ComicSelectActivity", ComicSelectActivity.class);
     }
 
     public class TestRequestManager extends RequestManager {
@@ -67,7 +67,7 @@ public class comicReaderTest extends ActivityInstrumentationTestCase2<comicReade
         signal = new CountDownLatch(1);
         Intent intent = new Intent();
         intent.putExtra("load_last_viewed", false);
-        Reader reader = launchActivityWithIntent("com.threeDBJ.comicReader", Reader.class, intent);
+        Reader reader = launchActivityWithIntent("com.threeDBJ.ComicSelectActivity", Reader.class, intent);
 
         pageHandler.init();
         /*

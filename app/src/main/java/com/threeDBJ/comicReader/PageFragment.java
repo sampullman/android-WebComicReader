@@ -12,19 +12,22 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.threeDBJ.comicReader.reader.Reader;
+import com.threeDBJ.comicReader.view.ComicPager;
+import com.threeDBJ.comicReader.view.TouchImageView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
+import timber.log.Timber;
 
 public class PageFragment extends Fragment {
     @BindView(R.id.comic) TouchImageView imageView;
-    @BindView(R.id.placeholder) TextView placeholder;
+    @BindView(R.id.placeholder)
+    TextView placeholder;
     ViewGroup vg;
     Bitmap image;
 
     public static PageFragment newInstance(Bitmap image) {
-        DebugLog.e("Made PageFragment");
+        Timber.e("Made PageFragment");
         PageFragment pageFragment = new PageFragment();
         //Bundle bundle = new Bundle();
         //bundle.putParcelable("image", image);
@@ -37,30 +40,30 @@ public class PageFragment extends Fragment {
         return newInstance(null);
     }
 
-    public void setImage(Bitmap image, MyViewPager mvp) {
+    public void setImage(Bitmap image, ComicPager mvp) {
         if(imageView != null) {
             imageView.setPager(mvp);
             imageView.setImageBitmap(image);
         } else {
-            DebugLog.e("Could not set image, view not inflated");
+            Timber.e("Could not set image, view not inflated");
         }
     }
 
-    public void setComic(Comic comic, MyViewPager mvp) {
+    public void setComic(Comic comic, ComicPager mvp) {
         Bitmap image = (comic == null) ? null : comic.getComic();
         setImage(image, mvp);
         if(placeholder != null) {
             if(comic != null && image == null) {
                 placeholder.setVisibility(View.VISIBLE);
-                final String url = ((Reader)getActivity()).getBase() + comic.getInd();
+                final String url = ((Reader) getActivity()).getBase() + comic.getInd();
                 placeholder.setOnClickListener(new OnClickListener() {
-                        public void onClick(View v) {
-                            Intent i = new Intent(Intent.ACTION_VIEW);
+                    public void onClick(View v) {
+                        Intent i = new Intent(Intent.ACTION_VIEW);
 
-                            i.setData(Uri.parse(url));
-                            getActivity().startActivity(i);
-                        }
-                    });
+                        i.setData(Uri.parse(url));
+                        getActivity().startActivity(i);
+                    }
+                });
             } else {
                 placeholder.setVisibility(View.INVISIBLE);
                 placeholder.setOnClickListener(null);
@@ -69,10 +72,10 @@ public class PageFragment extends Fragment {
     }
 
     public void setComic(Comic comic) {
-        MyViewPager mvp;
+        ComicPager mvp;
         try {
-            mvp = ((Reader)getActivity()).getViewPager();
-        } catch (Exception e) {
+            mvp = ((Reader) getActivity()).getViewPager();
+        } catch(Exception e) {
             mvp = null;
         }
         setComic(comic, mvp);
@@ -86,7 +89,8 @@ public class PageFragment extends Fragment {
         }
     }
 
-    @Override public void onCreate(Bundle state) {
+    @Override
+    public void onCreate(Bundle state) {
         super.onCreate(state);
         if(state != null) image = state.getParcelable("image");
     }
@@ -97,14 +101,15 @@ public class PageFragment extends Fragment {
         ButterKnife.bind(this, view);
         vg = (ViewGroup) view;
         if(image != null) {
-            DebugLog.e("Page fragment created with bitmap");
+            Timber.e("Page fragment created with bitmap");
             setImage(image, null);
             image = null;
         }
         return view;
     }
 
-    @Override public void onDestroyView() {
+    @Override
+    public void onDestroyView() {
         super.onDestroyView();
     }
 }

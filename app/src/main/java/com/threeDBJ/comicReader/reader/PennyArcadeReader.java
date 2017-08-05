@@ -1,20 +1,18 @@
 package com.threeDBJ.comicReader.reader;
 
-import android.app.Activity;
 import android.os.Bundle;
-
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.graphics.Bitmap;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 import com.threeDBJ.comicReader.Comic;
-import com.threeDBJ.comicReader.DebugLog;
 import com.threeDBJ.comicReader.R;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import timber.log.Timber;
 
 public class PennyArcadeReader extends Reader {
 
@@ -25,13 +23,21 @@ public class PennyArcadeReader extends Reader {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        loadInitial(max);
+    }
+
+    @Override
+    public void UISetup() {
+        super.UISetup();
+
         String prevPat = "<a class=\"btnPrev btn\" href=\"http://penny-arcade.com/comic/(.*?)\" title=\"Previous\">Previous</a>";
         String nextPat = "<a class=\"btnNext btn\" href=\"http://penny-arcade.com/comic/(.*?)\" title=\"Next\">Next</a>";
         String imgPat = "<img src=\"(http://art.penny-arcade.com/photos/(.*?))\" alt=\"";
         String maxPat = "<input type=\"hidden\" name=\"return_to\" value=\"http://penny-arcade[.]com/comic/(.*?)#added\" />";
 
-        this.pImages = Pattern.compile(imgPat,Pattern.DOTALL | Pattern.UNIX_LINES);
-        this.pPrev = Pattern.compile(prevPat,Pattern.DOTALL | Pattern.UNIX_LINES);
+        this.pImages = Pattern.compile(imgPat, Pattern.DOTALL | Pattern.UNIX_LINES);
+        this.pPrev = Pattern.compile(prevPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pNext = Pattern.compile(nextPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pMax = Pattern.compile(maxPat, Pattern.DOTALL | Pattern.UNIX_LINES);
 
@@ -46,9 +52,6 @@ public class PennyArcadeReader extends Reader {
         Button b = (Button) findViewById(R.id.comic_random);
         LinearLayout nav = (LinearLayout) findViewById(R.id.nav_bar);
         nav.removeView(b);
-
-        loadInitial(max);
-
     }
 
     public String handleRawPage(Comic c, String page) {
@@ -62,7 +65,7 @@ public class PennyArcadeReader extends Reader {
         int dotInd = imgTitle.indexOf(".");
         int slashInd = imgTitle.lastIndexOf("/");
         if(dotInd != -1) {
-            imgTitle = imgTitle.substring(slashInd+1, dotInd);
+            imgTitle = imgTitle.substring(slashInd + 1, dotInd);
         }
         c.setImageTitle(imgTitle);
         if(mPrev.find()) {
@@ -86,7 +89,7 @@ public class PennyArcadeReader extends Reader {
                 /* Anomaly, this should not happen */
             }
         }
-        DebugLog.e("ahmmmh", "max: "+maxInd);
+        Timber.e("max: %s", maxInd);
         return imgUrl;
     }
 
@@ -95,11 +98,11 @@ public class PennyArcadeReader extends Reader {
     }
 
     protected OnClickListener randomListener = new OnClickListener() {
-            public void onClick(View v) {
-                state.clearComics();
-                clearVisible();
-                loadInitial(base + "random");
-            }
-        };
+        public void onClick(View v) {
+            state.clearComics();
+            clearVisible();
+            loadInitial(base + "random");
+        }
+    };
 
 }

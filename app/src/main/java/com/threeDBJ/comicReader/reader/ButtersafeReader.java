@@ -1,19 +1,15 @@
 package com.threeDBJ.comicReader.reader;
 
-import android.app.Activity;
 import android.os.Bundle;
-
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.graphics.Bitmap;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 import com.threeDBJ.comicReader.Comic;
-import com.threeDBJ.comicReader.DebugLog;
 import com.threeDBJ.comicReader.R;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import butterknife.OnClick;
 
 public class ButtersafeReader extends Reader {
 
@@ -24,6 +20,14 @@ public class ButtersafeReader extends Reader {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        loadInitial(max);
+
+    }
+
+    @Override
+    public void UISetup() {
+        super.UISetup();
         String prevPat = "<div id=\"headernav\">.*?<a href=\"http://buttersafe\\.com/(.*?/)\" rel=\"prev\">&laquo;</a>";
         String nextPat = "<link rel='next' title='.*?' href='http://buttersafe\\.com/(.*?)' />";
         String imgPat = "<img src=\"(http://buttersafe.com/comics/(.*?)\\.jpg)\"";
@@ -43,12 +47,6 @@ public class ButtersafeReader extends Reader {
 
         this.firstInd = "2007/04/03/breakfast-sad-turtle/";
         this.randComic = "http://www.ohnorobot.com/random.pl?comic=1307";
-
-        Button b = (Button) findViewById(R.id.comic_random);
-        b.setOnClickListener(randomListener);
-
-        loadInitial(max);
-
     }
 
     public String handleRawPage(Comic c, String page) {
@@ -86,12 +84,11 @@ public class ButtersafeReader extends Reader {
         showDialog("Select Comic", "Feature currently unavailable for this comic.");
     }
 
-    protected OnClickListener randomListener = new OnClickListener() {
-            public void onClick(View v) {
-                state.clearComics();
-                clearVisible();
-                loadInitial(randComic);
-            }
-        };
+    @OnClick(R.id.comic_random)
+    public void randomClick(View v) {
+        state.clearComics();
+        clearVisible();
+        loadInitial(randComic);
+    }
 
 }

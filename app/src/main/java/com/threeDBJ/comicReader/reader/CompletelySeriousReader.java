@@ -1,19 +1,13 @@
 package com.threeDBJ.comicReader.reader;
 
-import android.app.Activity;
 import android.os.Bundle;
-
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.graphics.Bitmap;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 import com.threeDBJ.comicReader.Comic;
-import com.threeDBJ.comicReader.DebugLog;
-import com.threeDBJ.comicReader.R;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CompletelySeriousReader extends Reader {
 
@@ -23,6 +17,12 @@ public class CompletelySeriousReader extends Reader {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        loadInitial(max);
+    }
+
+    @Override
+    public void UISetup() {
+        super.UISetup();
         String prevPat = "First</a>.*?<a href=\"http://completelyseriouscomics.com/.p=(.*?)\" class=\"navi navi-prev\"";
         String nextPat = "<td class=\"comic_navi_right\">.*?<a href=\"http://completelyseriouscomics.com/.p=(.*?)\" class=\"navi navi-next\"";
         String imgPat = "<img src=\"(http://completelyseriouscomics.com/comics/.*?)\" alt=\"(.*?)\"";
@@ -43,11 +43,6 @@ public class CompletelySeriousReader extends Reader {
         this.shortTitle = "Completely";
         this.storeUrl = "https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=BAT2CLMHSCR36&lc=CA&currency_code=CAD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted";
 
-        loadInitial(max);
-    }
-
-    public void UISetup() {
-        super.UISetup();
         setAltListener(altListener);
     }
 
@@ -92,17 +87,17 @@ public class CompletelySeriousReader extends Reader {
     }
 
     protected OnClickListener altListener = new OnClickListener() {
-            public void onClick(View v) {
-                dispAltText(getCurComic().getAlt(), "Completely Serious Hover Text");
-            }
-        };
+        public void onClick(View v) {
+            dispAltText(getCurComic().getAlt(), "Completely Serious Hover Text");
+        }
+    };
 
     protected OnClickListener randomListener = new OnClickListener() {
-            public void onClick(View v) {
-                state.clearComics();
-                clearVisible();
-                loadInitial(max + "/?randomcomic&nocache=1");
-            }
-        };
+        public void onClick(View v) {
+            state.clearComics();
+            clearVisible();
+            loadInitial(max + "/?randomcomic&nocache=1");
+        }
+    };
 
 }

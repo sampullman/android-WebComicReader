@@ -1,12 +1,14 @@
 package com.threeDBJ.comicReader;
 
 import android.app.Application;
-import android.graphics.Bitmap;
+
+import com.threeDBJ.comicReader.reader.Reader;
 
 import java.util.HashMap;
 import java.util.HashSet;
 
-import com.threeDBJ.comicReader.reader.Reader;
+import timber.log.Timber;
+import timber.log.Timber.DebugTree;
 
 public class ComicReaderApp extends Application {
     static final String TAG = "webComicReader";
@@ -15,7 +17,14 @@ public class ComicReaderApp extends Application {
     Reader activeReader;
 
     @Override
-    public void onCreate () {
+    public void onCreate() {
+        super.onCreate();
+        if (BuildConfig.DEBUG) {
+            // TODO -- Add some analytics and a release tree
+            Timber.plant(new DebugTree());
+        } else {
+            Timber.plant(new DebugTree());
+        }
     }
 
     public ComicState getComicState() {
@@ -39,7 +48,7 @@ public class ComicReaderApp extends Application {
         public boolean hasUnseenComic = false;
         public String prevShortTitle;
 
-        public int prevPos=20000, setPager=20000;
+        public int prevPos = 20000, setPager = 20000;
 
         public ComicState() {
         }

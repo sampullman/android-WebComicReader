@@ -1,19 +1,13 @@
 package com.threeDBJ.comicReader.reader;
 
-import android.app.Activity;
 import android.os.Bundle;
-
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.graphics.Bitmap;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 import com.threeDBJ.comicReader.Comic;
-import com.threeDBJ.comicReader.DebugLog;
-import com.threeDBJ.comicReader.R;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SMBCReader extends Reader {
     public static String prevPat = "<!-- Back button--><a href=\"[?]id=([0-9]+).*?class=\"backRollover\">";
@@ -27,12 +21,13 @@ public class SMBCReader extends Reader {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        init();
 
         loadInitial(max);
     }
 
-    public void init() {
+    @Override
+    public void UISetup() {
+        super.UISetup();
         this.pImages = Pattern.compile(imgPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pPrev = Pattern.compile(prevPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pNext = Pattern.compile(nextPat, Pattern.DOTALL | Pattern.UNIX_LINES);
@@ -44,10 +39,6 @@ public class SMBCReader extends Reader {
         this.title = "SMBC";
         this.shortTitle = title;
         this.storeUrl = "http://smbc.myshopify.com/";
-    }
-
-    public void UISetup() {
-        super.UISetup();
         setAltListener(altListener);
     }
 
@@ -95,12 +86,12 @@ public class SMBCReader extends Reader {
     }
 
     protected OnClickListener altListener = new OnClickListener() {
-            public void onClick(View v) {
-                if(getCurComic().getAlt() != null) {
-                    dispAltImage(getCurComic().getAlt(), "SMBC Red Button");
-                } else {
-                    dispAltText("No Red Button Available!", "SMBC Red Button");
-                }
+        public void onClick(View v) {
+            if(getCurComic().getAlt() != null) {
+                dispAltImage(getCurComic().getAlt(), "SMBC Red Button");
+            } else {
+                dispAltText("No Red Button Available!", "SMBC Red Button");
             }
-        };
+        }
+    };
 }

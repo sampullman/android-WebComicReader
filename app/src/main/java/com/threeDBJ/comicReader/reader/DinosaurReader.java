@@ -2,15 +2,12 @@ package com.threeDBJ.comicReader.reader;
 
 import android.os.Bundle;
 
-import android.view.View;
-import android.view.View.OnClickListener;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
 import com.threeDBJ.comicReader.Comic;
-import com.threeDBJ.comicReader.DebugLog;
-import com.threeDBJ.comicReader.R;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import timber.log.Timber;
 
 public class DinosaurReader extends Reader {
 
@@ -19,6 +16,14 @@ public class DinosaurReader extends Reader {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        loadInitial(max);
+    }
+
+    @Override
+    public void UISetup() {
+        super.UISetup();
+
         String prevPat = "<a title=\"Previous comic\"  rel=\"prev\" href=\"http://www.qwantz.com/index.php[?]comic=([0-9]+)\">";
         String nextPat = "<a title=\"Next comic\" rel=\"next\" href=\"http://www.qwantz.com/index.php[?]comic=([0-9]+)\">";
         String imgPat = "valign=\"middle\"><img src=\"(.*?)\" class=\"comic\" title=\"(.*?)\">";
@@ -34,8 +39,6 @@ public class DinosaurReader extends Reader {
         this.title = "Dinosaur Comics";
         this.shortTitle = "Dinosaur";
         this.storeUrl = "http://www.qwantz.com/merchandise.php";
-
-        loadInitial(max);
     }
 
     public String handleRawPage(Comic c, String page) {
@@ -45,16 +48,16 @@ public class DinosaurReader extends Reader {
 
         boolean success = mImages.find();
         String imgUrl = mImages.group(1);
-        DebugLog.e("comic", imgUrl+"");
+        Timber.e("Dinosaur %s", imgUrl);
         c.setAlt(mImages.group(2));
-        DebugLog.e("comic", mImages.group(2)+"");
+        Timber.e("Dinosaur %s", mImages.group(2));
 
         if(mPrev.find()) {
             c.setPrevInd(mPrev.group(1));
             if(mNext.find() && mNext.group(1) != null) {
                 c.setNextInd(mNext.group(1));
             } else {
-                String temp = Integer.toString(Integer.parseInt(mPrev.group(1))+1);
+                String temp = Integer.toString(Integer.parseInt(mPrev.group(1)) + 1);
                 setMaxIndex(temp);
                 setMaxNum(temp);
             }

@@ -1,19 +1,13 @@
 package com.threeDBJ.comicReader.reader;
 
-import android.app.Activity;
 import android.os.Bundle;
-
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.graphics.Bitmap;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 import com.threeDBJ.comicReader.Comic;
-import com.threeDBJ.comicReader.DebugLog;
-import com.threeDBJ.comicReader.R;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AbstruseGooseReader extends Reader {
 
@@ -23,6 +17,11 @@ public class AbstruseGooseReader extends Reader {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        loadInitial(max);
+    }
+
+    @Override
+    public void UISetup() {
         String prevPat = "First.*?<a href=\"http://abstrusegoose.com/(.*?)\">.*?Previous</a>";
         String nextPat = "Random.*?<a href=\"http://abstrusegoose.com/(.*?)\">Next";
         String imgPat = "<img.*?src=\"(http://abstrusegoose.com/strips/.*?)\".*?(?:(?:title=\"(.*?)\" />)|(?: /></p>)|(?: /></a>))";
@@ -40,12 +39,6 @@ public class AbstruseGooseReader extends Reader {
         this.title = "Abstruse Goose";
         this.shortTitle = "Abstruse";
         this.storeUrl = "http://www.cafepress.com/abstrusegoose";
-
-        loadInitial(max);
-    }
-
-    public void UISetup() {
-        super.UISetup();
         setAltListener(altListener);
     }
 
@@ -55,6 +48,7 @@ public class AbstruseGooseReader extends Reader {
         Matcher mNext = pNext.matcher(page);
         boolean success = mImages.find();
         String imgUrl = mImages.group(1);
+
         if(mImages.groupCount() == 2) {
             c.setAlt(mImages.group(2));
         } else {
@@ -87,17 +81,17 @@ public class AbstruseGooseReader extends Reader {
     }
 
     protected OnClickListener altListener = new OnClickListener() {
-            public void onClick(View v) {
-                dispAltText(getCurComic().getAlt(), "Abstruse Goose Hover Text");
-            }
-        };
+        public void onClick(View v) {
+            dispAltText(getCurComic().getAlt(), "Abstruse Goose Hover Text");
+        }
+    };
 
     protected OnClickListener randomListener = new OnClickListener() {
-            public void onClick(View v) {
-                state.clearComics();
-                clearVisible();
-                loadInitial(max + "random.php");
-            }
-        };
+        public void onClick(View v) {
+            state.clearComics();
+            clearVisible();
+            loadInitial(max + "random.php");
+        }
+    };
 
 }
