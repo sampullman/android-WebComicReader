@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.0"
 
     defaultConfig {
         applicationId "com.threeDBJ.MainScreenActivity"
         minSdkVersion 15
-        targetSdkVersion 23
+        targetSdkVersion 26
 
         testApplicationId "com.threeDBJ.MainScreenActivity.tests"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
@@ -21,15 +21,13 @@ android {
     }
 }
 
-apply plugin: 'com.neenbedankt.android-apt'
-
 dependencies {
-    compile 'com.android.support:support-v4:23.4.0'
-    compile 'com.android.support:design:23.4.0'
-    compile 'com.jakewharton:butterknife:8.2.1'
-    apt 'com.jakewharton:butterknife-compiler:8.2.1'
-    compile 'com.squareup.okhttp3:okhttp:3.4.1'
-    compile 'com.squareup.okio:okio:1.9.0'
+    compile 'com.android.support:support-v4:26.0.0'
+    compile 'com.android.support:design:26.0.0'
+    compile 'com.jakewharton:butterknife:8.8.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.0'
+    compile 'com.squareup.okhttp3:okhttp:3.8.1'
+    compile 'com.squareup.okio:okio:1.13.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.jakewharton.timber:timber:4.1.2'
+    compile 'com.jakewharton.timber:timber:4.5.1'
 }
