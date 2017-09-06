@@ -51,27 +51,27 @@ public class CtrlAltDeleteReader extends Reader {
     }
 
     public String handleRawPage(Comic c, String page) {
-        Matcher mImages = pImages.matcher(page);
-        Matcher mPrev = pPrev.matcher(page);
-        Matcher mNext = pNext.matcher(page);
+        Matcher imageMatcher = pImages.matcher(page);
+        Matcher prevMatcher = pPrev.matcher(page);
+        Matcher nextMatcher = pNext.matcher(page);
 
-        mImages.find();
-        String imgUrl = mImages.group(1);
-        String imgTitle = mImages.group(2);
+        imageMatcher.find();
+        String imgUrl = imageMatcher.group(1);
+        String imgTitle = imageMatcher.group(2);
         int dotInd = imgTitle.indexOf(".");
         if(dotInd != -1) {
             imgTitle = imgTitle.substring(0, dotInd);
         }
         c.setImageTitle(imgTitle);
 
-        if(mPrev.find()) {
-            c.setPrevInd(mPrev.group(1));
+        if(prevMatcher.find()) {
+            c.setPrevInd(prevMatcher.group(1));
             /* Normal comic */
-            if(mNext.find()) {
-                if(mNext.group(1).equals("")) {
+            if(nextMatcher.find()) {
+                if(nextMatcher.group(1).equals("")) {
                     c.setNextInd(maxInd);
                 } else {
-                    c.setNextInd(mNext.group(1));
+                    c.setNextInd(nextMatcher.group(1));
                 }
                 /* Last comic */
             } else {
@@ -81,8 +81,8 @@ public class CtrlAltDeleteReader extends Reader {
             }
             /* First comic */
         } else {
-            if(mNext.find(1)) {
-                c.setNextInd(mNext.group(1));
+            if(nextMatcher.find(1)) {
+                c.setNextInd(nextMatcher.group(1));
             } else {
                 /* Anomaly, this should not happen */
             }

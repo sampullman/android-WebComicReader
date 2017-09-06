@@ -42,29 +42,29 @@ public class XKCDReader extends Reader {
     }
 
     public String handleRawPage(Comic c, String page) {
-        Matcher mImages = pImages.matcher(page);
-        Matcher mPrev = pPrev.matcher(page);
-        Matcher mNext = pNext.matcher(page);
+        Matcher imageMatcher = pImages.matcher(page);
+        Matcher prevMatcher = pPrev.matcher(page);
+        Matcher nextMatcher = pNext.matcher(page);
 
-        mImages.find();
-        String imgUrl = mImages.group(1);
-        c.setAlt(mImages.group(2));
+        imageMatcher.find();
+        String imgUrl = imageMatcher.group(1);
+        c.setAlt(imageMatcher.group(2));
 
-        if(mPrev.find()) {
-            c.setPrevInd(mPrev.group(1));
+        if(prevMatcher.find()) {
+            c.setPrevInd(prevMatcher.group(1));
             /* Normal comic */
-            if(mNext.find()) {
-                c.setNextInd(mNext.group(1));
+            if(nextMatcher.find()) {
+                c.setNextInd(nextMatcher.group(1));
                 /* Last comic */
             } else {
-                String temp = Integer.toString(Integer.parseInt(mPrev.group(1)) + 1);
+                String temp = Integer.toString(Integer.parseInt(prevMatcher.group(1)) + 1);
                 setMaxIndex(temp);
                 setMaxNum(temp);
             }
             /* First comic */
         } else {
-            if(mNext.find(1)) {
-                c.setNextInd(mNext.group(1));
+            if(nextMatcher.find(1)) {
+                c.setNextInd(nextMatcher.group(1));
             } else {
                 /* Anomaly, this should not happen */
             }

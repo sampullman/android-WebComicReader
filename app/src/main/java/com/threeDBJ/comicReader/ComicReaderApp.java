@@ -11,7 +11,6 @@ import timber.log.Timber;
 import timber.log.Timber.DebugTree;
 
 public class ComicReaderApp extends Application {
-    static final String TAG = "webComicReader";
     ComicState state = new ComicState();
     RequestManager rm = new RequestManager();
     Reader activeReader;

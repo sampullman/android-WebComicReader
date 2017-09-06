@@ -56,27 +56,27 @@ public class ManlyGuysReader extends Reader {
     }
 
     public String handleRawPage(Comic c, String page) {
-        Matcher mImages = pImages.matcher(page);
-        Matcher mPrev = pPrev.matcher(page);
-        Matcher mNext = pNext.matcher(page);
+        Matcher imageMatcher = pImages.matcher(page);
+        Matcher prevMatcher = pPrev.matcher(page);
+        Matcher nextMatcher = pNext.matcher(page);
 
-        boolean success = mImages.find();
-        String imgUrl = mImages.group(1);
+        boolean success = imageMatcher.find();
+        String imgUrl = imageMatcher.group(1);
 
-        if(mImages.groupCount() == 2) {
-            c.setAlt(mImages.group(2));
-            Timber.e("Manly alt: %s", c.getAlt());
+        if(imageMatcher.groupCount() == 2) {
+            c.setAlt(imageMatcher.group(2));
+            Timber.d("Manly alt: %s", c.getAlt());
         } else {
             c.setAlt(null);
         }
 
-        if(mPrev.find()) {
-            Timber.e("previous: %s", mPrev.group(1));
-            c.setPrevInd(mPrev.group(1));
+        if(prevMatcher.find()) {
+            Timber.d("previous: %s", prevMatcher.group(1));
+            c.setPrevInd(prevMatcher.group(1));
             /* Normal comic */
-            if(mNext.find()) {
-                Timber.e("next: %s", mPrev.group(1));
-                c.setNextInd(mNext.group(1));
+            if(nextMatcher.find()) {
+                Timber.d("next: %s", prevMatcher.group(1));
+                c.setNextInd(nextMatcher.group(1));
                 /* Last comic */
             } else {
                 if(maxInd == null) {
@@ -87,8 +87,8 @@ public class ManlyGuysReader extends Reader {
             }
             /* First comic */
         } else {
-            if(mNext.find(1)) {
-                c.setNextInd(mNext.group(1));
+            if(nextMatcher.find(1)) {
+                c.setNextInd(nextMatcher.group(1));
             } else {
                 /* Anomaly, this should not happen */
             }

@@ -68,7 +68,7 @@ public class SavedComicReader extends FragmentActivity {
         sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
         if(Reader.isStorageWritable()) {
             String path = sdPath + "/comics/" + title + "/";
-            Timber.e("comic %s", path);
+            Timber.d("comic %s", path);
             File dir = new File(path);
             images = dir.listFiles();
             if(images == null || images.length == 0) {

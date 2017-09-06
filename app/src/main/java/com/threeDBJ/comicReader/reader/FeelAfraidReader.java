@@ -47,20 +47,20 @@ public class FeelAfraidReader extends Reader {
     }
 
     public String handleRawPage(Comic c, String page) {
-        Matcher mImages = pImages.matcher(page);
-        Matcher mPrev = pPrev.matcher(page);
-        Matcher mNext = pNext.matcher(page);
-        if(mPrev.find()) {
-            c.setPrevInd(mPrev.group(1));
+        Matcher imageMatcher = pImages.matcher(page);
+        Matcher prevMatcher = pPrev.matcher(page);
+        Matcher nextMatcher = pNext.matcher(page);
+        if(prevMatcher.find()) {
+            c.setPrevInd(prevMatcher.group(1));
             // TODO -- figure out better solution
             //if(getCurComic().prevInd.equals("75.php"))
             //c.setNextInd("77.php");
             /* Normal comic */
-            if(mNext.find()) {
-                c.setNextInd(mNext.group(1));
+            if(nextMatcher.find()) {
+                c.setNextInd(nextMatcher.group(1));
                 /* Last comic */
             } else {
-                String temp = mPrev.group(1);
+                String temp = prevMatcher.group(1);
                 temp = temp.substring(0, temp.length() - 4);
                 temp = Integer.toString(Integer.parseInt(temp) + 1);
                 setMaxIndex(temp + ".php");
@@ -68,16 +68,16 @@ public class FeelAfraidReader extends Reader {
             }
             /* First comic */
         } else {
-            if(mNext.find(1)) {
-                c.setNextInd(mNext.group(1));
+            if(nextMatcher.find(1)) {
+                c.setNextInd(nextMatcher.group(1));
             } else {
                 /* Anomaly, this should not happen */
                 Timber.v("FeelAfraid grevious error");
             }
         }
-        if(mImages.find()) {
-            String imgUrl = this.base + mImages.group(1);
-            String imgTitle = mImages.group(2);
+        if(imageMatcher.find()) {
+            String imgUrl = this.base + imageMatcher.group(1);
+            String imgTitle = imageMatcher.group(2);
             int dotInd = imgTitle.indexOf(".");
             if(dotInd != -1) {
                 imgTitle = imgTitle.substring(0, dotInd);

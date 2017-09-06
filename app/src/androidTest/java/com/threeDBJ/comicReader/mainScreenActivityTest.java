@@ -117,7 +117,7 @@ public class mainScreenActivityTest extends ActivityInstrumentationTestCase2<Com
         testAllPrev(reader);
     }
 
-    public void testExplosmPrev() throws Exception {
+    public void testExplosprevMatcher() throws Exception {
         Reader reader = initReader(new ExplosmReader());
         testAllPrev(reader);
     }

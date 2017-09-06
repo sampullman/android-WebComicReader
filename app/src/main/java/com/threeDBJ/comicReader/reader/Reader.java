@@ -178,7 +178,7 @@ public abstract class Reader extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Timber.e("Comic Reader Destroyed");
+        Timber.d("Comic Reader Destroyed");
     }
 
     public void loadInitial(String url) {
@@ -203,10 +203,10 @@ public abstract class Reader extends AppCompatActivity {
 
     public void loadLast(String url) {
         boolean freshComic = shortTitle.equals(state.prevShortTitle);
-        Timber.e("Loading last: freshComic=%b, loading=%b, running=%b, curComic null=%b", freshComic, state.isLoading(), rm.running, (state.curComic.getComic()==null));
+        Timber.d("Loading last: freshComic=%b, loading=%b, running=%b, curComic null=%b", freshComic, state.isLoading(), rm.running, (state.curComic.getComic()==null));
         if(freshComic && state.curComic.getComic() != null) {
             //notifyComicLoaded(state.curComic);
-            Timber.e("Loading last comic image");
+            Timber.d("Loading last comic image");
             mReaderPagerAdapter.freshComics = true;
             state.hasUnseenComic = false;
         } else if(state.isLoading() && freshComic) {
@@ -232,7 +232,7 @@ public abstract class Reader extends AppCompatActivity {
     /* Notification from the RequestManager that a comic has finished loading.
        Matches comic url with current cur/prev/nextComic */
     public void notifyComicLoaded(CachedComic cached) {
-        Timber.e("Notified of comic load, cur? %b", (cached == state.curComic));
+        Timber.d("Notified of comic load, cur? %b", (cached == state.curComic));
         if(cached == state.curComic) {
             errorInd = null;
             if(loadingDialog != null && loadingDialog.isShowing()) {
@@ -260,9 +260,9 @@ public abstract class Reader extends AppCompatActivity {
             loadingDialog.cancel();
         }
         errorCount += 1;
-        //Timber.e("error: %d %d", c.getInd(), state.curComic.getInd());
+        //Timber.d("error: %d %d", c.getInd(), state.curComic.getInd());
         if(cached == state.curComic && !state.curComic.isLoaded()) {
-            //Timber.e("error: errTextNull = %b", (errorText == null));
+            //Timber.d("error: errTextNull = %b", (errorText == null));
             ViewGroup ll = (ViewGroup) findViewById(R.id.comic_wrapper);
             if(errorText == null) {
                 errorText = (TextView) getLayoutInflater().inflate(R.layout.error_text_view, ll, false);
@@ -291,7 +291,7 @@ public abstract class Reader extends AppCompatActivity {
                either be ignored or marked as the current comic. */
             @Override
             public void onPageSelected (int position) {
-                Timber.e("Page selected: %d", position);
+                Timber.d("Page selected: %d", position);
                 if(firstRun) {
                     firstRun = false;
                     return;
@@ -300,7 +300,7 @@ public abstract class Reader extends AppCompatActivity {
                 /* Load the next comic. */
                 String newInd = "";
                 if(position > state.prevPos) {
-                    Timber.e("Next page selected");
+                    Timber.d("Next page selected");
                     if(state.curComic.getInd() == null && nextEnabled) {
                     } else if(state.curComic.getInd() == null || !nextEnabled || state.curComic.getInd().equals(maxInd) ||
                               state.curComic.getInd().equals(getMax())) {
@@ -382,7 +382,7 @@ public abstract class Reader extends AppCompatActivity {
         @Override
         public Object instantiateItem(ViewGroup container, int pos) {
             PageFragment fragment = (PageFragment) super.instantiateItem(container, pos);
-            Timber.e("FragAdapter instantiating at pos: %d", pos);
+            Timber.d("FragAdapter instantiating at pos: %d", pos);
             fragMap.put(pos, fragment);
             if(freshComics) {
                 fragment.setComic(state.curComic, mViewPager);
@@ -406,11 +406,11 @@ public abstract class Reader extends AppCompatActivity {
             PageFragment frag = fragMap.get(pos);
             if(frag == null) {
                 frag = makePageFragment(pos, comic.image);
-                Timber.e("Made fragment with serialized image, mapsize=%d", fragMap.size());
+                Timber.d("Made fragment with serialized image, mapsize=%d", fragMap.size());
             } else {
                 frag.setComic(comic, mViewPager);
                 frag = makePageFragment(pos, comic.image);
-                Timber.e("Set fragment image directly");
+                Timber.d("Set fragment image directly");
             }
             return frag;
         }
@@ -515,7 +515,7 @@ public abstract class Reader extends AppCompatActivity {
                 String path = sdPath + "/comics/" + title + "/";
                 File dir = new File(path);
                 if(!dir.exists() && !dir.mkdirs()) {
-                    Timber.e("Could not create the save folder");
+                    Timber.d("Could not create the save folder");
                 }
                 String saveTitle;
                 if(state.curComic.getImageTitle() != null) {

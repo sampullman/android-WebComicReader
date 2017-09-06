@@ -42,28 +42,27 @@ public class DinosaurReader extends Reader {
     }
 
     public String handleRawPage(Comic c, String page) {
-        Matcher mImages = pImages.matcher(page);
-        Matcher mPrev = pPrev.matcher(page);
-        Matcher mNext = pNext.matcher(page);
+        Matcher imageMatcher = pImages.matcher(page);
+        Matcher prevMatcher = pPrev.matcher(page);
+        Matcher nextMatcher = pNext.matcher(page);
 
-        boolean success = mImages.find();
-        String imgUrl = mImages.group(1);
-        Timber.e("Dinosaur %s", imgUrl);
-        c.setAlt(mImages.group(2));
-        Timber.e("Dinosaur %s", mImages.group(2));
+        boolean success = imageMatcher.find();
+        String imgUrl = imageMatcher.group(1);
+        c.setAlt(imageMatcher.group(2));
+        Timber.d("Dinosaur %s %s", imgUrl, imageMatcher.group(2));
 
-        if(mPrev.find()) {
-            c.setPrevInd(mPrev.group(1));
-            if(mNext.find() && mNext.group(1) != null) {
-                c.setNextInd(mNext.group(1));
+        if(prevMatcher.find()) {
+            c.setPrevInd(prevMatcher.group(1));
+            if(nextMatcher.find() && nextMatcher.group(1) != null) {
+                c.setNextInd(nextMatcher.group(1));
             } else {
-                String temp = Integer.toString(Integer.parseInt(mPrev.group(1)) + 1);
+                String temp = Integer.toString(Integer.parseInt(prevMatcher.group(1)) + 1);
                 setMaxIndex(temp);
                 setMaxNum(temp);
             }
         } else {
-            if(mNext.find(1)) {
-                c.setNextInd(mNext.group(1));
+            if(nextMatcher.find(1)) {
+                c.setNextInd(nextMatcher.group(1));
             } else {
                 /* Anomaly, this should not happen */
             }

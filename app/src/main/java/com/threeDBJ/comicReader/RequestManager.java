@@ -19,11 +19,16 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.regex.Pattern;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import timber.log.Timber;
 
 public class RequestManager {
 
     Pattern unichar = Pattern.compile("&#[0-9]+");
+    private OkHttpClient client = new OkHttpClient();
 
     public int running = 0;
 
@@ -46,7 +51,7 @@ public class RequestManager {
     }
 
     /* Makes multiple attempts to retrieve an image if the first one doesn't work */
-    public Bitmap retrieveImage(String addr) {
+    private Bitmap retrieveImage(String addr) {
         Bitmap result = getImageFromURL(addr);
         if(result != null) return result;
         result = getImageFromURL(addr);
@@ -57,7 +62,7 @@ public class RequestManager {
 
     /* Grabs an image from the input url String and returns it in Bitmap form
        -Do not pass a null url */
-    public Bitmap getImageFromURL(String addr) {
+    private Bitmap getImageFromURL(String addr) {
         // This check should probably be somewhere else
         if(addr == null) {
             return null;
@@ -77,49 +82,23 @@ public class RequestManager {
 
     /* Retrieves the web page at the input url.
        On 302 response, go to redirect. */
-    public String makeQuery(String url) {
+    private String makeQuery(String url) {
+        Timber.d("make-query %s", url);
         try {
-            Timber.e("make-query %s", url);
-            URL addr = new URL(url);
-            HttpURLConnection con = null;
-            int response = -1, i = 0;
-            /* Try a few times before giving up. */
-            while(response == -1) {
-                if(i == 3) {
-                    return null;
-                }
-                con = (HttpURLConnection) (addr.openConnection());
-                con.setInstanceFollowRedirects(true);
-                con.connect();
-                response = con.getResponseCode();
-                i += 1;
+            Request request = new Request.Builder()
+                    .url(url)
+                    .build();
+            Response response = client.newCall(request).execute();
+            ResponseBody body = response.body();
+            if(body == null) {
+                Timber.e("Null response body in makeQuery");
+            } else {
+                return body.string();
             }
-            if(response == 302) {
-                con = (HttpURLConnection) (new URL(url.substring(0, url.length() - 8) +
-                        con.getHeaderField("Location")).openConnection());
-                con.connect();
-            }
-            InputStream inputStream = con.getInputStream();
-            response = con.getResponseCode();
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuilder res = new StringBuilder();
-            String line;
-            while((line = in.readLine()) != null) {
-                res.append(line);
-            }
-            in.close();
-            return res.toString();
-        } catch(MalformedURLException e) {
-            Timber.v("make_query_malformed %s", e.getMessage());
-            return null;
         } catch(IOException e) {
             Timber.v("make_query_io %s", e.getMessage());
-            return null;
-        } catch(Exception e) {
-            Timber.v("unknown %s", e.getMessage());
-            return null;
         }
+        return null;
     }
 
     /* Background task for displaying an alt image. */
@@ -181,7 +160,7 @@ public class RequestManager {
                     imgUrl = this.context.handleRawPage(comic, page);
                     this.context = null; // Hack so that the Reader is cleaned up quickly on orientation change
                     if(imgUrl == null) {
-                        Timber.e("cmreader url: %s" + comic.getInd());
+                        Timber.d("cmreader url: %s" + comic.getInd());
                     } else {
                         comic.setComic(retrieveImage(imgUrl));
                     }

@@ -47,13 +47,13 @@ public class SMBCReader extends Reader {
        Last comic has a first and a previous
        All other comics have a first, previous, and next */
     public String handleRawPage(Comic c, String page) {
-        Matcher mImages = pImages.matcher(page);
-        Matcher mPrev = pPrev.matcher(page);
-        Matcher mNext = pNext.matcher(page);
+        Matcher imageMatcher = pImages.matcher(page);
+        Matcher prevMatcher = pPrev.matcher(page);
+        Matcher nextMatcher = pNext.matcher(page);
         String imgUrl;
         try {
-            mImages.find();
-            imgUrl = mImages.group(1);
+            imageMatcher.find();
+            imgUrl = imageMatcher.group(1);
             Matcher mAlt = pAlt.matcher(page);
             if(mAlt.find()) {
                 c.setAlt(mAlt.group(1));
@@ -64,11 +64,11 @@ public class SMBCReader extends Reader {
             imgUrl = "http://cdn.shopify.com/s/files/1/0066/2852/products/science_large_grande.jpg?100646";
         }
 
-        boolean haveNext = mNext.find();
-        boolean havePrev = mPrev.find();
+        boolean haveNext = nextMatcher.find();
+        boolean havePrev = prevMatcher.find();
         /* First comic */
         if(!havePrev) {
-            c.setNextInd(mNext.group(1));
+            c.setNextInd(nextMatcher.group(1));
         } else if(!haveNext) {
             if(!haveMax()) {
                 Matcher mMax = pMax.matcher(page);
@@ -77,10 +77,10 @@ public class SMBCReader extends Reader {
                 setMaxIndex(temp);
                 setMaxNum(temp);
             }
-            c.setPrevInd(mPrev.group(1));
+            c.setPrevInd(prevMatcher.group(1));
         } else {
-            c.setPrevInd(mPrev.group(1));
-            c.setNextInd(mNext.group(1));
+            c.setPrevInd(prevMatcher.group(1));
+            c.setNextInd(nextMatcher.group(1));
         }
         return imgUrl;
     }

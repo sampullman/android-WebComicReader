@@ -48,24 +48,24 @@ public class QuestionableContentReader extends Reader {
     }
 
     public String handleRawPage(Comic c, String page) {
-        Matcher mImages = pImages.matcher(page);
-        Matcher mPrev = pPrev.matcher(page);
-        Matcher mNext = pNext.matcher(page);
+        Matcher imageMatcher = pImages.matcher(page);
+        Matcher prevMatcher = pPrev.matcher(page);
+        Matcher nextMatcher = pNext.matcher(page);
 
-        boolean success = mImages.find();
-        String imgUrl = "http://questionablecontent.net/comics/" + mImages.group(1) + mImages.group(2);
-        if(mPrev.find()) {
-            Timber.e("prev: %s", mPrev.group(1));
-            c.setPrevInd(mPrev.group(1));
-            if(mNext.find() && mNext.group(1) != null) {
-                c.setNextInd(mNext.group(1));
+        boolean success = imageMatcher.find();
+        String imgUrl = "http://questionablecontent.net/comics/" + imageMatcher.group(1) + imageMatcher.group(2);
+        if(prevMatcher.find()) {
+            Timber.d("prev: %s", prevMatcher.group(1));
+            c.setPrevInd(prevMatcher.group(1));
+            if(nextMatcher.find() && nextMatcher.group(1) != null) {
+                c.setNextInd(nextMatcher.group(1));
             } else {
-                setMaxIndex(mImages.group(1));
-                setMaxNum(mImages.group(1));
+                setMaxIndex(imageMatcher.group(1));
+                setMaxNum(imageMatcher.group(1));
             }
         } else {
-            if(mNext.find(1)) {
-                c.setNextInd(mNext.group(1));
+            if(nextMatcher.find(1)) {
+                c.setNextInd(nextMatcher.group(1));
             } else {
                 /* Anomaly, this should not happen */
             }

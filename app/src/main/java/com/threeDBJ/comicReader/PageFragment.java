@@ -27,7 +27,7 @@ public class PageFragment extends Fragment {
     Bitmap image;
 
     public static PageFragment newInstance(Bitmap image) {
-        Timber.e("Made PageFragment");
+        Timber.d("Made PageFragment");
         PageFragment pageFragment = new PageFragment();
         //Bundle bundle = new Bundle();
         //bundle.putParcelable("image", image);
@@ -101,7 +101,7 @@ public class PageFragment extends Fragment {
         ButterKnife.bind(this, view);
         vg = (ViewGroup) view;
         if(image != null) {
-            Timber.e("Page fragment created with bitmap");
+            Timber.d("Page fragment created with bitmap");
             setImage(image, null);
             image = null;
         }

@@ -1,5 +1,6 @@
 package com.threeDBJ.comicReader;
 
+import android.Manifest.permission;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,6 +18,13 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.CompositeMultiplePermissionsListener;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+import com.karumi.dexter.listener.multi.SnackbarOnAnyDeniedMultiplePermissionsListener;
 import com.threeDBJ.comicReader.ComicReaderApp.ComicState;
 
 import java.util.ArrayList;
@@ -44,6 +52,23 @@ public class ComicSelectActivity extends AppCompatActivity {
         tabs.setupWithViewPager(viewPager);
 
         state = ((ComicReaderApp) getApplicationContext()).getComicState();
+
+        MultiplePermissionsListener permissionsListener = new MultiplePermissionsListener() {
+            @Override
+            public void onPermissionsChecked(MultiplePermissionsReport report) {
+                Timber.d("PERMISSIONS CHECKED");
+            }
+
+            @Override
+            public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                Timber.d("PERMISSIONS RATIONALE");
+            }
+        };
+
+        Dexter.withActivity(this)
+                .withPermissions(permission.ACCESS_NETWORK_STATE, permission.INTERNET, permission.WRITE_EXTERNAL_STORAGE)
+                .withListener(permissionsListener)
+                .check();
     }
 
     private void setupViewPager(ViewPager viewPager) {
