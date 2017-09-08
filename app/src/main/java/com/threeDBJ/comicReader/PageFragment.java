@@ -21,8 +21,7 @@ import timber.log.Timber;
 
 public class PageFragment extends Fragment {
     @BindView(R.id.comic) TouchImageView imageView;
-    @BindView(R.id.placeholder)
-    TextView placeholder;
+    @BindView(R.id.placeholder) TextView placeholder;
     ViewGroup vg;
     Bitmap image;
 

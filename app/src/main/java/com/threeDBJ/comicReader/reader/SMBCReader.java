@@ -9,14 +9,17 @@ import com.threeDBJ.comicReader.Comic;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SMBCReader extends Reader {
-    public static String prevPat = "<!-- Back button--><a href=\"[?]id=([0-9]+).*?class=\"backRollover\">";
-    public static String nextPat = "<!-- Next button --><a href=\"[?]id=([0-9]+).*?class=\"nextRollover\">";
-    public static String imgPat = "<div id=\"comicimage\">.*?<img src='(http://www[.]smbc-comics[.]com/comics/.*?)'>.*?</div>";
-    public static String altPat = "<div id=\"aftercomic\".*?<img src='(http://www[.]smbc-comics[.]com/comics/.*?after[.]gif)'>";
-    public static String maxPat = "function jumpToRandom[(][)] [{].*?var num = Math.floor[(]Math.random[(][)].([0-9]*?)[)]";
+import timber.log.Timber;
 
-    String altURL;
+public class SMBCReader extends Reader {
+
+    public static String prevPat = "rel=\"start\"></a><a href=\"http://www.smbc-comics.com/comic/(.*?)\" class=\"prev\" rel=\"prev\"></a>";
+    public static String nextPat = "rel=\"rss\"></a><a href=\"http://www.smbc-comics.com/comic/(.*?)\" class=\"next\" rel=\"next\"></a>";
+    public static String imgPat = "<meta property=\"og:image\" content=\"http://www.smbc-comics.com/comics/(.*?)\" />";
+    public static String altPat = "<div id=\"aftercomic\".*?<img src='//smbc-comics.com/comics/(.*?)'>";
+    public static String maxPat = "<input id=\"permalinktext\" type=\"text\" value=\"http://smbc-comics.com/comic/(.*?)\" />";
+
+    String altURL, imageBase;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -33,8 +36,9 @@ public class SMBCReader extends Reader {
         this.pNext = Pattern.compile(nextPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pMax = Pattern.compile(maxPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pAlt = Pattern.compile(altPat, Pattern.DOTALL | Pattern.UNIX_LINES);
-        this.base = "http://www.smbc-comics.com/index.php?db=comics&id=";
+        this.base = "http://www.smbc-comics.com/comic/";
         this.max = "http://www.smbc-comics.com/";
+        this.imageBase = "http://www.smbc-comics.com/comics/";
 
         this.title = "SMBC";
         this.shortTitle = title;
@@ -53,17 +57,17 @@ public class SMBCReader extends Reader {
         String imgUrl;
         try {
             imageMatcher.find();
-            imgUrl = imageMatcher.group(1);
+            imgUrl = imageBase + imageMatcher.group(1);
+            Timber.d("IMAGE %s", imgUrl);
             Matcher mAlt = pAlt.matcher(page);
             if(mAlt.find()) {
-                c.setAlt(mAlt.group(1));
+                c.setAlt(imageBase + mAlt.group(1));
             } else {
                 c.setAlt(null);
             }
         } catch(Exception e) {
             imgUrl = "http://cdn.shopify.com/s/files/1/0066/2852/products/science_large_grande.jpg?100646";
         }
-
         boolean haveNext = nextMatcher.find();
         boolean havePrev = prevMatcher.find();
         /* First comic */
@@ -75,11 +79,13 @@ public class SMBCReader extends Reader {
                 mMax.find();
                 String temp = mMax.group(1);
                 setMaxIndex(temp);
-                setMaxNum(temp);
             }
+            Timber.d("Test3 %s", prevMatcher.group(1));
             c.setPrevInd(prevMatcher.group(1));
         } else {
+            Timber.d("Test6");
             c.setPrevInd(prevMatcher.group(1));
+            Timber.d("Test7");
             c.setNextInd(nextMatcher.group(1));
         }
         return imgUrl;
