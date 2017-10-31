@@ -26,7 +26,6 @@ public class PageFragment extends Fragment {
     Bitmap image;
 
     public static PageFragment newInstance(Bitmap image) {
-        Timber.d("Made PageFragment");
         PageFragment pageFragment = new PageFragment();
         //Bundle bundle = new Bundle();
         //bundle.putParcelable("image", image);

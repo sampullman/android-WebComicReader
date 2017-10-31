@@ -54,7 +54,7 @@ public abstract class Reader extends AppCompatActivity {
     ComicReaderApp app;
     ComicState state;
     @BindView(R.id.toolbar) Toolbar toolBar;
-    @BindView(R.id.reader_pager) ComicPager mViewPager;
+    @BindView(R.id.reader_pager) ComicPager viewPager;
     @BindView(R.id.comic_alt) Button altButton;
 
     String prevPat, nextPat, imgPat, base, max, errorInd,
@@ -75,7 +75,7 @@ public abstract class Reader extends AppCompatActivity {
     boolean firstRun=false, error=false, swipe=false,
         nextEnabled=true, prevEnabled=false, loadLastViewed;
 
-    ReaderPagerAdapter mReaderPagerAdapter;
+    ReaderPagerAdapter readerPagerAdapter;
 
     RequestManager rm;
 
@@ -108,22 +108,22 @@ public abstract class Reader extends AppCompatActivity {
     public void UISetup() {
         altButton.setVisibility(View.GONE);
         firstRun = true;
-        mReaderPagerAdapter = new ReaderPagerAdapter(getSupportFragmentManager());
-        mViewPager.setAdapter(mReaderPagerAdapter);
-        mViewPager.setOffscreenPageLimit(1);
-        mViewPager.setOnPageChangeListener(pageListener);
-        mViewPager.setCurrentItem(state.setPager);
-        mViewPager.setCurrentItem(state.setPager);
+        readerPagerAdapter = new ReaderPagerAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(readerPagerAdapter);
+        viewPager.setOffscreenPageLimit(1);
+        viewPager.setOnPageChangeListener(pageListener);
+        viewPager.setCurrentItem(state.setPager);
+        viewPager.setCurrentItem(state.setPager);
         /*
-          PageFragment frag = mReaderPagerAdapter.getFragment(state.setPager);
+          PageFragment frag = readerPagerAdapter.getFragment(state.setPager);
           if(state.curComic != null && frag != null) {
-          frag.setComic(state.curComic, mViewPager);
+          frag.setComic(state.curComic, viewPager);
           }
         */
     }
 
     public ComicPager getViewPager() {
-        return this.mViewPager;
+        return this.viewPager;
     }
 
     public ComicState getState() {
@@ -186,7 +186,7 @@ public abstract class Reader extends AppCompatActivity {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
             String lastInd = prefs.getString(shortTitle, "");
             if(lastInd.equals(state.curComic.getInd())) {
-                mReaderPagerAdapter.freshComics = true;
+                readerPagerAdapter.freshComics = true;
             } else if(lastInd.equals("") || lastInd.equals(max)) {
                 maxNum = prefs.getInt(shortTitle+"-max", -1);
                 loadLast(url);
@@ -207,7 +207,7 @@ public abstract class Reader extends AppCompatActivity {
         if(freshComic && state.curComic.getComic() != null) {
             //notifyComicLoaded(state.curComic);
             Timber.d("Loading last comic image");
-            mReaderPagerAdapter.freshComics = true;
+            readerPagerAdapter.freshComics = true;
             state.hasUnseenComic = false;
         } else if(state.isLoading() && freshComic) {
             showLoadingDialog();
@@ -238,11 +238,11 @@ public abstract class Reader extends AppCompatActivity {
             if(loadingDialog != null && loadingDialog.isShowing()) {
                 loadingDialog.dismiss();
             }
-            PageFragment frag = mReaderPagerAdapter.getFragment(mViewPager.getCurrentItem());
+            PageFragment frag = readerPagerAdapter.getFragment(viewPager.getCurrentItem());
             if(frag == null) {
                 state.handleComicCancel();
             } else {
-                frag.setComic(cached, mViewPager);
+                frag.setComic(cached, viewPager);
                 prevEnabled = true;
                 nextEnabled = true;
             }
@@ -296,7 +296,7 @@ public abstract class Reader extends AppCompatActivity {
                     firstRun = false;
                     return;
                 }
-                mReaderPagerAdapter.clean(position);
+                readerPagerAdapter.clean(position);
                 /* Load the next comic. */
                 String newInd = "";
                 if(position > state.prevPos) {
@@ -304,14 +304,11 @@ public abstract class Reader extends AppCompatActivity {
                     if(state.curComic.getInd() == null && nextEnabled) {
                     } else if(state.curComic.getInd() == null || !nextEnabled || state.curComic.getInd().equals(maxInd) ||
                               state.curComic.getInd().equals(getMax())) {
-                        mViewPager.setCurrentItem(state.prevPos);
+                        viewPager.setCurrentItem(state.prevPos);
                         return;
                     }
-                    state.prevComic.become(state.curComic);
-                    state.curComic.become(state.nextComic);
-                    state.nextComic.clear();
+                    newInd = state.transitionToNext();
 
-                    newInd = state.prevComic.getNextInd();
                     if(state.curComic.isLoaded()) {
                         state.comicMap.put(state.curComic.getNextInd(), state.nextComic);
                         loadComic(state.curComic.getNextInd());
@@ -320,14 +317,11 @@ public abstract class Reader extends AppCompatActivity {
                 } else if(position < state.prevPos) {
                     if(state.curComic.getInd() == null && prevEnabled) {
                     } else if(state.curComic.getInd() == null || !prevEnabled || state.curComic.getInd().equals(getFirstInd())) {
-                        mViewPager.setCurrentItem(state.prevPos);
+                        viewPager.setCurrentItem(state.prevPos);
                         return;
                     }
-                    state.nextComic.become(state.curComic);
-                    state.curComic.become(state.prevComic);
-                    state.prevComic.clear();
 
-                    newInd = state.nextComic.getPrevInd();
+                    newInd = state.transitionToPrev();
                     if(state.curComic.isLoaded() && !state.curComic.getInd().equals(getFirstInd())) {
                         state.comicMap.put(state.curComic.getPrevInd(), state.prevComic);
                         loadComic(state.curComic.getPrevInd());
@@ -344,9 +338,9 @@ public abstract class Reader extends AppCompatActivity {
                     loadComic(newInd);
                     errorInd = newInd;
                 } else {
-                    int curItem = mViewPager.getCurrentItem();
-                    PageFragment pf = mReaderPagerAdapter.getFragment(curItem);
-                    pf.setComic(state.curComic, mViewPager);
+                    int curItem = viewPager.getCurrentItem();
+                    PageFragment pf = readerPagerAdapter.getFragment(curItem);
+                    pf.setComic(state.curComic, viewPager);
                 }
                 state.prevPos = position;
             }
@@ -367,15 +361,9 @@ public abstract class Reader extends AppCompatActivity {
             if(frag != null) frag.clean();
         }
 
-        public void kill() {
-            for(Fragment frag : fragMap.values()) {
-                getSupportFragmentManager().beginTransaction().remove((Fragment)frag).commit();
-            }
-        }
-
         public void clearImages() {
             for(PageFragment frag : fragMap.values()) {
-                frag.setComic(null, mViewPager);
+                frag.setComic(null, viewPager);
             }
         }
 
@@ -385,7 +373,7 @@ public abstract class Reader extends AppCompatActivity {
             Timber.d("FragAdapter instantiating at pos: %d", pos);
             fragMap.put(pos, fragment);
             if(freshComics) {
-                fragment.setComic(state.curComic, mViewPager);
+                fragment.setComic(state.curComic, viewPager);
                 freshComics = false;
             }
             return fragment;
@@ -399,20 +387,6 @@ public abstract class Reader extends AppCompatActivity {
 
         private PageFragment makePageFragment(int pos) {
             return makePageFragment(pos, null);
-        }
-
-        /* Gets the PageFragment at pos, and sets its image */
-        public PageFragment getFragment(int pos, CachedComic comic) {
-            PageFragment frag = fragMap.get(pos);
-            if(frag == null) {
-                frag = makePageFragment(pos, comic.image);
-                Timber.d("Made fragment with serialized image, mapsize=%d", fragMap.size());
-            } else {
-                frag.setComic(comic, mViewPager);
-                frag = makePageFragment(pos, comic.image);
-                Timber.d("Set fragment image directly");
-            }
-            return frag;
         }
 
         public PageFragment getFragment(int pos) {
@@ -441,12 +415,6 @@ public abstract class Reader extends AppCompatActivity {
         }
     }
 
-    /* Helper for grabbing a random comic */
-    public void grabRandomComic(String url) {
-        state.clearComics();
-        //grabComicCold(url);
-    }
-
     /* Shows a loading dialog.
        Use when the current view page is waiting on a comic to load. */
     public void showLoadingDialog() {
@@ -468,7 +436,7 @@ public abstract class Reader extends AppCompatActivity {
     @OnClick(R.id.comic_prev)
     public void prevClicked() {
         if(prevEnabled && (state.curComic.getInd() != null) && !state.curComic.getInd().equals(getFirstInd())) {
-            mViewPager.setCurrentItem(state.prevPos - 1);
+            viewPager.setCurrentItem(state.prevPos - 1);
         }
     }
 
@@ -477,7 +445,7 @@ public abstract class Reader extends AppCompatActivity {
     public void lastClicked() {
         String ind = state.curComic.getInd();
         if(nextEnabled && ind != null && !ind.equals(maxInd) && !ind.equals(max)) {
-            mViewPager.setCurrentItem(state.prevPos + 1);
+            viewPager.setCurrentItem(state.prevPos + 1);
         }
     }
 
@@ -610,8 +578,9 @@ public abstract class Reader extends AppCompatActivity {
 
     /* To account for sites like Feel Afraid where the index has a trailing .php, etc */
     public void setMaxNum(String ind) {
-        if(maxNum == -1)
-            this.maxNum = (int)Double.parseDouble(ind);
+        if(maxNum == -1) {
+            this.maxNum = (int) Double.parseDouble(ind);
+        }
     }
 
     /* Returns whether the max has been recorded. */
@@ -664,7 +633,7 @@ public abstract class Reader extends AppCompatActivity {
 
     /* Clears visible comic */
     public void clearVisible() {
-        mReaderPagerAdapter.clearImages();
+        readerPagerAdapter.clearImages();
     }
 
     /* General click listener for getting a random comic.
@@ -764,7 +733,7 @@ public abstract class Reader extends AppCompatActivity {
 
     public void setSwipe(boolean on) {
         swipe = on;
-        mViewPager.setSwipeEnabled(on);
+        viewPager.setSwipeEnabled(on);
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         Editor editor = settings.edit();
         editor.putBoolean("swipe", swipe);

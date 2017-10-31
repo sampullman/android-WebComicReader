@@ -11,7 +11,7 @@ import timber.log.Timber;
 import timber.log.Timber.DebugTree;
 
 public class ComicReaderApp extends Application {
-    ComicState state = new ComicState();
+    private ComicState state = new ComicState();
     RequestManager rm = new RequestManager();
     Reader activeReader;
 
@@ -50,6 +50,20 @@ public class ComicReaderApp extends Application {
         public int prevPos = 20000, setPager = 20000;
 
         public ComicState() {
+        }
+
+        public String transitionToNext() {
+            prevComic.become(curComic);
+            curComic.become(nextComic);
+            nextComic.clear();
+            return prevComic.getNextInd();
+        }
+
+        public String transitionToPrev() {
+            nextComic.become(curComic);
+            curComic.become(prevComic);
+            prevComic.clear();
+            return nextComic.getPrevInd();
         }
 
         public boolean isLoading() {

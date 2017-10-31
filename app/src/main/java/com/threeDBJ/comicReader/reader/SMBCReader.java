@@ -73,6 +73,7 @@ public class SMBCReader extends Reader {
         /* First comic */
         if(!havePrev) {
             c.setNextInd(nextMatcher.group(1));
+            Timber.d("First comic: %s %s", c.getNextInd());
         } else if(!haveNext) {
             if(!haveMax()) {
                 Matcher mMax = pMax.matcher(page);
@@ -80,13 +81,12 @@ public class SMBCReader extends Reader {
                 String temp = mMax.group(1);
                 setMaxIndex(temp);
             }
-            Timber.d("Test3 %s", prevMatcher.group(1));
+            Timber.d("At max: %s", maxInd);
             c.setPrevInd(prevMatcher.group(1));
         } else {
-            Timber.d("Test6");
             c.setPrevInd(prevMatcher.group(1));
-            Timber.d("Test7");
             c.setNextInd(nextMatcher.group(1));
+            Timber.d("Normal comic: %s %s", c.getPrevInd(), c.getNextInd());
         }
         return imgUrl;
     }
