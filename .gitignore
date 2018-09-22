@@ -15,6 +15,7 @@ resources/
 # Generated files
 bin/
 gen/
+out/
 
 # Gradle files
 .gradle/
@@ -36,10 +37,10 @@ proguard/
 captures/
 
 # Android Studio / IntelliJ IDEA 
-*.iws
 *.iml
 .idea/libraries
-.idea/misc.xml
+.idea/dictionaries
+.idea/caches
 .idea/tasks.xml
 .idea/vcs.xml
 .idea/workspace.xml
@@ -48,8 +49,14 @@ captures/
 .idea/inspectionProfiles/
 .idea/copyright/
 .idea/encodings.xml
-.idea/codeStyleSettings.xml
+.idea/assetWizardSettings.xml
 .idea/compiler.xml
+
+# External native build folder (Android Studio 2.2 and later)
+.externalNativeBuild
+
+# Google services (APIs, Firebase, etc.)
+google-services.json
 
 # Emacs backups
 *~
