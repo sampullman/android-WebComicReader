@@ -617,9 +617,7 @@ public abstract class Reader extends AppCompatActivity {
     /* Handles a click of the last button. */
     @OnClick(R.id.comic_last)
     public void lastClicked(View v) {
-        if(state.curComic.getInd() == null) {
-            showDialog("Error", "Cannot connect to the internet.");
-        } else if(state.curComic.getInd() == null || !state.curComic.getInd().equals(maxInd)) {
+        if(state.curComic.getInd() == null || !state.curComic.getInd().equals(maxInd)) {
             state.clearComics();
             clearVisible();
             loadLast(getMax());

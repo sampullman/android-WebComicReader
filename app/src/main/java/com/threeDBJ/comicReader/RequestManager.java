@@ -160,7 +160,7 @@ public class RequestManager {
                     imgUrl = this.context.handleRawPage(comic, page);
                     this.context = null; // Hack so that the Reader is cleaned up quickly on orientation change
                     if(imgUrl == null) {
-                        Timber.d("cmreader url: %s" + comic.getInd());
+                        Timber.d("cmreader url: %s", comic.getInd());
                     } else {
                         comic.setComic(retrieveImage(imgUrl));
                     }

@@ -13,10 +13,10 @@ import timber.log.Timber;
 
 public class SMBCReader extends Reader {
 
-    public static String prevPat = "rel=\"start\"></a><a href=\"http://www.smbc-comics.com/comic/(.*?)\" class=\"prev\" rel=\"prev\"></a>";
-    public static String nextPat = "rel=\"rss\"></a><a href=\"http://www.smbc-comics.com/comic/(.*?)\" class=\"next\" rel=\"next\"></a>";
+    public static String prevPat = "\"></a><a class=\"cc-prev\" rel=\"prev\" href=\"http://www.smbc-comics.com/comic/(.*?)\"></a>";
+    public static String nextPat = "\"></a><a class=\"cc-next\" rel=\"next\" href=\"http://www.smbc-comics.com/comic/(.*?)\"></a>";
     public static String imgPat = "<meta property=\"og:image\" content=\"http://www.smbc-comics.com/comics/(.*?)\" />";
-    public static String altPat = "<div id=\"aftercomic\".*?<img src='//smbc-comics.com/comics/(.*?)'>";
+    public static String altPat = "<div id=\"mobaftercomic\".*?<img src='http://www.smbc-comics.com/comics/(.*?)'>";
     public static String maxPat = "<input id=\"permalinktext\" type=\"text\" value=\"http://smbc-comics.com/comic/(.*?)\" />";
 
     String altURL, imageBase;
@@ -46,10 +46,15 @@ public class SMBCReader extends Reader {
         setAltListener(altListener);
     }
 
+    @Override
+    public String getFirstInd() {
+        return "2002-09-05";
+    }
+
     /* Description of comic logic:
-       First comic only has a next
-       Last comic has a first and a previous
-       All other comics have a first, previous, and next */
+           First comic only has a next
+           Last comic has a first and a previous
+           All other comics have a first, previous, and next */
     public String handleRawPage(Comic c, String page) {
         Matcher imageMatcher = pImages.matcher(page);
         Matcher prevMatcher = pPrev.matcher(page);
@@ -58,7 +63,7 @@ public class SMBCReader extends Reader {
         try {
             imageMatcher.find();
             imgUrl = imageBase + imageMatcher.group(1);
-            Timber.d("IMAGE %s", imgUrl);
+
             Matcher mAlt = pAlt.matcher(page);
             if(mAlt.find()) {
                 c.setAlt(imageBase + mAlt.group(1));
@@ -73,7 +78,6 @@ public class SMBCReader extends Reader {
         /* First comic */
         if(!havePrev) {
             c.setNextInd(nextMatcher.group(1));
-            Timber.d("First comic: %s %s", c.getNextInd());
         } else if(!haveNext) {
             if(!haveMax()) {
                 Matcher mMax = pMax.matcher(page);
@@ -86,7 +90,6 @@ public class SMBCReader extends Reader {
         } else {
             c.setPrevInd(prevMatcher.group(1));
             c.setNextInd(nextMatcher.group(1));
-            Timber.d("Normal comic: %s %s", c.getPrevInd(), c.getNextInd());
         }
         return imgUrl;
     }
