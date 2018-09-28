@@ -9,6 +9,8 @@ import com.threeDBJ.comicReader.Comic;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import timber.log.Timber;
+
 public class XKCDReader extends Reader {
 
     Pattern pImages, pPrev, pNext;
@@ -25,7 +27,7 @@ public class XKCDReader extends Reader {
 
         String prevPat = "href=\"/([0-9]+)/\" accesskey=\"p\">";
         String nextPat = "href=\"/([0-9]+)/\" accesskey=\"n\">";
-        String imgPat = "\"(http://imgs.xkcd.com/comics/.*?)\" title=\"(.*?)\"";
+        String imgPat = "src=\"(//imgs.xkcd.com/comics/.*?)\" title=\"(.*?)\"";
 
         this.pPrev = Pattern.compile(prevPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pNext = Pattern.compile(nextPat, Pattern.DOTALL | Pattern.UNIX_LINES);
@@ -47,7 +49,7 @@ public class XKCDReader extends Reader {
         Matcher nextMatcher = pNext.matcher(page);
 
         imageMatcher.find();
-        String imgUrl = imageMatcher.group(1);
+        String imgUrl = "https:" + imageMatcher.group(1);
         c.setAlt(imageMatcher.group(2));
 
         if(prevMatcher.find()) {
