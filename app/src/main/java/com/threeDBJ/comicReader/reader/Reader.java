@@ -598,33 +598,39 @@ public abstract class Reader extends AppCompatActivity {
         state.curComic.setPrevInd(prev);
     }
 
+    void freshComic(String ind) {
+        state.clearComics();
+        clearVisible();
+        state.comicMap.put(ind, state.curComic);
+        loadComic(ind);
+        errorInd = ind;
+        showLoadingDialog();
+    }
+
     /* Handles a click of the first button. */
     @OnClick(R.id.comic_first)
     public void firstClicked() {
         String firstInd = getFirstInd();
         if(state.curComic.getInd() == null) {
             showDialog("Error", "Cannot connect to the internet.");
-        } else if(state.curComic.getInd() == null || !state.curComic.getInd().equals(firstInd)) {
-            state.clearComics();
-            clearVisible();
-            state.comicMap.put(firstInd, state.curComic);
-            loadComic(firstInd);
-            errorInd = firstInd;
-            showLoadingDialog();
+        } else if(!state.curComic.getInd().equals(firstInd)) {
+            freshComic(firstInd);
         }
     }
 
     /* Handles a click of the last button. */
     @OnClick(R.id.comic_last)
     public void lastClicked(View v) {
-        if(state.curComic.getInd() == null || !state.curComic.getInd().equals(maxInd)) {
+        if(state.curComic.getInd() == null) {
+            showDialog("Error", "Cannot connect to the internet.");
+        } else if(!state.curComic.getInd().equals(maxInd)) {
             state.clearComics();
             clearVisible();
             loadLast(getMax());
         }
     }
 
-    /* To be overidden if the comic id similar, but not exactly equal to the index. */
+    /* Override if the comic id similar, but not exactly equal to the index. */
     public String getIndFromNum(String num) {
         return num;
     }
@@ -642,12 +648,7 @@ public abstract class Reader extends AppCompatActivity {
             int n = (int)(Math.random() * maxNum);
             String ind = getIndFromNum(Integer.toString(n));
 
-            state.clearComics();
-            clearVisible();
-            state.comicMap.put(ind, state.curComic);
-            loadComic(ind);
-            errorInd = ind;
-            showLoadingDialog();
+            freshComic(ind);
         } else {
             showDialog("Error", "Could not resolve random comic.");
         }
@@ -697,12 +698,7 @@ public abstract class Reader extends AppCompatActivity {
                     String index = selectEdit.getText().toString();
                     selectDialog.cancel();
                     String newInd = getIndFromNum(index);
-                    state.clearComics();
-                    clearVisible();
-                    state.comicMap.put(newInd, state.curComic);
-                    loadComic(newInd);
-                    errorInd = newInd;
-                    showLoadingDialog();
+                    freshComic(newInd);
                     selectEdit = null;
                 }
             }

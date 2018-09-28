@@ -9,15 +9,11 @@ import android.widget.ImageView;
 import com.threeDBJ.comicReader.ComicReaderApp.ComicState;
 import com.threeDBJ.comicReader.reader.Reader;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.regex.Pattern;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -27,13 +23,34 @@ import timber.log.Timber;
 
 public class RequestManager {
 
-    Pattern unichar = Pattern.compile("&#[0-9]+");
     private OkHttpClient client = new OkHttpClient();
 
     public int running = 0;
 
     public RequestManager() {
 
+    }
+
+    /* Get a String from a URL.
+       Should not be called from the main thread
+     */
+    public String grabString(String url) {
+        Request request = new Request.Builder().url(url).build();
+
+        try {
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    return null;
+                }
+                ResponseBody data = response.body();
+                if(data == null) {
+                    return null;
+                } else {
+                    return data.string();
+                }
+            }
+        } catch(IOException e) {}
+        return null;
     }
 
     /* Start a background task that grabs a comic. */
@@ -44,10 +61,6 @@ public class RequestManager {
     /* Start a background task that grabs a comic's alt image. */
     public void displayAltImage(Dialog context, String imgUrl, String title) {
         new DisplayAltImageTask(context, title).execute(imgUrl);
-    }
-
-    public char to_unichr(String val) {
-        return (char) Integer.parseInt(val);
     }
 
     /* Makes multiple attempts to retrieve an image if the first one doesn't work */
@@ -128,7 +141,7 @@ public class RequestManager {
 
         protected void onPostExecute(Bitmap result) {
             if(context.isShowing()) {
-                ImageView image = (ImageView) context.findViewById(R.id.alt_image);
+                ImageView image = context.findViewById(R.id.alt_image);
                 image.setImageBitmap(result);
                 context.setTitle(title);
             }
@@ -183,5 +196,4 @@ public class RequestManager {
         }
 
     }
-
 }

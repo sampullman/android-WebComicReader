@@ -1,5 +1,6 @@
 package com.threeDBJ.comicReader.reader;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -18,6 +19,8 @@ public class SMBCReader extends Reader {
     public static String imgPat = "<meta property=\"og:image\" content=\"http://www.smbc-comics.com/comics/(.*?)\" />";
     public static String altPat = "<div id=\"mobaftercomic\".*?<img src='http://www.smbc-comics.com/comics/(.*?)'>";
     public static String maxPat = "<input id=\"permalinktext\" type=\"text\" value=\"http://smbc-comics.com/comic/(.*?)\" />";
+
+    public static String randomUrl = "http://www.smbc-comics.com/rand.php";
 
     String altURL, imageBase;
 
@@ -71,7 +74,8 @@ public class SMBCReader extends Reader {
                 c.setAlt(null);
             }
         } catch(Exception e) {
-            imgUrl = "http://cdn.shopify.com/s/files/1/0066/2852/products/science_large_grande.jpg?100646";
+            imgUrl = "http://cdn.shopify.com/s/files/1/0066/2852/products/science_large_grand" +
+                    "e.jpg?100646";
         }
         boolean haveNext = nextMatcher.find();
         boolean havePrev = prevMatcher.find();
@@ -92,6 +96,28 @@ public class SMBCReader extends Reader {
             c.setNextInd(nextMatcher.group(1));
         }
         return imgUrl;
+    }
+
+    class GetRandom extends AsyncTask<String, Integer, String> {
+
+        protected String doInBackground(String... data) {
+            return rm.grabString(data[0]);
+        }
+
+        protected void onPostExecute(String randomId) {
+            if(randomId != null && randomId.length() > 2) {
+                freshComic(randomId.substring(1, randomId.length() - 1));
+            } else {
+                Timber.d("Failed to grab random comic ID %s", randomId);
+                showDialog("Error", "Could not resolve random comic.");
+            }
+        }
+
+    }
+
+    @Override
+    public void randomClicked() {
+        new GetRandom().execute(randomUrl);
     }
 
     protected OnClickListener altListener = new OnClickListener() {

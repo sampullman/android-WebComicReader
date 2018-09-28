@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.threeDBJ.MainScreenActivity"
-        minSdkVersion 15
+        minSdkVersion 19
         targetSdkVersion 28
 
         testApplicationId "com.threeDBJ.MainScreenActivity.tests"
