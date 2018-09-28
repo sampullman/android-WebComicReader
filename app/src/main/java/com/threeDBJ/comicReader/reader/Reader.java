@@ -440,6 +440,15 @@ public abstract class Reader extends AppCompatActivity {
         }
     }
 
+    /* Handles a click of the next button. */
+    @OnClick(R.id.comic_next)
+    public void nextClicked() {
+        String ind = state.curComic.getInd();
+        if(nextEnabled && (state.curComic.getInd() != null) && !ind.equals(maxInd) && !ind.equals(max)) {
+            viewPager.setCurrentItem(state.prevPos + 1);
+        }
+    }
+
     /* Handles a click of the prev button. */
     @OnClick(R.id.comic_last)
     public void lastClicked() {
