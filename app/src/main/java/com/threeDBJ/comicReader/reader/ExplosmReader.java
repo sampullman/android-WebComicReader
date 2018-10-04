@@ -8,9 +8,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ExplosmReader extends Reader {
-    public static String prevPat = "a rel=\"prev\".*?href=\"/comics/([0-9]+)/\"";
-    public static String nextPat = "a rel=\"next\".*?href=\"/comics/([0-9]+)/\"";
-    public static String imgPat = "src=\"(http://w?w?w?.?explosm.net/db/files/(?!comic-authors).*?)\"";
+    public static String prevPat = "<a href=\"/comics/([0-9]+)/\" class=\"nav-previous";
+    public static String nextPat = "<a href=\"/comics/([0-9]+)/\" class=\"nav-next";
+    public static String imgPat = "<meta property=\"og:image\" content=\"(.*?)\">";
     String altUrl;
 
     @Override
@@ -28,13 +28,13 @@ public class ExplosmReader extends Reader {
         this.pNext = Pattern.compile(nextPat, Pattern.DOTALL | Pattern.UNIX_LINES);
 
         this.base = "http://explosm.net/comics/";
-        this.max = "http://explosm.net/comics/";
+        this.max = "http://explosm.net/comics/latest/";
 
         this.title = "Explosm";
         this.shortTitle = title;
         this.storeUrl = "http://store.explosm.net/";
 
-        /* Wierd, but true */
+        /* Weird, but true */
         this.firstInd = "15";
     }
 
@@ -62,7 +62,16 @@ public class ExplosmReader extends Reader {
                 /* Anomaly, this should not happen */
             }
         }
-        return imageMatcher.find() ? imageMatcher.group(1) : null;
+        if(imageMatcher.find()) {
+            String imageUrl = imageMatcher.group(1);
+
+            int questionInd = imageUrl.lastIndexOf("?");
+            if (questionInd != -1) {
+                imageUrl = imageUrl.substring(0, questionInd);
+            }
+            return imageUrl;
+        }
+        return null;
     }
 
 }
