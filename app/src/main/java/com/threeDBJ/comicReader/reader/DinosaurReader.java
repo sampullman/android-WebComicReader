@@ -24,9 +24,9 @@ public class DinosaurReader extends Reader {
     public void UISetup() {
         super.UISetup();
 
-        String prevPat = "<a title=\"Previous comic\"  rel=\"prev\" href=\"http://www.qwantz.com/index.php[?]comic=([0-9]+)\">";
-        String nextPat = "<a title=\"Next comic\" rel=\"next\" href=\"http://www.qwantz.com/index.php[?]comic=([0-9]+)\">";
-        String imgPat = "valign=\"middle\"><img src=\"(.*?)\" class=\"comic\" title=\"(.*?)\">";
+        String prevPat = "<a title=\"Previous comic\"  rel=\"prev\" href=\"/*?index.php[?]comic=([0-9]+)\">";
+        String nextPat = "<a title=\"Next comic\" rel=\"next\" href=\".*?index.php[?]comic=([0-9]+)\">";
+        String imgPat = "og:description\" content=\"(.*?)\" />.*?og:image\" content=\"(.*?)\"";
 
         this.pPrev = Pattern.compile(prevPat, Pattern.DOTALL | Pattern.UNIX_LINES);
         this.pNext = Pattern.compile(nextPat, Pattern.DOTALL | Pattern.UNIX_LINES);
@@ -47,26 +47,29 @@ public class DinosaurReader extends Reader {
         Matcher nextMatcher = pNext.matcher(page);
 
         boolean success = imageMatcher.find();
-        String imgUrl = imageMatcher.group(1);
-        c.setAlt(imageMatcher.group(2));
-        Timber.d("Dinosaur %s %s", imgUrl, imageMatcher.group(2));
+        if(success) {
+            String imgUrl = imageMatcher.group(2);
+            c.setAlt(imageMatcher.group(1));
+            Timber.d("Dinosaur %s %s", imgUrl, imageMatcher.group(2));
 
-        if(prevMatcher.find()) {
-            c.setPrevInd(prevMatcher.group(1));
-            if(nextMatcher.find() && nextMatcher.group(1) != null) {
-                c.setNextInd(nextMatcher.group(1));
+            if (prevMatcher.find()) {
+                c.setPrevInd(prevMatcher.group(1));
+                if (nextMatcher.find() && nextMatcher.group(1) != null) {
+                    c.setNextInd(nextMatcher.group(1));
+                } else {
+                    String temp = Integer.toString(Integer.parseInt(prevMatcher.group(1)) + 1);
+                    setMaxIndex(temp);
+                    setMaxNum(temp);
+                }
             } else {
-                String temp = Integer.toString(Integer.parseInt(prevMatcher.group(1)) + 1);
-                setMaxIndex(temp);
-                setMaxNum(temp);
+                if (nextMatcher.find(1)) {
+                    c.setNextInd(nextMatcher.group(1));
+                } else {
+                    /* Anomaly, this should not happen */
+                }
             }
-        } else {
-            if(nextMatcher.find(1)) {
-                c.setNextInd(nextMatcher.group(1));
-            } else {
-                /* Anomaly, this should not happen */
-            }
+            return imgUrl;
         }
-        return imgUrl;
+        return null;
     }
 }
