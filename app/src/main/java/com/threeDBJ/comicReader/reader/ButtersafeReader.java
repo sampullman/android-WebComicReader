@@ -34,9 +34,9 @@ public class ButtersafeReader extends Reader {
         String maxPat = "<h2 class=\"index-title\">.*?<a href=\"http://buttersafe[.]com/(.*?)\" rel=\"bookmark\"";
 
         this.pImages = Pattern.compile(imgPat);
-        this.pPrev = Pattern.compile(prevPat);
-        this.pNext = Pattern.compile(nextPat);
-        this.pMax = Pattern.compile(maxPat);
+        this.pPrev = Pattern.compile(prevPat, Pattern.DOTALL | Pattern.UNIX_LINES);
+        this.pNext = Pattern.compile(nextPat, Pattern.DOTALL | Pattern.UNIX_LINES);
+        this.pMax = Pattern.compile(maxPat, Pattern.DOTALL | Pattern.UNIX_LINES);
 
         this.base = "http://buttersafe.com/";
         this.max = "http://buttersafe.com";
@@ -46,7 +46,7 @@ public class ButtersafeReader extends Reader {
         this.storeUrl = "http://buttersafe.com/store/";
 
         this.firstInd = "2007/04/03/breakfast-sad-turtle/";
-        this.randComic = "http://www.ohnorobot.com/random.pl?comic=1307";
+        this.randComic = "http://buttersafe.com/?randomcomic";
     }
 
     public String handleRawPage(Comic c, String page) {
