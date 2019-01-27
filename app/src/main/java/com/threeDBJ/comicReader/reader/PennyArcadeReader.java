@@ -72,7 +72,7 @@ public class PennyArcadeReader extends Reader {
             c.setPrevInd(prevMatcher.group(1));
             /* Normal comic */
             if(nextMatcher.find()) {
-                if(nextMatcher.group(1).equals("") && !haveMax()) {
+                if(nextMatcher.group(1).equals("") && noMax()) {
                     Matcher mMax = pMax.matcher(page);
                     mMax.find();
                     setMaxIndex(mMax.group(1));

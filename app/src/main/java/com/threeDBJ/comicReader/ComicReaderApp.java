@@ -42,15 +42,12 @@ public class ComicReaderApp extends Application {
         public CachedComic curComic = new CachedComic();
         public CachedComic prevComic = new CachedComic();
         public CachedComic nextComic = new CachedComic();
-        public HashSet<String> loadingInds = new HashSet<String>();
-        public HashMap<String, CachedComic> comicMap = new HashMap<String, CachedComic>();
+        public HashSet<String> loadingInds = new HashSet<>();
+        public HashMap<String, CachedComic> comicMap = new HashMap<>();
         public boolean hasUnseenComic = false;
         public String prevShortTitle;
 
         public int prevPos = 20000, setPager = 20000;
-
-        public ComicState() {
-        }
 
         public String transitionToNext() {
             prevComic.become(curComic);
@@ -70,7 +67,7 @@ public class ComicReaderApp extends Application {
             return rm.running > 0;
         }
 
-        public void comicLoaded(Comic c) {
+        void comicLoaded(Comic c) {
             loadingInds.remove(c.getInd());
             CachedComic cached = comicMap.remove(c.getInd());
             if(cached != null) {
@@ -92,7 +89,7 @@ public class ComicReaderApp extends Application {
             }
         }
 
-        public void comicError(Comic c) {
+        void comicError(Comic c) {
             loadingInds.remove(c.getInd());
             CachedComic cached = comicMap.remove(c.getInd());
             if(c.getInd() == null && curComic.ind == null) {

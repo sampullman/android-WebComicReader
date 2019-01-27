@@ -64,7 +64,7 @@ public class ButtersafeReader extends Reader {
             if(nextMatcher.find()) {
                 c.setNextInd(nextMatcher.group(1));
                 /* Last comic */
-            } else if(!haveMax()) {
+            } else if(noMax()) {
                 Matcher mMax = pMax.matcher(page);
                 mMax.find();
                 setMaxIndex(mMax.group(1));

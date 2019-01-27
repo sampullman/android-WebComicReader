@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             style="@style/toolbar">
             <ImageView
@@ -21,8 +21,8 @@
                 android:layout_marginRight="80dp"
                 android:layout_gravity="top"
                 android:src="@drawable/reader_title"/>
-        </android.support.v7.widget.Toolbar>
-        <android.support.design.widget.TabLayout
+        </androidx.appcompat.widget.Toolbar>
+        <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -32,7 +32,7 @@
             app:tabMode="fixed"
             app:tabGravity="fill" />
     </LinearLayout>
-    <android.support.v4.view.ViewPager
+    <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

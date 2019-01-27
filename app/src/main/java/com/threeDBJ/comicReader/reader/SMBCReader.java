@@ -83,7 +83,7 @@ public class SMBCReader extends Reader {
         if(!havePrev) {
             c.setNextInd(nextMatcher.group(1));
         } else if(!haveNext) {
-            if(!haveMax()) {
+            if(noMax()) {
                 Matcher mMax = pMax.matcher(page);
                 mMax.find();
                 String temp = mMax.group(1);

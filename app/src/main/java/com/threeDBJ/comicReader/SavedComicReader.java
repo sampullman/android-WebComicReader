@@ -7,11 +7,11 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager.OnPageChangeListener;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
@@ -60,9 +60,9 @@ public class SavedComicReader extends FragmentActivity {
         setSwipe(settings.getBoolean("swipe", false));
 
         Intent intent = getIntent();
-        this.title = intent.getExtras().getString("comic");
+        this.title = intent.getStringExtra("comic");
 
-        this.storeIndex = intent.getExtras().getInt("index");
+        this.storeIndex = intent.getIntExtra("index", 0);
         altButton.setVisibility(View.GONE);
 
         sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -84,7 +84,7 @@ public class SavedComicReader extends FragmentActivity {
 
         setResult(0);
         Timber.v("scr %d", images.length);
-        mViewPager.setOnPageChangeListener(pageListener);
+        mViewPager.addOnPageChangeListener(pageListener);
         mReaderPagerAdapter = new ReaderPagerAdapter(getSupportFragmentManager(), images.length);
         mViewPager.setAdapter(mReaderPagerAdapter);
         cur = images.length - 1;
@@ -111,7 +111,7 @@ public class SavedComicReader extends FragmentActivity {
 
         private int count;
 
-        public ReaderPagerAdapter(FragmentManager fm, int count) {
+        ReaderPagerAdapter(FragmentManager fm, int count) {
             super(fm);
             this.count = count;
         }
@@ -150,7 +150,7 @@ public class SavedComicReader extends FragmentActivity {
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("swipe", swipe);
-        editor.commit();
+        editor.apply();
     }
 
     @OnClick(R.id.comic_prev)

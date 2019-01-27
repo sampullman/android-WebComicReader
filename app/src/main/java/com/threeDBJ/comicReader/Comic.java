@@ -5,8 +5,9 @@ import android.graphics.Bitmap;
 public class Comic {
 
     public Bitmap image;
-    String url, ind, prevInd, nextInd, altData, imgTitle;
-    boolean error = false;
+    private String url;
+    String ind, prevInd, nextInd, altData, imgTitle;
+    private boolean error = false;
 
     public Comic() {
     }

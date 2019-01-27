@@ -116,10 +116,10 @@ public class RequestManager {
 
     /* Background task for displaying an alt image. */
     private class DisplayAltImageTask extends AsyncTask<String, Integer, Bitmap> {
-        protected Dialog context;
+        Dialog context;
         protected String title;
 
-        public DisplayAltImageTask(Dialog context, String title) {
+        DisplayAltImageTask(Dialog context, String title) {
             this.context = context;
             this.title = title;
         }

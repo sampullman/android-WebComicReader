@@ -66,7 +66,7 @@ public class CompletelySeriousReader extends Reader {
                 c.setNextInd(nextMatcher.group(1));
                 /* Last comic */
             } else {
-                if(!haveMax()) {
+                if(noMax()) {
                     Matcher mMax = pMax.matcher(page);
                     if(mMax.find()) {
                         String maxInd = mMax.group(1);

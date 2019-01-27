@@ -9,6 +9,8 @@ import com.threeDBJ.comicReader.Comic;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import timber.log.Timber;
+
 public class AbstruseGooseReader extends Reader {
 
     Pattern pImages, pPrev, pNext, pCur;
@@ -47,6 +49,9 @@ public class AbstruseGooseReader extends Reader {
         Matcher prevMatcher = pPrev.matcher(page);
         Matcher nextMatcher = pNext.matcher(page);
         boolean success = imageMatcher.find();
+        if(!success) {
+            return null;
+        }
         String imgUrl = imageMatcher.group(1);
 
         if(imageMatcher.groupCount() == 2) {
@@ -75,23 +80,20 @@ public class AbstruseGooseReader extends Reader {
                 c.setNextInd(nextMatcher.group(1));
             } else {
                 /* Anomaly, this should not happen */
+                Timber.e("No prev and no next?");
             }
         }
         return imgUrl;
     }
 
-    protected OnClickListener altListener = new OnClickListener() {
-        public void onClick(View v) {
-            dispAltText(getCurComic().getAlt(), "Abstruse Goose Hover Text");
-        }
+    protected OnClickListener altListener = v -> {
+        dispAltText(getCurComic().getAlt(), "Abstruse Goose Hover Text");
     };
 
-    protected OnClickListener randomListener = new OnClickListener() {
-        public void onClick(View v) {
-            state.clearComics();
-            clearVisible();
-            loadInitial(max + "random.php");
-        }
+    protected OnClickListener randomListener = v -> {
+        state.clearComics();
+        clearVisible();
+        loadInitial(max + "random.php");
     };
 
 }

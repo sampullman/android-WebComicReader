@@ -11,12 +11,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager.OnPageChangeListener;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
@@ -59,7 +60,7 @@ public abstract class Reader extends AppCompatActivity {
 
     String prevPat, nextPat, imgPat, base, max, errorInd,
         firstInd="1", maxInd, storeUrl,	sdPath, title, shortTitle;
-    Pattern pImages, pPrev, pNext, pIndices, pMax, pAlt;
+    Pattern pImages, pPrev, pNext, pMax, pAlt;
 
     Spanned aboutHtml = Html.fromHtml(aboutText);
     static final String aboutText = "Created by 3DBJ developers. Please email questions, comments, or concerns to "+
@@ -71,7 +72,7 @@ public abstract class Reader extends AppCompatActivity {
     Dialog selectDialog;
     TextView errorText;
 
-    int errorCount=0, accessed=0;
+    int errorCount=0;
     boolean firstRun=false, error=false, swipe=false,
         nextEnabled=true, prevEnabled=false, loadLastViewed;
 
@@ -97,8 +98,7 @@ public abstract class Reader extends AppCompatActivity {
 
         sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
 
-        Intent intent = getIntent();
-        this.loadLastViewed = intent.getExtras().getBoolean("load_last_viewed");
+        this.loadLastViewed = getIntent().getBooleanExtra("load_last_viewed", false);
 
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         setSwipe(settings.getBoolean("swipe", false));
@@ -111,7 +111,7 @@ public abstract class Reader extends AppCompatActivity {
         readerPagerAdapter = new ReaderPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(readerPagerAdapter);
         viewPager.setOffscreenPageLimit(1);
-        viewPager.setOnPageChangeListener(pageListener);
+        viewPager.addOnPageChangeListener(pageListener);
         viewPager.setCurrentItem(state.setPager);
         viewPager.setCurrentItem(state.setPager);
         /*
@@ -185,6 +185,8 @@ public abstract class Reader extends AppCompatActivity {
         if(loadLastViewed) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
             String lastInd = prefs.getString(shortTitle, "");
+            lastInd = lastInd == null ? "" : lastInd;
+
             if(lastInd.equals(state.curComic.getInd())) {
                 readerPagerAdapter.freshComics = true;
             } else if(lastInd.equals("") || lastInd.equals(max)) {
@@ -203,7 +205,9 @@ public abstract class Reader extends AppCompatActivity {
 
     public void loadLast(String url) {
         boolean freshComic = shortTitle.equals(state.prevShortTitle);
-        Timber.d("Loading last: freshComic=%b, loading=%b, running=%b, curComic null=%b", freshComic, state.isLoading(), rm.running, (state.curComic.getComic()==null));
+        Timber.d("Loading last: freshComic=%b, loading=%b, running=%d, curComic null=%b",
+            freshComic, state.isLoading(), rm.running, (state.curComic.getComic()==null));
+
         if(freshComic && state.curComic.getComic() != null) {
             //notifyComicLoaded(state.curComic);
             Timber.d("Loading last comic image");
@@ -263,7 +267,7 @@ public abstract class Reader extends AppCompatActivity {
         //Timber.d("error: %d %d", c.getInd(), state.curComic.getInd());
         if(cached == state.curComic && !state.curComic.isLoaded()) {
             //Timber.d("error: errTextNull = %b", (errorText == null));
-            ViewGroup ll = (ViewGroup) findViewById(R.id.comic_wrapper);
+            ViewGroup ll = findViewById(R.id.comic_wrapper);
             if(errorText == null) {
                 errorText = (TextView) getLayoutInflater().inflate(R.layout.error_text_view, ll, false);
                 errorText.setOnClickListener(reloadListener);
@@ -296,14 +300,16 @@ public abstract class Reader extends AppCompatActivity {
                     firstRun = false;
                     return;
                 }
-                readerPagerAdapter.clean(position);
                 /* Load the next comic. */
                 String newInd = "";
                 if(position > state.prevPos) {
                     Timber.d("Next page selected");
                     if(state.curComic.getInd() == null && nextEnabled) {
+                        Timber.d("Current index is null, next is enabled");
+
                     } else if(state.curComic.getInd() == null || !nextEnabled || state.curComic.getInd().equals(maxInd) ||
                               state.curComic.getInd().equals(getMax())) {
+
                         viewPager.setCurrentItem(state.prevPos);
                         return;
                     }
@@ -316,7 +322,10 @@ public abstract class Reader extends AppCompatActivity {
                     /* Load the previous comic. */
                 } else if(position < state.prevPos) {
                     if(state.curComic.getInd() == null && prevEnabled) {
+                        Timber.d("Current index is null, prev is enabled");
+
                     } else if(state.curComic.getInd() == null || !prevEnabled || state.curComic.getInd().equals(getFirstInd())) {
+
                         viewPager.setCurrentItem(state.prevPos);
                         return;
                     }
@@ -351,24 +360,26 @@ public abstract class Reader extends AppCompatActivity {
         boolean freshComics = false;
         HashMap<Integer, PageFragment> fragMap = new HashMap<>();
 
-        public ReaderPagerAdapter(FragmentManager fm) {
+        ReaderPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
-        public void destroyItem(ViewGroup container, int position, Object object) {
+        public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
             super.destroyItem(container, position, object);
             PageFragment frag = fragMap.remove(position);
-            if(frag != null) frag.clean();
+            if(frag != null) {
+                frag.clean();
+            }
         }
 
-        public void clearImages() {
+        void clearImages() {
             for(PageFragment frag : fragMap.values()) {
                 frag.setComic(null, viewPager);
             }
         }
 
-        @Override
-        public Object instantiateItem(ViewGroup container, int pos) {
+        @Override @NonNull
+        public Object instantiateItem(@NonNull ViewGroup container, int pos) {
             PageFragment fragment = (PageFragment) super.instantiateItem(container, pos);
             Timber.d("FragAdapter instantiating at pos: %d", pos);
             fragMap.put(pos, fragment);
@@ -379,25 +390,18 @@ public abstract class Reader extends AppCompatActivity {
             return fragment;
         }
 
-        private PageFragment makePageFragment(int pos, Bitmap image) {
-            PageFragment ret = PageFragment.newInstance(image);
+        private PageFragment makePageFragment(int pos) {
+            PageFragment ret = PageFragment.newInstance(null);
             fragMap.put(pos, ret);
             return ret;
         }
 
-        private PageFragment makePageFragment(int pos) {
-            return makePageFragment(pos, null);
-        }
-
-        public PageFragment getFragment(int pos) {
+        PageFragment getFragment(int pos) {
             PageFragment frag = fragMap.get(pos);
             if(frag == null) {
                 frag = makePageFragment(pos);
             }
             return frag;
-        }
-
-        public void clean(int pos) {
         }
 
         @Override
@@ -474,9 +478,9 @@ public abstract class Reader extends AppCompatActivity {
         selectDialog = new Dialog(this);
         selectDialog.setContentView(R.layout.select_comic);
         selectDialog.setTitle(title);
-        selectEdit = (EditText) selectDialog.findViewById(R.id.select_input);
+        selectEdit = selectDialog.findViewById(R.id.select_input);
 
-        Button b = (Button) selectDialog.findViewById(R.id.select_enter);
+        Button b = selectDialog.findViewById(R.id.select_enter);
         b.setOnClickListener(goToComicListener);
         selectDialog.setCancelable(true);
         selectDialog.show();
@@ -529,24 +533,16 @@ public abstract class Reader extends AppCompatActivity {
         dialog.setContentView(R.layout.text_alt);
         dialog.setTitle(title);
         dialog.setCancelable(true);
-        Button done = (Button) dialog.findViewById(R.id.alt_done);
+        Button done = dialog.findViewById(R.id.alt_done);
         done.setOnClickListener(makeDialogCancelListener(dialog));
         return dialog;
     }
 
     /* Shows a cancelable dialog with the given title and text. */
-    public void showDialog(String title, String text) {
+    public void showDialog(String title, CharSequence text) {
         final Dialog dialog = createEmptyDialog(title);
-        TextView t = (TextView) dialog.findViewById(R.id.alt_text);
+        TextView t = dialog.findViewById(R.id.alt_text);
         t.setText(text);
-        dialog.show();
-    }
-
-    /* Shows a cancelable dialog with the given title and text. */
-    public void showDialog(String title, Spanned html) {
-        final Dialog dialog = createEmptyDialog(title);
-        TextView t = (TextView) dialog.findViewById(R.id.alt_text);
-        t.setText(html);
         t.setMovementMethod(LinkMovementMethod.getInstance());
         dialog.show();
     }
@@ -555,7 +551,7 @@ public abstract class Reader extends AppCompatActivity {
     public void dispAltText(String text, String title) {
         if(text != null) {
             final Dialog dialog = createEmptyDialog(title);
-            TextView t = (TextView) dialog.findViewById(R.id.alt_text);
+            TextView t = dialog.findViewById(R.id.alt_text);
             t.setText(Html.fromHtml(text));
             dialog.show();
         } else {
@@ -571,7 +567,7 @@ public abstract class Reader extends AppCompatActivity {
         dialog.setTitle("Loading");
         rm.displayAltImage(dialog, url, title);
         dialog.setCancelable(true);
-        Button done = (Button) dialog.findViewById(R.id.alt_done);
+        Button done = dialog.findViewById(R.id.alt_done);
         done.setOnClickListener(makeDialogCancelListener(dialog));
         dialog.show();
     }
@@ -593,8 +589,8 @@ public abstract class Reader extends AppCompatActivity {
     }
 
     /* Returns whether the max has been recorded. */
-    public boolean haveMax() {
-        return maxNum != -1 || maxInd != null;
+    public boolean noMax() {
+        return maxNum == -1 && maxInd == null;
     }
 
     /* Sets the next index of the comic being grabbed. */
@@ -672,7 +668,7 @@ public abstract class Reader extends AppCompatActivity {
     }
 
     public void removeError() {
-        ViewGroup ll = (ViewGroup) findViewById(R.id.comic_wrapper);
+        ViewGroup ll = findViewById(R.id.comic_wrapper);
         if(errorText != null && ll.findViewById(R.id.error_text) != null) {
             ll.removeView(errorText);
             errorText = null;
@@ -740,7 +736,7 @@ public abstract class Reader extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         Editor editor = settings.edit();
         editor.putBoolean("swipe", swipe);
-        editor.commit();
+        editor.apply();
     }
 
     /* Inflates the options menu. TODO -convert menu stuff to action bar */

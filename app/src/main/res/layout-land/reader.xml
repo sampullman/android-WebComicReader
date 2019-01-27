@@ -2,10 +2,10 @@
 <LinearLayout
     style="@style/linear_vertical_full"
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         style="@style/toolbar">
-    </android.support.v7.widget.Toolbar>
+    </androidx.appcompat.widget.Toolbar>
     <RelativeLayout
         android:id="@+id/comic_wrapper"
         style="@style/view_full"

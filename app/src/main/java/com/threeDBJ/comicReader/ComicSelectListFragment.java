@@ -3,7 +3,7 @@ package com.threeDBJ.comicReader;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
+import androidx.fragment.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,11 +76,13 @@ public class ComicSelectListFragment extends ListFragment {
             intent = new Intent(activity, comicClasses[position]);
             intent.putExtra("load_last_viewed", true);
         }
-        activity.startActivityForResult(intent, type);
+        if(activity != null) {
+            activity.startActivityForResult(intent, type);
+        }
     }
 
     void savedComicsCount() {
-        int counts[] = new int[comicTitles.length];
+        int[] counts = new int[comicTitles.length];
         for(int i=0; i < comicTitles.length; i += 1) {
             counts[i] = 0;
         }

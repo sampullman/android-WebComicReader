@@ -4,7 +4,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -34,10 +35,6 @@ public class PageFragment extends Fragment {
         return pageFragment;
     }
 
-    public static PageFragment newInstance() {
-        return newInstance(null);
-    }
-
     public void setImage(Bitmap image, ComicPager mvp) {
         if(imageView != null) {
             imageView.setPager(mvp);
@@ -59,7 +56,9 @@ public class PageFragment extends Fragment {
                         Intent i = new Intent(Intent.ACTION_VIEW);
 
                         i.setData(Uri.parse(url));
-                        getActivity().startActivity(i);
+                        if(getActivity() != null) {
+                            getActivity().startActivity(i);
+                        }
                     }
                 });
             } else {
@@ -94,7 +93,7 @@ public class PageFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.page_fragment, container, false);
         ButterKnife.bind(this, view);
         vg = (ViewGroup) view;
