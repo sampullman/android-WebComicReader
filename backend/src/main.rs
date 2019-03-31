@@ -7,6 +7,9 @@ use actix_web::web::{resource, get};
 mod health;
 use health::{db_check, server_check};
 
+mod comics;
+use comics::{get_web_comics};
+
 mod db;
 
 fn main() -> io::Result<()> {
@@ -24,6 +27,10 @@ fn main() -> io::Result<()> {
                 web::scope("/health")
                     .service(resource("/db").route(get().to_async(db_check)))
                     .service(resource("/server").route(get().to(server_check)))
+            )
+            .service(
+                web::scope("/comics")
+                    .route("", get().to_async(get_web_comics))   
             )
     })
     .bind("127.0.0.1:9000")?
