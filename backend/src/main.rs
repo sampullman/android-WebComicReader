@@ -8,7 +8,7 @@ mod health;
 use health::{db_check, server_check};
 
 mod comics;
-use comics::{get_web_comics};
+use comics::{get_web_comics, get_comic};
 
 mod db;
 
@@ -30,7 +30,8 @@ fn main() -> io::Result<()> {
             )
             .service(
                 web::scope("/comics")
-                    .route("", get().to_async(get_web_comics))   
+                    .route("", get().to_async(get_web_comics))
+                    .service(resource("/{id}").route(get().to_async(get_comic)))
             )
     })
     .bind("127.0.0.1:9000")?
