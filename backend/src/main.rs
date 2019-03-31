@@ -3,18 +3,18 @@ use std::io;
 
 use actix_web::{middleware, web, App, HttpServer};
 use actix_web::web::{resource, get};
-use r2d2_sqlite::SqliteConnectionManager;
 
 mod health;
 use health::{db_check, server_check};
+
+mod db;
 
 fn main() -> io::Result<()> {
     let sys = actix_rt::System::new("r2d2-example");
     env_logger::init();
     println!("Starting WebComicReader backend...");
 
-    let manager = SqliteConnectionManager::file("db/development.db");
-    let pool = r2d2::Pool::new(manager).unwrap();
+    let pool = db::init();
 
     HttpServer::new(move || {
         App::new()

@@ -38,19 +38,19 @@ captures/
 
 # Android Studio / IntelliJ IDEA 
 *.iml
-.idea/libraries
-.idea/dictionaries
-.idea/caches
-.idea/tasks.xml
-.idea/vcs.xml
-.idea/workspace.xml
-.idea/gradle.xml
-.idea/modules.xml
-.idea/inspectionProfiles/
-.idea/copyright/
-.idea/encodings.xml
-.idea/assetWizardSettings.xml
-.idea/compiler.xml
+android/.idea/libraries
+android/.idea/dictionaries
+android/.idea/caches
+android/.idea/tasks.xml
+android/.idea/vcs.xml
+android/.idea/workspace.xml
+android/.idea/gradle.xml
+android/.idea/modules.xml
+android/.idea/inspectionProfiles/
+android/.idea/copyright/
+android/.idea/encodings.xml
+android/.idea/assetWizardSettings.xml
+android/.idea/compiler.xml
 
 # External native build folder (Android Studio 2.2 and later)
 .externalNativeBuild
