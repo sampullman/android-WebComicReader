@@ -1,36 +1,12 @@
 
 use std::io;
 
-use actix_web::{middleware, web, App, Error, HttpResponse, HttpServer};
-use futures::Future;
-use r2d2::Pool;
+use actix_web::{middleware, web, App, HttpServer};
+use actix_web::web::{resource, get};
 use r2d2_sqlite::SqliteConnectionManager;
-use serde_json::json;
 
-fn health_check(
-    db: web::Data<Pool<SqliteConnectionManager>>
-) -> impl Future<Item = HttpResponse, Error = Error> {
-
-    web::block(move || {
-        let conn = db.get().unwrap();
-        println!("Checking db status");
-
-        conn.query_row("SELECT name FROM users WHERE id=$1", &[1], |row| {
-            row.get::<_, String>(0)
-        })
-    })
-    .then(|res| match res {
-        Ok(user) => Ok(HttpResponse::Ok().json(user)),
-        Err(err) => {
-            println!("DB connection failed: {:?}", err);
-            let json = json!({
-                "status": "error",
-                "message": "Failed to connect to the database",
-            });
-            Ok(HttpResponse::BadRequest().json(json))
-        }
-    })
-}
+mod health;
+use health::{db_check, server_check};
 
 fn main() -> io::Result<()> {
     let sys = actix_rt::System::new("r2d2-example");
@@ -44,7 +20,11 @@ fn main() -> io::Result<()> {
         App::new()
             .data(pool.clone())
             .wrap(middleware::Logger::default())
-            .route("/health", web::get().to_async(health_check))
+            .service(
+                web::scope("/health")
+                    .service(resource("/db").route(get().to_async(db_check)))
+                    .service(resource("/server").route(get().to(server_check)))
+            )
     })
     .bind("127.0.0.1:9000")?
     .start();
