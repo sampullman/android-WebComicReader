@@ -6,6 +6,7 @@ use serde_json::json;
 use r2d2_sqlite::SqliteConnectionManager;
 
 use crate::db::{get_comics_count};
+use crate::util::{api_error};
 
 pub fn db_check(
     db: web::Data<Pool<SqliteConnectionManager>>
@@ -23,14 +24,7 @@ pub fn db_check(
             });
             Ok(HttpResponse::Ok().json(json))
         },
-        Err(err) => {
-            println!("DB connection failed: {:?}", err);
-            let json = json!({
-                "status": "error",
-                "message": "Failed to connect to the database",
-            });
-            Ok(HttpResponse::BadRequest().json(json))
-        }
+        _ => api_error("Failed to connect to the database")
     })
 }
 

@@ -6,8 +6,10 @@ use serde::Deserialize;
 use serde_json::json;
 use r2d2_sqlite::SqliteConnectionManager;
 use rusqlite::Error::QueryReturnedNoRows;
+
 use crate::db;
 use db::{Comic};
+use crate::util::{api_error};
 
 #[derive(Deserialize)]
 pub struct UpdateParams {
@@ -30,14 +32,7 @@ pub fn get_web_comics(
             });
             Ok(HttpResponse::Ok().json(json))
         },
-        Err(err) => {
-            println!("DB connection failed: {:?}", err);
-            let json = json!({
-                "status": "error",
-                "message": "Failed to connect to the database",
-            });
-            Ok(HttpResponse::BadRequest().json(json))
-        }
+        _ => api_error("Failed to query the database")
     })
 }
 
@@ -69,24 +64,10 @@ pub fn get_comic(
                             });
                             Ok(HttpResponse::Ok().json(json))
                         },
-                        err => {
-                            println!("DB query failed: {:?}", err);
-                            let json = json!({
-                                "status": "error",
-                                "message": "Failed to connect to the database",
-                            });
-                            Ok(HttpResponse::BadRequest().json(json))
-                        }
+                        _ => api_error("Failed to query the database")
                     }
                 },
-                _ => {
-                    println!("DB connection failed: {:?}", err);
-                    let json = json!({
-                        "status": "error",
-                        "message": "Failed to connect to the database",
-                    });
-                    Ok(HttpResponse::BadRequest().json(json))
-                }
+                _ => api_error("Failed to connect to the database")
             }
         },
     })

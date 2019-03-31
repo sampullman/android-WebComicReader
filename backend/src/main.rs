@@ -11,6 +11,7 @@ mod comics;
 use comics::{get_web_comics, get_comic};
 
 mod db;
+mod util;
 
 fn main() -> io::Result<()> {
     let sys = actix_rt::System::new("r2d2-example");
