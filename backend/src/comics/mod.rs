@@ -8,7 +8,6 @@ use r2d2_sqlite::SqliteConnectionManager;
 use rusqlite::Error::QueryReturnedNoRows;
 
 use crate::db;
-use db::{Comic};
 use crate::util::{api_error};
 
 #[derive(Deserialize)]
@@ -57,13 +56,7 @@ pub fn get_comic(
             match err {
                 BlockingError::Error(err) => {
                     match err {
-                        QueryReturnedNoRows => {
-                            let json = json!({
-                                "status": "ok",
-                                "comic": Vec::new() as Vec<Comic>
-                            });
-                            Ok(HttpResponse::Ok().json(json))
-                        },
+                        QueryReturnedNoRows => api_error("Comic not found"),
                         _ => api_error("Failed to query the database")
                     }
                 },
