@@ -1,4 +1,4 @@
-
+#[macro_use] extern crate failure;
 use std::io;
 
 use actix_web::{middleware, web, App, HttpServer};
@@ -11,6 +11,7 @@ mod comics;
 use comics::{get_web_comics, get_comic};
 
 mod db;
+mod trawl;
 mod util;
 
 fn main() -> io::Result<()> {
@@ -19,6 +20,9 @@ fn main() -> io::Result<()> {
     println!("Starting WebComicReader backend...");
 
     let pool = db::init();
+
+    let trawl_result = trawl::trawl_full(pool.clone(), trawl::ComicType::SMBC);
+    println!("{:?}", trawl_result);
 
     HttpServer::new(move || {
         App::new()

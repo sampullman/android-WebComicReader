@@ -26,15 +26,13 @@ pub struct WebComic {
     id: i32,
     name: String,
     count: u32,
-    random: bool,
     alt: AltType,
     store: String,
 }
 
 #[derive(Debug, Serialize)]
 pub struct Comic {
-    url: String,
-    random: bool,
+    image_url: String,
     alt: String,
 }
 
@@ -49,7 +47,6 @@ pub fn init() -> Pool<SqliteConnectionManager> {
             id          INTEGER PRIMARY KEY,\
             name        TEXT NOT NULL,\
             count       INTEGER,\
-            random      INTEGER,\
             alt         INTEGER,\
             store       TEXT)",
         NO_PARAMS
@@ -61,8 +58,7 @@ pub fn init() -> Pool<SqliteConnectionManager> {
     match conn.execute(
         "CREATE TABLE IF NOT EXISTS comics (\
             id          INTEGER PRIMARY KEY,\
-            url         TEXT NOT NULL,\
-            random      TEXT,\
+            image_url   TEXT NOT NULL,\
             alt         INTEGER)",
         NO_PARAMS
     ) {
@@ -82,15 +78,14 @@ pub fn get_comics_count(conn: Connection) -> Result<i64, Error> {
 }
 
 pub fn get_web_comics(conn: Connection) -> Result<Vec<WebComic>, Error> {
-    let mut prep_stmt = conn.prepare("SELECT id, name, count, random, alt, store FROM web_comics")?;
+    let mut prep_stmt = conn.prepare("SELECT id, name, count, alt, store FROM web_comics")?;
     let comics = prep_stmt
         .query_map(NO_PARAMS, |row| Ok(WebComic {
             id: row.get(0)?,
             name: row.get(1)?,
             count: row.get(2)?,
-            random: row.get::<_, i32>(3)? == 1,
-            alt: int_to_alttype(row.get(4)?),
-            store: row.get(5)?,
+            alt: int_to_alttype(row.get(3)?),
+            store: row.get(4)?,
         }))
         .and_then(|mapped_rows| {
             Ok(mapped_rows
@@ -102,11 +97,10 @@ pub fn get_web_comics(conn: Connection) -> Result<Vec<WebComic>, Error> {
 
 pub fn get_comic(conn: Connection, id: i32) -> Result<Comic, Error> {
 
-    conn.query_row("SELECT url, random, alt FROM comics WHERE id=$1", &[&id], |row| {
+    conn.query_row("SELECT url, alt FROM comics WHERE id=$1", &[&id], |row| {
         Ok(Comic {
-            url: row.get(0)?,
-            random: row.get(1)?,
-            alt: row.get(2)?,
+            image_url: row.get(0)?,
+            alt: row.get(1)?,
         })
     })
 }
