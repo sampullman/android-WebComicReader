@@ -23,8 +23,12 @@ trait ComicTrawler {
 
 #[derive(Debug, Fail)]
 pub enum TrawlError {
-    #[fail(display = "Url not found: {}", url)]
-    InvalidUrl {
+    #[fail(display = "Can't acces url: {}", url)]
+    PageLoadFail {
+        url: String,
+    },
+    #[fail(display = "Failed to parse result at: {}", url)]
+    PageParseFail {
         url: String,
     },
     #[fail(display = "No comic found at: {}", url)]
@@ -39,7 +43,14 @@ fn from_type(comic_type: ComicType) -> impl ComicTrawler {
     }
 }
 
-pub fn trawl_full(db: Pool<SqliteConnectionManager>, comic_type: ComicType) -> Result<TrawlResult, TrawlError> {
+pub fn trawl_full(db: Pool<SqliteConnectionManager>, comic_type: ComicType) -> Result<(), TrawlError> {
+
     let trawler = from_type(comic_type);
-    trawler.get_comic(trawler.first_url())
+    let mut next_url = Some(trawler.first_url());
+
+    while let Some(url) = next_url {
+        let result = trawler.get_comic(url)?;
+        next_url = result.next_url;
+    }
+    Ok(())
 }
